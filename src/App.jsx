@@ -17,7 +17,6 @@ import { getBootstrap, logoutSession } from './lib/api'
 function getRouteInfo() {
   const search = new URLSearchParams(window.location.search)
   const parts = window.location.pathname.split('/').filter(Boolean)
-
   const isPublic = parts[0] === 'agendar' || search.get('publico') === '1'
   const isMaster = parts[0] === 'master'
   const appSlug = parts[0] === 'app' && parts[1] ? parts[1] : ''
@@ -47,9 +46,7 @@ export default function App() {
 
   async function refreshBootstrap() {
     if (!session?.session_token) return
-
     setBootLoading(true)
-
     try {
       const data = await getBootstrap(session.session_token)
       setBootstrap(data)
@@ -73,9 +70,7 @@ export default function App() {
       return
     }
 
-    if (session?.session_token) {
-      refreshBootstrap()
-    }
+    if (session?.session_token) refreshBootstrap()
   }, [session?.session_token, route.isPublic, route.isMaster, route.appSlug])
 
   function handleLogin(payload) {
@@ -84,7 +79,6 @@ export default function App() {
     showToast(`Bem-vindo, ${payload.user?.name || 'usuário'}!`)
 
     const slug = payload?.barbershop?.slug
-
     if (slug && window.location.pathname === '/') {
       window.history.replaceState(null, '', `/app/${slug}`)
     }
@@ -92,11 +86,8 @@ export default function App() {
 
   async function handleLogout() {
     try {
-      if (session?.session_token) {
-        await logoutSession(session.session_token)
-      }
+      if (session?.session_token) await logoutSession(session.session_token)
     } catch {}
-
     clearSession()
     setSession(null)
     setBootstrap(null)
@@ -129,26 +120,12 @@ export default function App() {
     )
   }
 
-  const commonProps = {
-    session,
-    bootstrap,
-    showToast,
-    refreshBootstrap,
-  }
+  const commonProps = { session, bootstrap, showToast, refreshBootstrap }
 
   return (
     <>
-      <AppShell
-        session={session}
-        bootstrap={bootstrap}
-        page={page}
-        setPage={setPage}
-        onLogout={handleLogout}
-      >
-        {bootLoading && !bootstrap ? (
-          <div className="loading-card">Preparando o painel...</div>
-        ) : null}
-
+      <AppShell session={session} bootstrap={bootstrap} page={page} setPage={setPage} onLogout={handleLogout}>
+        {bootLoading && !bootstrap ? <div className="loading-card">Preparando o painel...</div> : null}
         {page === 'dashboard' && <Dashboard {...commonProps} />}
         {page === 'agenda' && <Agenda {...commonProps} />}
         {page === 'clientes' && <Clientes {...commonProps} />}
@@ -157,7 +134,6 @@ export default function App() {
         {page === 'financeiro' && <Financeiro {...commonProps} />}
         {page === 'configuracoes' && <Configuracoes {...commonProps} />}
       </AppShell>
-
       <Toast toast={toast} onClose={() => setToast(null)} />
     </>
   )

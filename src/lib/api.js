@@ -208,3 +208,78 @@ export async function publicCreateAppointment(slug, payload) {
 
   return unwrapRpc(res)
 }
+
+export async function masterLoginWithPin(pin) {
+  const res = await supabase.rpc('master_login_with_pin', {
+    p_pin: pin,
+  })
+
+  return unwrapRpc(res)
+}
+
+export async function masterLogout(masterSessionToken) {
+  const res = await supabase.rpc('master_logout', {
+    p_session_token: masterSessionToken,
+  })
+
+  return unwrapRpc(res, { ok: true })
+}
+
+export async function masterListBarbershops(masterSessionToken) {
+  const res = await supabase.rpc('master_list_barbershops', {
+    p_session_token: masterSessionToken,
+  })
+
+  const data = unwrapRpc(res, [])
+
+  return Array.isArray(data) ? data : []
+}
+
+export async function masterCreateBarbershop(masterSessionToken, payload) {
+  const res = await supabase.rpc('master_create_barbershop', {
+    p_session_token: masterSessionToken,
+    p_name: payload.name,
+    p_slug: payload.slug,
+    p_phone: payload.phone || '',
+    p_address: payload.address || '',
+    p_monthly_fee: Number(payload.monthlyFee || 0),
+    p_subscription_due_date: payload.subscriptionDueDate || null,
+    p_admin_name: payload.adminName || 'Administrador',
+    p_admin_pin: payload.adminPin || '1234',
+  })
+
+  return unwrapRpc(res)
+}
+
+export async function masterUpdateBarbershop(masterSessionToken, payload) {
+  const res = await supabase.rpc('master_update_barbershop', {
+    p_session_token: masterSessionToken,
+    p_barbershop_id: payload.id,
+    p_name: payload.name,
+    p_slug: payload.slug,
+    p_phone: payload.phone || '',
+    p_address: payload.address || '',
+    p_active: payload.active !== false,
+    p_public_booking_enabled: payload.publicBookingEnabled !== false,
+    p_subscription_status: payload.subscriptionStatus || 'ATIVO',
+    p_subscription_due_date: payload.subscriptionDueDate || null,
+    p_subscription_grace_days: Number(payload.subscriptionGraceDays ?? 5),
+    p_monthly_fee: Number(payload.monthlyFee || 0),
+    p_blocked_reason: payload.blockedReason || '',
+  })
+
+  return unwrapRpc(res)
+}
+
+export async function masterRegisterPayment(masterSessionToken, payload) {
+  const res = await supabase.rpc('master_register_payment', {
+    p_session_token: masterSessionToken,
+    p_barbershop_id: payload.barbershopId,
+    p_amount: Number(payload.amount || 0),
+    p_paid_at: payload.paidAt || new Date().toISOString(),
+    p_next_due_date: payload.nextDueDate || null,
+    p_notes: payload.notes || '',
+  })
+
+  return unwrapRpc(res)
+}

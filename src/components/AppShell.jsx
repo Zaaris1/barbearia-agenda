@@ -11,12 +11,20 @@ const baseMenu = [
   { id: 'configuracoes', label: 'Configurações', icon: Settings, adminOnly: true },
 ]
 
+function statusClass(status) {
+  const normalized = String(status || 'ATIVO').toLowerCase()
+  if (normalized.includes('bloqueado') || normalized.includes('cancelado') || normalized.includes('inativo')) return 'danger'
+  if (normalized.includes('pendente')) return 'warn'
+  return 'ok'
+}
+
 export default function AppShell({ session, bootstrap, page, setPage, onLogout, children }) {
   const isAdmin = session?.user?.role === 'ADMIN'
   const menu = baseMenu.filter((item) => !item.adminOnly || isAdmin)
   const shop = bootstrap?.barbershop || session?.barbershop || {}
   const roleLabel = isAdmin ? 'Administrador' : 'Barbeiro'
   const shopInitial = (shop?.name || 'B').trim().slice(0, 1).toUpperCase()
+  const subscriptionStatus = shop?.subscription_status || 'ATIVO'
 
   return (
     <div className="app-shell">
@@ -50,9 +58,15 @@ export default function AppShell({ session, bootstrap, page, setPage, onLogout, 
             <span className="eyebrow">Painel interno</span>
             <h1>{shop?.name || 'Agenda da Barbearia'}</h1>
           </div>
-          <div className="user-pill">
-            <span>{session?.user?.name}</span>
-            <small>{roleLabel}</small>
+          <div className="topbar-actions">
+            <div className={`subscription-pill ${statusClass(subscriptionStatus)}`}>
+              <span>{subscriptionStatus}</span>
+              {shop?.subscription_due_date && <small>Vence {shop.subscription_due_date}</small>}
+            </div>
+            <div className="user-pill">
+              <span>{session?.user?.name}</span>
+              <small>{roleLabel}</small>
+            </div>
           </div>
         </header>
         {children}

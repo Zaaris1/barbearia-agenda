@@ -1,63 +1,98 @@
-# Barbearia Agenda V1.1
+# Barbearia Agenda V1.2
 
-App de agendamentos para barbearia com React + Vite + Supabase + Cloudflare Pages.
+App de agendamentos para barbearias feito com React + Vite + Supabase, publicado no Cloudflare Pages e gerenciado pelo GitHub.
 
-## O que existe na V1
+## O que existe nesta versão
 
-- Login interno por PIN.
-- Dashboard diário.
-- Agenda por data, barbeiro e status.
-- Criar, confirmar, iniciar, concluir, cancelar, remarcar e marcar falta.
-- Cadastro de clientes.
-- Cadastro de serviços.
-- Cadastro de barbeiros e PINs.
-- Financeiro diário básico.
-- Página pública de agendamento.
-- Bloqueio de conflito de horário no banco.
+- Painel interno por barbearia: `/app/:slug`
+- Link público de agendamento por barbearia: `/agendar/:slug`
+- Painel master da plataforma: `/master`
+- Cadastro de múltiplas barbearias no mesmo banco
+- Separação dos dados por `barbershop_id`
+- Controle de mensalidade por barbearia
+- Bloqueio automático quando passar do vencimento + tolerância
+- Bloqueio manual pelo painel master
+- Registro de pagamento e renovação do vencimento
+- Login interno por PIN
+- Agenda, clientes, barbeiros, serviços, dashboard e financeiro diário
 
-## Novidades da V1.1
+## Instalação no Supabase
 
-- Nova aba **Configurações** para administrador.
-- Alteração do nome da barbearia, slug/link público, WhatsApp, endereço e intervalo padrão.
-- Botão para copiar/abrir link público.
-- Página pública de agendamento redesenhada com visual mais profissional.
-- Botão de WhatsApp na tela de sucesso quando houver telefone cadastrado.
-- Ajuste definitivo do `api.js` para preservar listas retornadas pelo Supabase.
-- SQL de atualização `database/004_configuracoes_e_ajustes.sql`.
+Se estiver instalando do zero, rode os SQLs nesta ordem:
 
-## Instalação do banco
-
-Para instalação nova, rode no Supabase SQL Editor:
-
-1. `database/001_schema.sql`
-2. `database/002_functions.sql`
-3. `database/003_seed_demo.sql`
-4. `database/004_configuracoes_e_ajustes.sql`
-
-Para quem já está com a V1 funcionando, rode apenas:
-
-1. `database/004_configuracoes_e_ajustes.sql`
-
-## Variáveis de ambiente
-
-No Cloudflare Pages, configure:
-
-```env
-VITE_SUPABASE_URL=https://SEU-PROJETO.supabase.co
-VITE_SUPABASE_ANON_KEY=SUA_CHAVE_PUBLICA
-VITE_DEFAULT_SHOP_SLUG=barbearia-demo
+```txt
+001_schema.sql
+002_functions.sql
+003_seed_demo.sql
+004_configuracoes_e_ajustes.sql
+005_multibarbearias_mensalidades.sql
 ```
 
-## Rodar localmente
+Se você já estava na V1.1, rode somente:
 
-```bash
-npm install
-npm run dev
+```txt
+database/005_multibarbearias_mensalidades.sql
+```
+
+Não cole o caminho do arquivo no SQL Editor. Abra o arquivo, copie o conteúdo completo e cole no Supabase.
+
+## Acessos iniciais
+
+Painel interno demo:
+
+```txt
+/app/barbearia-demo
+```
+
+Agendamento público demo:
+
+```txt
+/agendar/barbearia-demo
+```
+
+Painel master:
+
+```txt
+/master
+```
+
+PINs iniciais:
+
+```txt
+Barbearia demo admin: 1234
+Barbeiro demo: 1111
+Master: 9999
+```
+
+Depois de validar, troque o PIN master no Supabase com:
+
+```sql
+update public.platform_admins
+set pin_hash = crypt('NOVO_PIN_AQUI', gen_salt('bf'))
+where name = 'Master';
+```
+
+## Variáveis do Cloudflare Pages
+
+```txt
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua-chave-publishable-ou-anon
+VITE_DEFAULT_SHOP_SLUG=barbearia-demo
 ```
 
 ## Build
 
 ```bash
+npm install
 npm run build
 ```
 
+## Fluxo recomendado
+
+1. Acesse `/master`.
+2. Entre com PIN master.
+3. Crie uma nova barbearia.
+4. Copie o link interno `/app/slug-da-barbearia`.
+5. Copie o link público `/agendar/slug-da-barbearia`.
+6. Cadastre serviços, barbeiros e PINs dentro do painel interno da barbearia.
+7. Controle mensalidade, vencimento, status e bloqueio pelo painel master.
