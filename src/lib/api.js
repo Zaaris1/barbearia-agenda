@@ -159,6 +159,20 @@ export async function saveBarber(sessionToken, payload) {
   return unwrapRpc(res)
 }
 
+export async function updateBarbershopSettings(sessionToken, payload) {
+  const res = await supabase.rpc('internal_update_barbershop_settings', {
+    p_session_token: sessionToken,
+    p_name: payload.name,
+    p_slug: payload.slug,
+    p_phone: payload.phone || '',
+    p_address: payload.address || '',
+    p_default_slot_minutes: Number(payload.defaultSlotMinutes || 30),
+    p_public_booking_enabled: payload.publicBookingEnabled !== false,
+  })
+
+  return unwrapRpc(res)
+}
+
 export async function publicGetShop(slug) {
   const res = await supabase.rpc('public_get_shop', {
     p_shop_slug: slug,

@@ -8,6 +8,7 @@ import Clientes from './pages/Clientes'
 import Servicos from './pages/Servicos'
 import Barbeiros from './pages/Barbeiros'
 import Financeiro from './pages/Financeiro'
+import Configuracoes from './pages/Configuracoes'
 import PublicBooking from './pages/PublicBooking'
 import { clearSession, readSession, saveSession } from './lib/storage'
 import { getBootstrap, logoutSession } from './lib/api'
@@ -89,7 +90,7 @@ export default function App() {
 
   return (
     <>
-      <AppShell session={session} page={page} setPage={setPage} onLogout={handleLogout}>
+      <AppShell session={session} bootstrap={bootstrap} page={page} setPage={setPage} onLogout={handleLogout}>
         {bootLoading && !bootstrap ? <div className="loading-card">Preparando o painel...</div> : null}
         {page === 'dashboard' && <Dashboard {...commonProps} />}
         {page === 'agenda' && <Agenda {...commonProps} />}
@@ -97,6 +98,7 @@ export default function App() {
         {page === 'servicos' && <Servicos {...commonProps} />}
         {page === 'barbeiros' && <Barbeiros {...commonProps} />}
         {page === 'financeiro' && <Financeiro {...commonProps} />}
+        {page === 'configuracoes' && <Configuracoes {...commonProps} />}
       </AppShell>
       <Toast toast={toast} onClose={() => setToast(null)} />
     </>

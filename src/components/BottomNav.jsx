@@ -1,18 +1,7 @@
-import { CalendarDays, Home, Scissors, Users, UserRoundCog, WalletCards } from 'lucide-react'
-
-const items = [
-  { id: 'dashboard', label: 'Início', icon: Home },
-  { id: 'agenda', label: 'Agenda', icon: CalendarDays },
-  { id: 'clientes', label: 'Clientes', icon: Users },
-  { id: 'servicos', label: 'Serviços', icon: Scissors },
-  { id: 'barbeiros', label: 'Equipe', icon: UserRoundCog },
-  { id: 'financeiro', label: 'Caixa', icon: WalletCards },
-]
-
-export default function BottomNav({ page, setPage }) {
+export default function BottomNav({ page, setPage, menu = [] }) {
   return (
-    <nav className="bottom-nav">
-      {items.map((item) => {
+    <nav className="bottom-nav" aria-label="Menu principal">
+      {menu.map((item) => {
         const Icon = item.icon
         return (
           <button key={item.id} className={page === item.id ? 'active' : ''} onClick={() => setPage(item.id)} type="button">

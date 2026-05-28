@@ -1,24 +1,31 @@
-import { CalendarDays, Home, LogOut, Scissors, UserRoundCog, Users, WalletCards } from 'lucide-react'
+import { CalendarDays, Home, LogOut, Scissors, Settings, UserRoundCog, Users, WalletCards } from 'lucide-react'
 import BottomNav from './BottomNav'
 
-const menu = [
+const baseMenu = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
   { id: 'agenda', label: 'Agenda', icon: CalendarDays },
   { id: 'clientes', label: 'Clientes', icon: Users },
   { id: 'servicos', label: 'Serviços', icon: Scissors },
-  { id: 'barbeiros', label: 'Barbeiros', icon: UserRoundCog },
+  { id: 'barbeiros', label: 'Barbeiros', icon: UserRoundCog, adminOnly: true },
   { id: 'financeiro', label: 'Financeiro', icon: WalletCards },
+  { id: 'configuracoes', label: 'Configurações', icon: Settings, adminOnly: true },
 ]
 
-export default function AppShell({ session, page, setPage, onLogout, children }) {
+export default function AppShell({ session, bootstrap, page, setPage, onLogout, children }) {
+  const isAdmin = session?.user?.role === 'ADMIN'
+  const menu = baseMenu.filter((item) => !item.adminOnly || isAdmin)
+  const shop = bootstrap?.barbershop || session?.barbershop || {}
+  const roleLabel = isAdmin ? 'Administrador' : 'Barbeiro'
+  const shopInitial = (shop?.name || 'B').trim().slice(0, 1).toUpperCase()
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand-block">
-          <div className="brand-mark">B</div>
+          <div className="brand-mark">{shopInitial}</div>
           <div>
-            <strong>{session?.barbershop?.name || 'Barbearia'}</strong>
-            <span>{session?.user?.role === 'ADMIN' ? 'Administrador' : 'Barbeiro'}</span>
+            <strong>{shop?.name || 'Barbearia'}</strong>
+            <span>{roleLabel}</span>
           </div>
         </div>
         <div className="side-menu">
@@ -41,16 +48,16 @@ export default function AppShell({ session, page, setPage, onLogout, children })
         <header className="topbar">
           <div>
             <span className="eyebrow">Painel interno</span>
-            <h1>{session?.barbershop?.name || 'Agenda da Barbearia'}</h1>
+            <h1>{shop?.name || 'Agenda da Barbearia'}</h1>
           </div>
           <div className="user-pill">
             <span>{session?.user?.name}</span>
-            <small>{session?.user?.role}</small>
+            <small>{roleLabel}</small>
           </div>
         </header>
         {children}
       </main>
-      <BottomNav page={page} setPage={setPage} />
+      <BottomNav page={page} setPage={setPage} menu={menu} />
     </div>
   )
 }

@@ -1,135 +1,63 @@
-# Barbearia Agenda V1
+# Barbearia Agenda V1.1
 
-App de agendamentos para barbearia feito com **React + Vite + Supabase**, preparado para publicar no **Cloudflare Pages** e gerenciar pelo **GitHub**.
+App de agendamentos para barbearia com React + Vite + Supabase + Cloudflare Pages.
 
-## O que já vem nesta V1
+## O que existe na V1
 
-- Login interno por PIN
-- Perfil de administrador e barbeiro
-- Dashboard diário
-- Agenda com filtros por data, barbeiro e status
-- Criação de agendamento interno
-- Remarcar, confirmar, iniciar, concluir, cancelar e marcar falta
-- Cadastro de clientes
-- Cadastro de serviços
-- Cadastro de barbeiros
-- Financeiro diário básico
-- Página pública de agendamento
-- Bloqueio de conflito de horário direto no banco
-- Interface escura premium e responsiva para celular
+- Login interno por PIN.
+- Dashboard diário.
+- Agenda por data, barbeiro e status.
+- Criar, confirmar, iniciar, concluir, cancelar, remarcar e marcar falta.
+- Cadastro de clientes.
+- Cadastro de serviços.
+- Cadastro de barbeiros e PINs.
+- Financeiro diário básico.
+- Página pública de agendamento.
+- Bloqueio de conflito de horário no banco.
 
-## Estrutura
+## Novidades da V1.1
 
-```txt
-barbearia-agenda-v1/
-  public/
-    _redirects
-  src/
-    components/
-    pages/
-    lib/
-    styles/
-  database/
-    001_schema.sql
-    002_functions.sql
-    003_seed_demo.sql
-  .env.example
-  package.json
-  vite.config.js
-```
+- Nova aba **Configurações** para administrador.
+- Alteração do nome da barbearia, slug/link público, WhatsApp, endereço e intervalo padrão.
+- Botão para copiar/abrir link público.
+- Página pública de agendamento redesenhada com visual mais profissional.
+- Botão de WhatsApp na tela de sucesso quando houver telefone cadastrado.
+- Ajuste definitivo do `api.js` para preservar listas retornadas pelo Supabase.
+- SQL de atualização `database/004_configuracoes_e_ajustes.sql`.
 
-## Como instalar o banco no Supabase
+## Instalação do banco
 
-1. Crie um projeto no Supabase.
-2. Acesse **SQL Editor**.
-3. Execute os arquivos nesta ordem:
-   - `database/001_schema.sql`
-   - `database/002_functions.sql`
-   - `database/003_seed_demo.sql`
+Para instalação nova, rode no Supabase SQL Editor:
 
-Depois disso, a demo estará criada com:
+1. `database/001_schema.sql`
+2. `database/002_functions.sql`
+3. `database/003_seed_demo.sql`
+4. `database/004_configuracoes_e_ajustes.sql`
 
-```txt
-Barbearia: barbearia-demo
-PIN admin: 1234
-PIN barbeiro: 1111
-```
+Para quem já está com a V1 funcionando, rode apenas:
 
-## Como rodar localmente
+1. `database/004_configuracoes_e_ajustes.sql`
 
-Crie um arquivo `.env` com base no `.env.example`:
+## Variáveis de ambiente
+
+No Cloudflare Pages, configure:
 
 ```env
 VITE_SUPABASE_URL=https://SEU-PROJETO.supabase.co
-VITE_SUPABASE_ANON_KEY=SUA_CHAVE_ANON_PUBLICA
+VITE_SUPABASE_ANON_KEY=SUA_CHAVE_PUBLICA
 VITE_DEFAULT_SHOP_SLUG=barbearia-demo
 ```
 
-Instale e rode:
+## Rodar localmente
 
 ```bash
 npm install
 npm run dev
 ```
 
-Acesse:
+## Build
 
-```txt
-http://localhost:5173
+```bash
+npm run build
 ```
 
-Página pública:
-
-```txt
-http://localhost:5173/agendar/barbearia-demo
-```
-
-## Como publicar no Cloudflare Pages
-
-1. Suba este projeto para um repositório no GitHub.
-2. No Cloudflare Pages, escolha **Create a project**.
-3. Conecte com o GitHub.
-4. Configure:
-
-```txt
-Framework preset: Vite
-Build command: npm run build
-Build output directory: dist
-```
-
-5. Em **Environment Variables**, configure:
-
-```txt
-VITE_SUPABASE_URL
-VITE_SUPABASE_ANON_KEY
-VITE_DEFAULT_SHOP_SLUG=barbearia-demo
-```
-
-6. Faça o deploy.
-
-## Rotas principais
-
-```txt
-/                       Painel interno
-/agendar/barbearia-demo  Agendamento público
-/?publico=1              Agendamento público usando slug padrão
-```
-
-## Observações importantes
-
-- Esta V1 usa PIN com hash no banco, não salva PIN puro.
-- O frontend conversa com o Supabase por funções RPC.
-- As tabelas estão com RLS ativado.
-- A página pública não acessa dashboard, clientes, financeiro nem agenda completa.
-- O conflito de horário é validado no banco usando bloqueio transacional.
-
-## Próximas evoluções sugeridas
-
-- Logo/nome/cores por barbearia
-- Confirmação automática por WhatsApp
-- Link de remarcação para cliente
-- Relatório mensal
-- Comissão por barbeiro
-- Ranking de serviços
-- Histórico detalhado por cliente
-- Múltiplas unidades/barbearias com plano pago
