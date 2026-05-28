@@ -4,8 +4,12 @@ function unwrapRpc(result, fallback = null) {
   if (result.error) {
     throw new Error(result.error.message || 'Erro ao consultar o Supabase.')
   }
-  if (Array.isArray(result.data)) return result.data[0] ?? fallback
-  return result.data ?? fallback
+
+  if (result.data === null || result.data === undefined) {
+    return fallback
+  }
+
+  return result.data
 }
 
 export async function loginWithPin(shopSlug, pin) {
@@ -13,16 +17,29 @@ export async function loginWithPin(shopSlug, pin) {
     p_shop_slug: shopSlug,
     p_pin: pin,
   })
-  return unwrapRpc(res)
+
+  const data = unwrapRpc(res)
+
+  if (Array.isArray(data)) {
+    return data[0] ?? null
+  }
+
+  return data
 }
 
 export async function logoutSession(sessionToken) {
-  const res = await supabase.rpc('logout_session', { p_session_token: sessionToken })
+  const res = await supabase.rpc('logout_session', {
+    p_session_token: sessionToken,
+  })
+
   return unwrapRpc(res, { ok: true })
 }
 
 export async function getBootstrap(sessionToken) {
-  const res = await supabase.rpc('internal_get_bootstrap', { p_session_token: sessionToken })
+  const res = await supabase.rpc('internal_get_bootstrap', {
+    p_session_token: sessionToken,
+  })
+
   return unwrapRpc(res, {})
 }
 
@@ -31,17 +48,21 @@ export async function getDashboard(sessionToken, dateISO) {
     p_session_token: sessionToken,
     p_date: dateISO,
   })
+
   return unwrapRpc(res, {})
 }
 
-export async function listAppointments(sessionToken, filters) {
+export async function listAppointments(sessionToken, filters = {}) {
   const res = await supabase.rpc('internal_list_appointments', {
     p_session_token: sessionToken,
     p_date: filters.date || null,
     p_barber_id: filters.barberId || null,
     p_status: filters.status || null,
   })
-  return unwrapRpc(res, [])
+
+  const data = unwrapRpc(res, [])
+
+  return Array.isArray(data) ? data : []
 }
 
 export async function createAppointment(sessionToken, payload) {
@@ -57,6 +78,7 @@ export async function createAppointment(sessionToken, payload) {
     p_notes: payload.notes || '',
     p_status: payload.status || 'AGENDADO',
   })
+
   return unwrapRpc(res)
 }
 
@@ -67,6 +89,7 @@ export async function updateAppointmentStatus(sessionToken, appointmentId, statu
     p_status: status,
     p_note: note,
   })
+
   return unwrapRpc(res)
 }
 
@@ -77,6 +100,7 @@ export async function rescheduleAppointment(sessionToken, appointmentId, date, s
     p_date: date,
     p_start_time: startTime,
   })
+
   return unwrapRpc(res)
 }
 
@@ -85,7 +109,10 @@ export async function listClients(sessionToken, search = '') {
     p_session_token: sessionToken,
     p_search: search || '',
   })
-  return unwrapRpc(res, [])
+
+  const data = unwrapRpc(res, [])
+
+  return Array.isArray(data) ? data : []
 }
 
 export async function saveClient(sessionToken, payload) {
@@ -96,6 +123,7 @@ export async function saveClient(sessionToken, payload) {
     p_phone: payload.phone,
     p_notes: payload.notes || '',
   })
+
   return unwrapRpc(res)
 }
 
@@ -108,6 +136,7 @@ export async function saveService(sessionToken, payload) {
     p_price: Number(payload.price || 0),
     p_active: payload.active !== false,
   })
+
   return unwrapRpc(res)
 }
 
@@ -126,11 +155,15 @@ export async function saveBarber(sessionToken, payload) {
     p_service_ids: payload.serviceIds || null,
     p_color: payload.color || '#d4a857',
   })
+
   return unwrapRpc(res)
 }
 
 export async function publicGetShop(slug) {
-  const res = await supabase.rpc('public_get_shop', { p_shop_slug: slug })
+  const res = await supabase.rpc('public_get_shop', {
+    p_shop_slug: slug,
+  })
+
   return unwrapRpc(res, {})
 }
 
@@ -141,7 +174,10 @@ export async function publicGetAvailableSlots(slug, serviceId, barberId, dateISO
     p_barber_id: barberId,
     p_date: dateISO,
   })
-  return unwrapRpc(res, [])
+
+  const data = unwrapRpc(res, [])
+
+  return Array.isArray(data) ? data : []
 }
 
 export async function publicCreateAppointment(slug, payload) {
@@ -155,5 +191,6 @@ export async function publicCreateAppointment(slug, payload) {
     p_client_phone: payload.clientPhone,
     p_notes: payload.notes || '',
   })
+
   return unwrapRpc(res)
 }
