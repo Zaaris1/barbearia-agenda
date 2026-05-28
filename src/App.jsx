@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import AppShell from './components/AppShell'
 import Toast from './components/Toast'
 import Login from './pages/Login'
@@ -10,21 +10,34 @@ import Barbeiros from './pages/Barbeiros'
 import Financeiro from './pages/Financeiro'
 import Configuracoes from './pages/Configuracoes'
 import PublicBooking from './pages/PublicBooking'
+import MasterPanel from './pages/MasterPanel'
 import { clearSession, readSession, saveSession } from './lib/storage'
 import { getBootstrap, logoutSession } from './lib/api'
 
-function isPublicRoute() {
+function getRouteInfo() {
   const search = new URLSearchParams(window.location.search)
-  return window.location.pathname.includes('/agendar') || search.get('publico') === '1'
+  const parts = window.location.pathname.split('/').filter(Boolean)
+
+  const isPublic = parts[0] === 'agendar' || search.get('publico') === '1'
+  const isMaster = parts[0] === 'master'
+  const appSlug = parts[0] === 'app' && parts[1] ? parts[1] : ''
+  const publicSlug = parts[0] === 'agendar' && parts[1] ? parts[1] : ''
+
+  return {
+    isPublic,
+    isMaster,
+    appSlug,
+    publicSlug,
+  }
 }
 
 export default function App() {
+  const route = useMemo(() => getRouteInfo(), [])
   const [session, setSession] = useState(() => readSession())
   const [bootstrap, setBootstrap] = useState(null)
   const [page, setPage] = useState('dashboard')
   const [toast, setToast] = useState(null)
   const [bootLoading, setBootLoading] = useState(false)
-  const publicRoute = isPublicRoute()
 
   function showToast(message, type = 'success') {
     setToast({ message, type })
@@ -34,41 +47,71 @@ export default function App() {
 
   async function refreshBootstrap() {
     if (!session?.session_token) return
+
     setBootLoading(true)
+
     try {
       const data = await getBootstrap(session.session_token)
       setBootstrap(data)
     } catch (error) {
       showToast(error.message, 'error')
-      if (String(error.message || '').toLowerCase().includes('sess')) {
-        clearSession()
-        setSession(null)
-      }
+      clearSession()
+      setSession(null)
+      setBootstrap(null)
     } finally {
       setBootLoading(false)
     }
   }
 
   useEffect(() => {
-    if (!publicRoute && session?.session_token) refreshBootstrap()
-  }, [session?.session_token, publicRoute])
+    if (route.isPublic || route.isMaster) return
+
+    if (route.appSlug && session?.barbershop?.slug && session.barbershop.slug !== route.appSlug) {
+      clearSession()
+      setSession(null)
+      setBootstrap(null)
+      return
+    }
+
+    if (session?.session_token) {
+      refreshBootstrap()
+    }
+  }, [session?.session_token, route.isPublic, route.isMaster, route.appSlug])
 
   function handleLogin(payload) {
     saveSession(payload)
     setSession(payload)
     showToast(`Bem-vindo, ${payload.user?.name || 'usuário'}!`)
+
+    const slug = payload?.barbershop?.slug
+
+    if (slug && window.location.pathname === '/') {
+      window.history.replaceState(null, '', `/app/${slug}`)
+    }
   }
 
   async function handleLogout() {
     try {
-      if (session?.session_token) await logoutSession(session.session_token)
+      if (session?.session_token) {
+        await logoutSession(session.session_token)
+      }
     } catch {}
+
     clearSession()
     setSession(null)
     setBootstrap(null)
   }
 
-  if (publicRoute) {
+  if (route.isMaster) {
+    return (
+      <>
+        <MasterPanel showToast={showToast} />
+        <Toast toast={toast} onClose={() => setToast(null)} />
+      </>
+    )
+  }
+
+  if (route.isPublic) {
     return (
       <>
         <PublicBooking showToast={showToast} />
@@ -80,18 +123,32 @@ export default function App() {
   if (!session) {
     return (
       <>
-        <Login onLogin={handleLogin} showToast={showToast} />
+        <Login onLogin={handleLogin} showToast={showToast} forcedShopSlug={route.appSlug} />
         <Toast toast={toast} onClose={() => setToast(null)} />
       </>
     )
   }
 
-  const commonProps = { session, bootstrap, showToast, refreshBootstrap }
+  const commonProps = {
+    session,
+    bootstrap,
+    showToast,
+    refreshBootstrap,
+  }
 
   return (
     <>
-      <AppShell session={session} bootstrap={bootstrap} page={page} setPage={setPage} onLogout={handleLogout}>
-        {bootLoading && !bootstrap ? <div className="loading-card">Preparando o painel...</div> : null}
+      <AppShell
+        session={session}
+        bootstrap={bootstrap}
+        page={page}
+        setPage={setPage}
+        onLogout={handleLogout}
+      >
+        {bootLoading && !bootstrap ? (
+          <div className="loading-card">Preparando o painel...</div>
+        ) : null}
+
         {page === 'dashboard' && <Dashboard {...commonProps} />}
         {page === 'agenda' && <Agenda {...commonProps} />}
         {page === 'clientes' && <Clientes {...commonProps} />}
@@ -100,6 +157,7 @@ export default function App() {
         {page === 'financeiro' && <Financeiro {...commonProps} />}
         {page === 'configuracoes' && <Configuracoes {...commonProps} />}
       </AppShell>
+
       <Toast toast={toast} onClose={() => setToast(null)} />
     </>
   )
