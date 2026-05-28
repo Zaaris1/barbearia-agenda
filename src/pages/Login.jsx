@@ -1,19 +1,44 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ExternalLink, LockKeyhole, Scissors } from 'lucide-react'
-import { loginWithPin } from '../lib/api'
+import { loginWithPin, publicGetBranding } from '../lib/api'
+import { applyDocumentBrand, buildThemeStyle, normalizeUrl, publicBookingLink } from '../lib/branding'
 
 export default function Login({ onLogin, showToast, forcedShopSlug = '' }) {
   const defaultSlug = import.meta.env.VITE_DEFAULT_SHOP_SLUG || 'barbearia-demo'
   const [shopSlug, setShopSlug] = useState(forcedShopSlug || defaultSlug)
   const [pin, setPin] = useState('')
   const [loading, setLoading] = useState(false)
+  const [brand, setBrand] = useState(null)
 
   useEffect(() => {
     if (forcedShopSlug) setShopSlug(forcedShopSlug)
   }, [forcedShopSlug])
 
-  const publicLink = useMemo(() => `${window.location.origin}/agendar/${shopSlug || defaultSlug}`, [shopSlug, defaultSlug])
+  useEffect(() => {
+    const slug = (shopSlug || defaultSlug).trim().toLowerCase()
+    if (!slug) return
+    let cancelled = false
+    const timer = window.setTimeout(async () => {
+      try {
+        const data = await publicGetBranding(slug)
+        if (!cancelled && data?.slug) {
+          setBrand(data)
+          applyDocumentBrand(data)
+        }
+      } catch {
+        if (!cancelled) setBrand(null)
+      }
+    }, 350)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [shopSlug, defaultSlug])
+
+  const publicLink = useMemo(() => publicBookingLink(shopSlug || defaultSlug), [shopSlug, defaultSlug])
+  const logoUrl = normalizeUrl(brand?.logo_url)
+  const themeStyle = buildThemeStyle(brand || {})
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -35,16 +60,16 @@ export default function Login({ onLogin, showToast, forcedShopSlug = '' }) {
   }
 
   return (
-    <div className="login-page">
+    <div className="login-page branded-login" style={themeStyle}>
       <div className="login-orb orb-1" />
       <div className="login-orb orb-2" />
       <motion.div className="login-card" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
-        <div className="login-logo">
-          <Scissors size={34} />
+        <div className={`login-logo ${logoUrl ? 'with-image' : ''}`}>
+          {logoUrl ? <img src={logoUrl} alt={`Logo ${brand?.name || 'Barbearia'}`} /> : <Scissors size={34} />}
         </div>
         <span className="eyebrow centered">Agenda premium</span>
-        <h1>Barbearia Agenda</h1>
-        <p>Entre com o PIN do administrador ou barbeiro para acessar o painel interno.</p>
+        <h1>{brand?.name || 'Barbearia Agenda'}</h1>
+        <p>{brand?.slogan || 'Entre com o PIN do administrador ou barbeiro para acessar o painel interno.'}</p>
 
         <form onSubmit={handleSubmit} className="form-stack">
           <label>

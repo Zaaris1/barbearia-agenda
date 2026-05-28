@@ -1,5 +1,6 @@
 import { CalendarDays, Home, LogOut, Scissors, Settings, UserRoundCog, Users, WalletCards } from 'lucide-react'
 import BottomNav from './BottomNav'
+import { buildThemeStyle, normalizeUrl } from '../lib/branding'
 
 const baseMenu = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
@@ -25,15 +26,19 @@ export default function AppShell({ session, bootstrap, page, setPage, onLogout, 
   const roleLabel = isAdmin ? 'Administrador' : 'Barbeiro'
   const shopInitial = (shop?.name || 'B').trim().slice(0, 1).toUpperCase()
   const subscriptionStatus = shop?.subscription_status || 'ATIVO'
+  const logoUrl = normalizeUrl(shop?.logo_url)
+  const shellStyle = buildThemeStyle(shop)
 
   return (
-    <div className="app-shell">
+    <div className="app-shell branded-shell" style={shellStyle}>
       <aside className="sidebar">
         <div className="brand-block">
-          <div className="brand-mark">{shopInitial}</div>
+          <div className={`brand-mark ${logoUrl ? 'with-image' : ''}`}>
+            {logoUrl ? <img src={logoUrl} alt={`Logo ${shop?.name || 'Barbearia'}`} /> : shopInitial}
+          </div>
           <div>
             <strong>{shop?.name || 'Barbearia'}</strong>
-            <span>{roleLabel}</span>
+            <span>{shop?.slogan || roleLabel}</span>
           </div>
         </div>
         <div className="side-menu">
@@ -53,10 +58,11 @@ export default function AppShell({ session, bootstrap, page, setPage, onLogout, 
         </button>
       </aside>
       <main className="main-area">
-        <header className="topbar">
+        <header className="topbar branded-topbar">
           <div>
             <span className="eyebrow">Painel interno</span>
             <h1>{shop?.name || 'Agenda da Barbearia'}</h1>
+            {shop?.slogan && <p className="topbar-slogan">{shop.slogan}</p>}
           </div>
           <div className="topbar-actions">
             <div className={`subscription-pill ${statusClass(subscriptionStatus)}`}>

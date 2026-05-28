@@ -13,6 +13,7 @@ import PublicBooking from './pages/PublicBooking'
 import MasterPanel from './pages/MasterPanel'
 import { clearSession, readSession, saveSession } from './lib/storage'
 import { getBootstrap, logoutSession } from './lib/api'
+import { applyDocumentBrand } from './lib/branding'
 
 function getRouteInfo() {
   const search = new URLSearchParams(window.location.search)
@@ -59,6 +60,11 @@ export default function App() {
       setBootLoading(false)
     }
   }
+
+  useEffect(() => {
+    const shop = bootstrap?.barbershop || session?.barbershop
+    if (shop) applyDocumentBrand(shop)
+  }, [bootstrap?.barbershop, session?.barbershop])
 
   useEffect(() => {
     if (route.isPublic || route.isMaster) return

@@ -1,54 +1,40 @@
-# Barbearia Agenda V1.2
+# Barbearia Agenda V1.3
 
-App de agendamentos para barbearias feito com React + Vite + Supabase, publicado no Cloudflare Pages e gerenciado pelo GitHub.
+App de agendamentos para barbearias em **React + Vite + Supabase + Cloudflare Pages**.
 
-## O que existe nesta versão
+## V1.3 - Identidade visual
 
-- Painel interno por barbearia: `/app/:slug`
-- Link público de agendamento por barbearia: `/agendar/:slug`
-- Painel master da plataforma: `/master`
-- Cadastro de múltiplas barbearias no mesmo banco
-- Separação dos dados por `barbershop_id`
-- Controle de mensalidade por barbearia
-- Bloqueio automático quando passar do vencimento + tolerância
-- Bloqueio manual pelo painel master
-- Registro de pagamento e renovação do vencimento
-- Login interno por PIN
-- Agenda, clientes, barbeiros, serviços, dashboard e financeiro diário
+Inclui:
 
-## Instalação no Supabase
+- Multi-barbearias
+- Painel master em `/master`
+- Controle de mensalidades e bloqueio
+- Painel interno por barbearia em `/app/:slug`
+- Agendamento público em `/agendar/:slug`
+- Logo por barbearia
+- Banner/capa por barbearia
+- Favicon dinâmico por barbearia
+- Slogan
+- WhatsApp
+- Instagram
+- Horário de funcionamento em texto
+- Presets visuais prontos
+- Cores personalizadas
+- QR Code do link público
+- Botão copiar/compartilhar link público
+- Página pública redesenhada com identidade da barbearia
 
-Se estiver instalando do zero, rode os SQLs nesta ordem:
+## Instalação/atualização do banco
 
-```txt
-001_schema.sql
-002_functions.sql
-003_seed_demo.sql
-004_configuracoes_e_ajustes.sql
-005_multibarbearias_mensalidades.sql
+Se você já está na V1.2, rode apenas:
+
+```sql
+-- Conteúdo do arquivo database/006_branding_identidade_visual.sql
 ```
 
-Se você já estava na V1.1, rode somente:
+Não cole o nome do arquivo no Supabase. Abra o arquivo, copie todo o conteúdo e cole no SQL Editor.
 
-```txt
-database/005_multibarbearias_mensalidades.sql
-```
-
-Não cole o caminho do arquivo no SQL Editor. Abra o arquivo, copie o conteúdo completo e cole no Supabase.
-
-## Acessos iniciais
-
-Painel interno demo:
-
-```txt
-/app/barbearia-demo
-```
-
-Agendamento público demo:
-
-```txt
-/agendar/barbearia-demo
-```
+## Links principais
 
 Painel master:
 
@@ -56,27 +42,23 @@ Painel master:
 /master
 ```
 
-PINs iniciais:
+Painel interno de uma barbearia:
 
 ```txt
-Barbearia demo admin: 1234
-Barbeiro demo: 1111
-Master: 9999
+/app/barbearia-demo
 ```
 
-Depois de validar, troque o PIN master no Supabase com:
+Agendamento público:
 
-```sql
-update public.platform_admins
-set pin_hash = crypt('NOVO_PIN_AQUI', gen_salt('bf'))
-where name = 'Master';
+```txt
+/agendar/barbearia-demo
 ```
 
 ## Variáveis do Cloudflare Pages
 
 ```txt
 VITE_SUPABASE_URL=https://seu-projeto.supabase.co
-VITE_SUPABASE_ANON_KEY=sua-chave-publishable-ou-anon
+VITE_SUPABASE_ANON_KEY=sua_chave_publishable
 VITE_DEFAULT_SHOP_SLUG=barbearia-demo
 ```
 
@@ -87,12 +69,7 @@ npm install
 npm run build
 ```
 
-## Fluxo recomendado
+## Observação sobre imagens
 
-1. Acesse `/master`.
-2. Entre com PIN master.
-3. Crie uma nova barbearia.
-4. Copie o link interno `/app/slug-da-barbearia`.
-5. Copie o link público `/agendar/slug-da-barbearia`.
-6. Cadastre serviços, barbeiros e PINs dentro do painel interno da barbearia.
-7. Controle mensalidade, vencimento, status e bloqueio pelo painel master.
+Nesta versão, logo, capa e favicon são configurados por **URL direta de imagem**.
+Você pode usar links de imagens hospedadas em qualquer lugar público. Futuramente pode ser incluído upload direto via Supabase Storage.

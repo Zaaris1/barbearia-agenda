@@ -173,6 +173,35 @@ export async function updateBarbershopSettings(sessionToken, payload) {
   return unwrapRpc(res)
 }
 
+export async function updateBarbershopBranding(sessionToken, payload) {
+  const res = await supabase.rpc('internal_update_barbershop_branding', {
+    p_session_token: sessionToken,
+    p_logo_url: payload.logoUrl || '',
+    p_cover_url: payload.coverUrl || '',
+    p_favicon_url: payload.faviconUrl || '',
+    p_slogan: payload.slogan || '',
+    p_instagram: payload.instagram || '',
+    p_opening_hours_text: payload.openingHoursText || '',
+    p_preset_theme: payload.presetTheme || 'classic_gold',
+    p_primary_color: payload.primaryColor || '#D4A857',
+    p_secondary_color: payload.secondaryColor || '#0B0B0C',
+    p_accent_color: payload.accentColor || '#F5C66A',
+    p_bg_color: payload.bgColor || '#09090B',
+    p_surface_color: payload.surfaceColor || '#151518',
+    p_text_color: payload.textColor || '#F5F5F5',
+  })
+
+  return unwrapRpc(res)
+}
+
+export async function publicGetBranding(slug) {
+  const res = await supabase.rpc('public_get_branding', {
+    p_shop_slug: slug,
+  })
+
+  return unwrapRpc(res, {})
+}
+
 export async function publicGetShop(slug) {
   const res = await supabase.rpc('public_get_shop', {
     p_shop_slug: slug,
