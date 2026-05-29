@@ -80,8 +80,13 @@ Não é necessário rodar SQL novo para a V1.7.
 - Acesso de barbeiro/admin mantido secundário.
 
 
-## V1.7.3
+## V1.7.4
 
 - Card principal de cliente transformado em CTA visual claro.
 - Botão “Começar agendamento” com aparência real de ação.
 - Card do barbeiro/admin mantido como opção secundária.
+
+
+## V1.7.4
+
+Correção definitiva do CTA principal do cliente no portal inicial, com fundo dourado fixo, texto legível e botão “Começar agendamento” mais evidente.

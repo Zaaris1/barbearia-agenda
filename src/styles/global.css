@@ -1873,26 +1873,25 @@ body,
   cursor: not-allowed;
 }
 
+/* V1.7.4 - CTA principal do cliente com contraste fixo e aparência real de botão */
 .portal-action-client {
-  grid-template-columns: 84px minmax(0, 1fr);
-  gap: 20px;
-  padding: 28px;
-  min-height: 214px;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 22px;
+  padding: 30px;
+  min-height: 238px;
   border-radius: 34px;
   isolation: isolate;
   background:
-    radial-gradient(circle at 88% 10%, rgba(255,255,255,.55), transparent 28%),
-    radial-gradient(circle at 8% 100%, color-mix(in srgb, var(--accent) 50%, #fff 50%), transparent 38%),
-    linear-gradient(135deg,
-      color-mix(in srgb, var(--primary) 78%, #fff 22%),
-      color-mix(in srgb, var(--accent) 72%, #fff 28%)
-    );
-  color: #101010;
-  border: 2px solid color-mix(in srgb, var(--primary) 58%, #fff 42%);
+    radial-gradient(circle at 92% 6%, rgba(255,255,255,.42), transparent 24%),
+    radial-gradient(circle at 0% 100%, rgba(251,191,36,.5), transparent 42%),
+    linear-gradient(135deg, #d4a857 0%, #f8d57a 46%, #b9822f 100%);
+  color: #120d05;
+  border: 2px solid rgba(255, 236, 173, .92);
   box-shadow:
-    0 30px 90px color-mix(in srgb, var(--primary) 34%, transparent),
-    0 0 0 6px color-mix(in srgb, var(--primary) 10%, transparent),
-    inset 0 1px 0 rgba(255,255,255,.48);
+    0 34px 110px rgba(212,168,87,.24),
+    0 0 0 7px rgba(212,168,87,.10),
+    inset 0 1px 0 rgba(255,255,255,.58),
+    inset 0 -22px 60px rgba(72,43,0,.18);
   cursor: pointer;
 }
 
@@ -1901,8 +1900,8 @@ body,
   position: absolute;
   inset: 12px;
   border-radius: 26px;
-  border: 1px solid rgba(255,255,255,.34);
-  opacity: .78;
+  border: 1px solid rgba(255,255,255,.42);
+  opacity: .9;
   pointer-events: none;
 }
 
@@ -1912,11 +1911,12 @@ body,
   top: 16px;
   right: 16px;
   z-index: 3;
-  padding: 8px 12px;
+  padding: 8px 13px;
   border-radius: 999px;
-  background: rgba(0,0,0,.72);
-  color: #fff;
-  box-shadow: 0 10px 26px rgba(0,0,0,.22);
+  background: rgba(14,10,4,.86);
+  color: #fff3c4;
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 12px 28px rgba(0,0,0,.22);
   font-size: .7rem;
   font-weight: 950;
   letter-spacing: .1em;
@@ -1925,12 +1925,65 @@ body,
 
 .portal-action-client:hover {
   transform: translateY(-5px) scale(1.018);
-  filter: brightness(1.04) saturate(1.06);
-  border-color: #fff;
+  filter: brightness(1.045) saturate(1.08);
+  border-color: #fff4c2;
   box-shadow:
-    0 34px 108px color-mix(in srgb, var(--primary) 42%, transparent),
-    0 0 0 8px color-mix(in srgb, var(--primary) 13%, transparent),
-    inset 0 1px 0 rgba(255,255,255,.56);
+    0 38px 118px rgba(212,168,87,.32),
+    0 0 0 9px rgba(212,168,87,.13),
+    inset 0 1px 0 rgba(255,255,255,.62),
+    inset 0 -22px 60px rgba(72,43,0,.14);
+}
+
+.portal-action-client .portal-action-icon {
+  width: 92px;
+  height: 92px;
+  border-radius: 31px;
+  color: #111;
+  background: rgba(255,255,255,.86);
+  border: 1px solid rgba(255,255,255,.58);
+  box-shadow:
+    0 20px 46px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.78);
+}
+
+.portal-action-client strong {
+  font-size: 1.78rem;
+  line-height: 1;
+  letter-spacing: -.052em;
+  margin-bottom: 10px;
+  color: #0f0a02;
+  text-shadow: 0 1px 0 rgba(255,255,255,.28);
+}
+
+.portal-action-client span {
+  color: rgba(21,14,3,.82);
+  font-weight: 800;
+}
+
+.portal-action-client .portal-action-kicker {
+  color: rgba(27,18,3,.72);
+}
+
+.portal-action-client em {
+  grid-column: 1 / -1;
+  justify-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 14px 18px;
+  border-radius: 19px;
+  background: linear-gradient(135deg, #0b0b0c, #171717);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 20px 40px rgba(0,0,0,.26);
+  font-size: 1.05rem;
+  letter-spacing: -.01em;
+}
+
+.portal-action-client em::after {
+  content: ' →';
+  margin-left: 4px;
 }
 
 .portal-action-barber {
@@ -2258,4 +2311,46 @@ body,
     flex: 1 1 100%;
     border-radius: 15px;
   }
+}
+
+/* V1.7.4 final overrides - garante que o CTA do cliente nunca fique apagado por tema escuro */
+.portal-action-card.portal-action-client {
+  background: radial-gradient(circle at 92% 8%, rgba(255,255,255,.38), transparent 24%), radial-gradient(circle at 0% 100%, rgba(251,191,36,.5), transparent 42%), linear-gradient(135deg, #d4a857 0%, #f8d57a 48%, #b9822f 100%) !important;
+  border-color: rgba(255,236,173,.95) !important;
+  color: #120d05 !important;
+  box-shadow: 0 34px 110px rgba(212,168,87,.24), 0 0 0 7px rgba(212,168,87,.10), inset 0 1px 0 rgba(255,255,255,.58), inset 0 -22px 60px rgba(72,43,0,.18) !important;
+}
+.portal-action-card.portal-action-client .portal-action-icon {
+  background: rgba(255,255,255,.9) !important;
+  color: #111 !important;
+  border: 1px solid rgba(255,255,255,.62) !important;
+}
+.portal-action-card.portal-action-client .portal-action-kicker,
+.portal-action-card.portal-action-client span {
+  color: rgba(24,16,3,.82) !important;
+  opacity: 1 !important;
+}
+.portal-action-card.portal-action-client strong {
+  color: #0f0a02 !important;
+  opacity: 1 !important;
+}
+.portal-action-card.portal-action-client em {
+  background: linear-gradient(135deg, #0b0b0c, #171717) !important;
+  color: #fff !important;
+  opacity: 1 !important;
+}
+@media (max-width: 640px) {
+  .portal-action-card.portal-action-client {
+    grid-template-columns: 58px minmax(0, 1fr);
+    padding: 18px;
+    min-height: 198px;
+    gap: 14px;
+  }
+  .portal-action-card.portal-action-client .portal-action-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 21px;
+  }
+  .portal-action-card.portal-action-client strong { font-size: 1.46rem !important; }
+  .portal-action-card.portal-action-client em { min-height: 50px; font-size: .96rem; }
 }
