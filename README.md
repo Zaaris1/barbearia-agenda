@@ -33,3 +33,34 @@ Não precisa rodar SQL novo nesta versão.
 Suba/substitua os arquivos no GitHub e aguarde o Cloudflare Pages publicar automaticamente.
 
 Mantenha o `package-lock.json` fora do GitHub se o Cloudflare voltar a travar em `npm clean-install`.
+
+
+## V1.7 - Portal inicial da barbearia
+
+A V1.7 adiciona uma tela inicial única para cada barbearia. Assim, em vez de divulgar dois links separados, você pode divulgar apenas:
+
+```txt
+https://barbearia-agenda.pages.dev/barbearia-demo
+```
+
+Nessa tela, o visitante escolhe:
+
+```txt
+Sou cliente -> /agendar/barbearia-demo
+Sou barbeiro / administrador -> /app/barbearia-demo
+```
+
+O painel master continua separado em:
+
+```txt
+/master
+```
+
+Links antigos continuam funcionando:
+
+```txt
+/app/barbearia-demo
+/agendar/barbearia-demo
+```
+
+Não é necessário rodar SQL novo para a V1.7.

@@ -11,6 +11,7 @@ import Financeiro from './pages/Financeiro'
 import Configuracoes from './pages/Configuracoes'
 import PublicBooking from './pages/PublicBooking'
 import MasterPanel from './pages/MasterPanel'
+import BarbershopPortal from './pages/BarbershopPortal'
 import { clearSession, readSession, saveSession } from './lib/storage'
 import { getBootstrap, logoutSession } from './lib/api'
 import { applyDocumentBrand } from './lib/branding'
@@ -20,14 +21,19 @@ function getRouteInfo() {
   const parts = window.location.pathname.split('/').filter(Boolean)
   const isPublic = parts[0] === 'agendar' || search.get('publico') === '1'
   const isMaster = parts[0] === 'master'
-  const appSlug = parts[0] === 'app' && parts[1] ? parts[1] : ''
+  const isApp = parts[0] === 'app'
+  const appSlug = isApp && parts[1] ? parts[1] : ''
   const publicSlug = parts[0] === 'agendar' && parts[1] ? parts[1] : ''
+  const portalSlug = !isPublic && !isMaster && !isApp ? (parts[0] || import.meta.env.VITE_DEFAULT_SHOP_SLUG || 'barbearia-demo') : ''
 
   return {
     isPublic,
     isMaster,
+    isApp,
     appSlug,
     publicSlug,
+    portalSlug,
+    isPortal: Boolean(portalSlug),
   }
 }
 
@@ -67,7 +73,7 @@ export default function App() {
   }, [bootstrap?.barbershop, session?.barbershop])
 
   useEffect(() => {
-    if (route.isPublic || route.isMaster) return
+    if (route.isPublic || route.isMaster || route.isPortal) return
 
     if (route.appSlug && session?.barbershop?.slug && session.barbershop.slug !== route.appSlug) {
       clearSession()
@@ -77,7 +83,7 @@ export default function App() {
     }
 
     if (session?.session_token) refreshBootstrap()
-  }, [session?.session_token, route.isPublic, route.isMaster, route.appSlug])
+  }, [session?.session_token, route.isPublic, route.isMaster, route.isPortal, route.appSlug])
 
   function handleLogin(payload) {
     saveSession(payload)
@@ -112,6 +118,15 @@ export default function App() {
     return (
       <>
         <PublicBooking showToast={showToast} />
+        <Toast toast={toast} onClose={() => setToast(null)} />
+      </>
+    )
+  }
+
+  if (route.isPortal) {
+    return (
+      <>
+        <BarbershopPortal showToast={showToast} fallbackSlug={route.portalSlug} />
         <Toast toast={toast} onClose={() => setToast(null)} />
       </>
     )
