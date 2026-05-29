@@ -1,4 +1,4 @@
-# Barbearia Agenda V1.5
+# Barbearia Agenda V1.5.1
 
 App de agendamento para barbearias com React + Vite + Supabase + Cloudflare Pages.
 
@@ -62,3 +62,17 @@ Configure:
 - Instruções ao cliente
 
 O cliente verá o QR Code e o Pix copia e cola após solicitar o agendamento.
+
+
+## V1.5.1
+
+- Correção do layout mobile do bloco Pix na tela de confirmação.
+- Normalização automática da chave Pix do tipo telefone para o formato internacional `+55`.
+
+## V1.5.2
+
+Correção forte de responsividade do bloco Pix no celular:
+- QR Code menor no mobile.
+- Pix copia e cola dentro de área rolável própria.
+- Botões empilhados e sem estourar largura.
+- Página de pagamento sem rolagem lateral.

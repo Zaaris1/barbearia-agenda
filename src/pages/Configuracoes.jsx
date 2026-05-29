@@ -114,12 +114,13 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
 
   const pixPreviewPayload = useMemo(() => buildPixPayload({
     pixKey: form.pixKey,
+    pixKeyType: form.pixKeyType,
     receiverName: form.pixReceiverName || form.name,
     receiverCity: form.pixReceiverCity || 'BRASIL',
     amount: pixPreviewAmount,
     txid: 'TESTE',
     description: 'AGENDAMENTO',
-  }), [form.pixKey, form.pixReceiverName, form.pixReceiverCity, form.name, pixPreviewAmount])
+  }), [form.pixKey, form.pixKeyType, form.pixReceiverName, form.pixReceiverCity, form.name, pixPreviewAmount])
 
   function setField(field, value) {
     setForm((old) => {

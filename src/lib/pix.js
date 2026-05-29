@@ -34,8 +34,23 @@ function crc16(payload) {
   return crc.toString(16).toUpperCase().padStart(4, '0')
 }
 
-export function normalizePixKey(value = '') {
-  return String(value || '').trim()
+export function normalizePixKey(value = '', keyType = '') {
+  const raw = String(value || '').trim()
+  const type = String(keyType || '').toUpperCase()
+
+  if (!raw) return ''
+
+  if (['PHONE', 'TELEFONE', 'CELULAR'].includes(type)) {
+    const digits = raw.replace(/\D/g, '')
+
+    if (raw.startsWith('+')) return `+${digits}`
+    if (digits.startsWith('55') && (digits.length === 12 || digits.length === 13)) return `+${digits}`
+    if (digits.length === 10 || digits.length === 11) return `+55${digits}`
+
+    return raw
+  }
+
+  return raw
 }
 
 export function getPaymentModeLabel(mode) {
@@ -84,11 +99,11 @@ export function calculatePaymentAmount(shop = {}, servicePrice = 0) {
 }
 
 export function shouldShowPayment(shop = {}, paymentAmount = 0) {
-  return Boolean(shop?.payment_enabled && normalizePixKey(shop?.pix_key) && Number(paymentAmount || 0) > 0)
+  return Boolean(shop?.payment_enabled && normalizePixKey(shop?.pix_key, shop?.pix_key_type) && Number(paymentAmount || 0) > 0)
 }
 
-export function buildPixPayload({ pixKey, receiverName, receiverCity, amount, txid, description }) {
-  const key = normalizePixKey(pixKey)
+export function buildPixPayload({ pixKey, pixKeyType, receiverName, receiverCity, amount, txid, description }) {
+  const key = normalizePixKey(pixKey, pixKeyType)
   if (!key) return ''
 
   const merchantName = onlyAscii(receiverName || 'BARBEARIA', 25).toUpperCase() || 'BARBEARIA'

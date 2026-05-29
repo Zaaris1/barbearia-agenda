@@ -93,6 +93,7 @@ export default function PublicBooking({ showToast }) {
     const showPayment = shouldShowPayment(shop || {}, paymentAmount)
     const pixPayload = showPayment ? buildPixPayload({
       pixKey: shop?.pix_key,
+      pixKeyType: shop?.pix_key_type,
       receiverName: shop?.pix_receiver_name || shop?.name,
       receiverCity: shop?.pix_receiver_city || 'BRASIL',
       amount: paymentAmount,
@@ -105,7 +106,7 @@ export default function PublicBooking({ showToast }) {
     const wa = whatsappLink(shop?.phone, `${baseText}${paymentText}`)
 
     return (
-      <div className="public-page public-page-pro branded-public" style={themeStyle}>
+      <div className="public-page public-page-pro branded-public payment-result-page" style={themeStyle}>
         <motion.div className="public-card success-card payment-success-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
           <div className="success-icon"><CheckCircle2 size={42} /></div>
           <span className="eyebrow centered">Solicitação enviada</span>
@@ -131,9 +132,18 @@ export default function PublicBooking({ showToast }) {
 
               {pixPayload && <div className="qr-box pix-qr"><img src={pixQrCodeUrl(pixPayload)} alt="QR Code Pix" /></div>}
 
-              <div className="pix-copy-box">
-                <span>{pixPayload || shop?.pix_key}</span>
-                <button className="ghost-icon" type="button" onClick={() => copyText(pixPayload || shop?.pix_key, 'Pix copiado.')} title="Copiar Pix"><Copy size={17} /></button>
+              <div className="pix-copy-box pix-copy-box-v152">
+                <div className="pix-copy-label">
+                  <strong>Pix copia e cola</strong>
+                  <small>Use o botão abaixo para copiar o código completo.</small>
+                </div>
+                <textarea
+                  className="pix-payload-textarea"
+                  value={pixPayload || shop?.pix_key || ''}
+                  readOnly
+                  aria-label="Pix copia e cola"
+                />
+                <button className="ghost-icon pix-copy-inline" type="button" onClick={() => copyText(pixPayload || shop?.pix_key, 'Pix copiado.')} title="Copiar Pix"><Copy size={17} /></button>
               </div>
 
               <div className="payment-actions-public">
@@ -153,7 +163,7 @@ export default function PublicBooking({ showToast }) {
   }
 
   return (
-    <div className="public-page public-page-pro branded-public" style={themeStyle}>
+    <div className="public-page public-page-pro branded-public payment-result-page" style={themeStyle}>
       <div className="public-orb one" />
       <div className="public-orb two" />
 

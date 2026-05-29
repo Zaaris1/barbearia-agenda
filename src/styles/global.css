@@ -1280,3 +1280,371 @@ textarea { resize: vertical; }
     grid-template-columns: 1fr;
   }
 }
+
+
+/* V1.5.1 - Correção mobile do bloco Pix e prevenção de rolagem lateral */
+html,
+body,
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.payment-success-card,
+.payment-box-public,
+.pix-copy-box,
+.payment-actions-public {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .login-page,
+  .public-page {
+    width: 100%;
+    max-width: 100%;
+    padding: 12px;
+    overflow-x: hidden;
+    place-items: start center;
+  }
+
+  .login-card,
+  .public-card,
+  .payment-success-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 22px 16px;
+    border-radius: 26px;
+  }
+
+  .payment-success-card h1 {
+    font-size: clamp(1.85rem, 9vw, 2.5rem);
+    line-height: 1;
+  }
+
+  .payment-box-public {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    padding: 16px 12px;
+    border-radius: 22px;
+  }
+
+  .payment-box-heading {
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .payment-box-heading strong {
+    white-space: normal;
+    text-align: center;
+  }
+
+  .payment-box-public p {
+    text-align: center;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    font-size: .95rem;
+  }
+
+  .pix-qr {
+    width: min(100%, 250px);
+    max-width: 250px;
+    padding: 10px;
+    border-radius: 20px;
+  }
+
+  .pix-qr img {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+  }
+
+  .pix-copy-box {
+    width: 100%;
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 40px;
+    align-items: center;
+    overflow: hidden;
+    padding: 10px;
+  }
+
+  .pix-copy-box span {
+    width: 100%;
+    min-width: 0;
+    white-space: normal;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    text-align: left;
+    line-height: 1.35;
+    max-height: 76px;
+    overflow: auto;
+  }
+
+  .payment-actions-public {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .payment-actions-public .btn {
+    white-space: normal;
+    line-height: 1.25;
+    min-height: 52px;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .booking-summary span {
+    justify-content: flex-start;
+    text-align: left;
+    word-break: break-word;
+  }
+}
+
+/* V1.5.2 - Revisão forte do bloco Pix no mobile */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.payment-result-page {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.payment-success-card {
+  width: min(100%, 640px);
+  max-width: 640px;
+  overflow: hidden;
+}
+
+.payment-box-public,
+.payment-box-public *,
+.pix-copy-box,
+.pix-copy-box * {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.pix-copy-box-v152 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  grid-template-areas:
+    "label copy"
+    "payload payload";
+  gap: 10px;
+  align-items: center;
+}
+
+.pix-copy-label {
+  grid-area: label;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+}
+
+.pix-copy-label strong {
+  color: var(--text);
+  font-size: .9rem;
+}
+
+.pix-copy-label small {
+  color: var(--muted);
+  font-size: .76rem;
+  line-height: 1.35;
+}
+
+.pix-copy-inline {
+  grid-area: copy;
+  width: 42px;
+  height: 42px;
+}
+
+.pix-payload-textarea {
+  grid-area: payload;
+  width: 100%;
+  min-height: 66px;
+  max-height: 96px;
+  resize: none;
+  overflow: auto;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.09);
+  background: rgba(0,0,0,.26);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: .72rem;
+  line-height: 1.45;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+@media (max-width: 640px) {
+  body {
+    min-width: 0;
+  }
+
+  .payment-result-page {
+    display: block;
+    min-height: 100svh;
+    padding: 10px;
+  }
+
+  .payment-result-page .payment-success-card {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 18px 12px;
+    border-radius: 22px;
+  }
+
+  .payment-result-page .success-icon {
+    transform: scale(.85);
+    margin-bottom: 4px;
+  }
+
+  .payment-result-page .eyebrow {
+    font-size: .62rem;
+    letter-spacing: .16em;
+  }
+
+  .payment-result-page .payment-success-card h1 {
+    font-size: clamp(1.42rem, 7vw, 1.95rem);
+    line-height: 1.05;
+    letter-spacing: -.045em;
+    margin-bottom: 8px;
+  }
+
+  .payment-result-page .payment-success-card > p {
+    font-size: .9rem;
+    line-height: 1.45;
+    margin-bottom: 14px;
+  }
+
+  .payment-result-page .booking-summary {
+    margin: 14px 0;
+    gap: 8px;
+  }
+
+  .payment-result-page .booking-summary span {
+    padding: 10px;
+    border-radius: 13px;
+    font-size: .84rem;
+  }
+
+  .payment-result-page .payment-box-public {
+    margin: 14px 0;
+    padding: 13px 10px;
+    border-radius: 18px;
+    box-shadow: none;
+  }
+
+  .payment-result-page .payment-box-heading {
+    width: 100%;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .payment-result-page .payment-box-heading h2 {
+    font-size: 1.08rem;
+    line-height: 1.2;
+  }
+
+  .payment-result-page .payment-box-heading strong {
+    padding: 8px 12px;
+    font-size: .98rem;
+  }
+
+  .payment-result-page .payment-box-public p {
+    width: 100%;
+    max-width: 100%;
+    font-size: .86rem;
+    line-height: 1.45;
+    margin-bottom: 12px;
+  }
+
+  .payment-result-page .pix-qr {
+    width: 176px;
+    max-width: 176px;
+    padding: 8px;
+    border-radius: 16px;
+    margin: 10px auto 12px;
+  }
+
+  .payment-result-page .pix-qr img {
+    border-radius: 10px;
+  }
+
+  .payment-result-page .pix-copy-box-v152 {
+    grid-template-columns: minmax(0, 1fr) 38px;
+    gap: 8px;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .payment-result-page .pix-copy-label strong {
+    font-size: .84rem;
+  }
+
+  .payment-result-page .pix-copy-label small {
+    font-size: .7rem;
+  }
+
+  .payment-result-page .pix-copy-inline {
+    width: 38px;
+    height: 38px;
+  }
+
+  .payment-result-page .pix-payload-textarea {
+    min-height: 58px;
+    max-height: 72px;
+    font-size: .66rem;
+    line-height: 1.35;
+    padding: 8px;
+  }
+
+  .payment-result-page .payment-actions-public {
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .payment-result-page .payment-actions-public .btn,
+  .payment-result-page .btn.full {
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    font-size: .86rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 380px) {
+  .payment-result-page {
+    padding: 8px;
+  }
+
+  .payment-result-page .payment-success-card {
+    padding: 16px 10px;
+  }
+
+  .payment-result-page .pix-qr {
+    width: 158px;
+    max-width: 158px;
+  }
+
+  .payment-result-page .payment-actions-public .btn,
+  .payment-result-page .btn.full {
+    font-size: .82rem;
+  }
+}
