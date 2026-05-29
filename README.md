@@ -1,78 +1,35 @@
-# Barbearia Agenda V1.5.1
+# Barbearia Agenda V1.6
 
-App de agendamento para barbearias com React + Vite + Supabase + Cloudflare Pages.
+App de agendamentos para barbearias feito com React + Vite + Supabase + Cloudflare Pages.
 
-## Recursos principais
+## V1.6 - Confirmação por WhatsApp
 
-- Multi-barbearias no mesmo app
-- Painel master em `/master`
-- Painel interno por barbearia em `/app/slug-da-barbearia`
-- Página pública em `/agendar/slug-da-barbearia`
-- Agenda, clientes, barbeiros, serviços e financeiro básico
-- Identidade visual por barbearia: logo, capa, favicon, cores, slogan e Instagram
-- Controle de mensalidades da plataforma com bloqueio
-- Pagamento Pix manual para agendamento público
-- QR Code Pix e Pix copia e cola
-- Marcação manual de pagamento recebido no painel interno
+Nesta versão foi adicionada a confirmação via WhatsApp sem API:
 
-## Aplicação no projeto existente
+- Ao clicar em **Confirmar** no card do agendamento, o status muda para `CONFIRMADO` e o WhatsApp do cliente abre com mensagem pronta.
+- Após o agendamento estar confirmado, o card mostra o botão **Enviar confirmação** para reenviar/abrir a mensagem novamente.
+- A mensagem usa automaticamente nome do cliente, serviço, barbeiro, data, horário, valor, nome da barbearia, endereço e telefone da barbearia quando disponíveis.
+- O telefone do cliente é normalizado para link `wa.me`, adicionando `55` quando necessário.
 
-1. Substitua os arquivos deste pacote no GitHub.
-2. Remova `package-lock.json` do GitHub caso ele exista, para evitar erro de `npm clean-install` no Cloudflare.
-3. Rode no Supabase o SQL novo:
+## Observação importante
 
-```txt
-database/008_pix_manual_pagamento.sql
-```
+Esta versão não envia a mensagem automaticamente pela API oficial do WhatsApp. Ela abre o WhatsApp com a mensagem preenchida para o barbeiro/admin tocar em enviar.
 
-Abra o arquivo, copie o conteúdo completo e cole no SQL Editor do Supabase.
+Isso evita custo com API, aprovação da Meta e necessidade de backend/webhook.
 
-## Build
+## Arquivos principais alterados
 
-```bash
-npm install
-npm run build
-```
+- `src/components/AppointmentCard.jsx`
+- `src/pages/Agenda.jsx`
+- `src/lib/whatsapp.js`
+- `src/styles/global.css`
 
-## Variáveis no Cloudflare Pages
+## Banco de dados
 
-```txt
-VITE_SUPABASE_URL=https://seu-projeto.supabase.co
-VITE_SUPABASE_ANON_KEY=sua-chave-publica
-VITE_DEFAULT_SHOP_SLUG=barbearia-demo
-NODE_VERSION=20
-```
+Não precisa rodar SQL novo nesta versão.
 
-## Configuração do Pix
+## Deploy
 
-No painel interno da barbearia, entre em:
+Suba/substitua os arquivos no GitHub e aguarde o Cloudflare Pages publicar automaticamente.
 
-```txt
-Configurações > Pagamento Pix manual
-```
-
-Configure:
-
-- Ativar Pix
-- Regra de pagamento: opcional, obrigatório/valor total ou sinal
-- Chave Pix
-- Tipo da chave
-- Nome do recebedor
-- Cidade do recebedor
-- Instruções ao cliente
-
-O cliente verá o QR Code e o Pix copia e cola após solicitar o agendamento.
-
-
-## V1.5.1
-
-- Correção do layout mobile do bloco Pix na tela de confirmação.
-- Normalização automática da chave Pix do tipo telefone para o formato internacional `+55`.
-
-## V1.5.2
-
-Correção forte de responsividade do bloco Pix no celular:
-- QR Code menor no mobile.
-- Pix copia e cola dentro de área rolável própria.
-- Botões empilhados e sem estourar largura.
-- Página de pagamento sem rolagem lateral.
+Mantenha o `package-lock.json` fora do GitHub se o Cloudflare voltar a travar em `npm clean-install`.
