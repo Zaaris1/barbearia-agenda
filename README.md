@@ -78,3 +78,10 @@ Não é necessário rodar SQL novo para a V1.7.
 - Card principal de cliente com contraste corrigido.
 - Botão de agendamento com mais destaque visual.
 - Acesso de barbeiro/admin mantido secundário.
+
+
+## V1.7.3
+
+- Card principal de cliente transformado em CTA visual claro.
+- Botão “Começar agendamento” com aparência real de ação.
+- Card do barbeiro/admin mantido como opção secundária.
