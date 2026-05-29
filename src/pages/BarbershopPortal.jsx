@@ -138,22 +138,24 @@ export default function BarbershopPortal({ showToast, fallbackSlug }) {
           )}
 
           <div className="portal-action-grid">
-            <a className={`portal-action-card ${bookingDisabled ? 'disabled' : ''}`} href={bookingDisabled ? undefined : `/agendar/${slug}`} onClick={(e) => { if (bookingDisabled) e.preventDefault() }}>
-              <div className="portal-action-icon client"><UserRound size={28} /></div>
+            <a className={`portal-action-card portal-action-client ${bookingDisabled ? 'disabled' : ''}`} href={bookingDisabled ? undefined : `/agendar/${slug}`} onClick={(e) => { if (bookingDisabled) e.preventDefault() }}>
+              <div className="portal-action-icon client"><UserRound size={32} /></div>
               <div>
-                <strong>Sou cliente</strong>
-                <span>Quero escolher serviço, barbeiro, data e horário.</span>
+                <span className="portal-action-kicker">Cliente</span>
+                <strong>Agendar horário</strong>
+                <span>Escolha serviço, barbeiro, data e horário em poucos segundos.</span>
               </div>
-              <em>{bookingDisabled ? 'Indisponível' : 'Agendar horário'}</em>
+              <em>{bookingDisabled ? 'Indisponível' : 'Começar agendamento'}</em>
             </a>
 
-            <a className="portal-action-card" href={`/app/${slug}`}>
-              <div className="portal-action-icon barber"><LockKeyhole size={28} /></div>
+            <a className="portal-action-card portal-action-barber" href={`/app/${slug}`}>
+              <div className="portal-action-icon barber"><LockKeyhole size={24} /></div>
               <div>
-                <strong>Sou barbeiro / administrador</strong>
-                <span>Acessar agenda, clientes, financeiro e configurações.</span>
+                <span className="portal-action-kicker">Equipe</span>
+                <strong>Entrar no painel</strong>
+                <span>Acesso de barbeiro ou administrador.</span>
               </div>
-              <em>Entrar no painel</em>
+              <em>Usar PIN</em>
             </a>
           </div>
 

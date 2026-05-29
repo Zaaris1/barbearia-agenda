@@ -64,3 +64,10 @@ Links antigos continuam funcionando:
 ```
 
 Não é necessário rodar SQL novo para a V1.7.
+
+## V1.7.1 - Refinamento do portal inicial
+
+- Card principal de cliente com mais destaque visual.
+- Botão de agendamento mais forte como CTA principal.
+- Acesso de barbeiro/admin mantido como opção secundária e discreta.
+- Ajustes de responsividade para mobile.
