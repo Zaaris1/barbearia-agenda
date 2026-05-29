@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Copy, ExternalLink, ImageIcon, Palette, QrCode, Save, Send, Settings, ShieldCheck, Sparkles } from 'lucide-react'
-import { updateBarbershopBranding, updateBarbershopSettings } from '../lib/api'
+import { Copy, CreditCard, ExternalLink, ImageIcon, KeyRound, Palette, QrCode, Save, Send, Settings, ShieldCheck, Sparkles } from 'lucide-react'
+import { updateBarbershopBranding, updateBarbershopPayment, updateBarbershopSettings } from '../lib/api'
 import { buildThemeStyle, instagramUrl, normalizeUrl, presetOptions, publicBookingLink, qrCodeUrl, THEME_PRESETS } from '../lib/branding'
+import { buildPixPayload, getPaymentModeLabel, pixQrCodeUrl } from '../lib/pix'
+import { formatMoney } from '../lib/dates'
 
 function normalizeSlug(value) {
   return String(value || '')
@@ -50,6 +52,15 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
     bgColor: '#09090B',
     surfaceColor: '#151518',
     textColor: '#F5F5F5',
+    paymentEnabled: false,
+    paymentMode: 'DISABLED',
+    pixKey: '',
+    pixKeyType: 'EVP',
+    pixReceiverName: '',
+    pixReceiverCity: '',
+    depositType: 'PERCENT',
+    depositValue: 50,
+    paymentInstructions: '',
   })
 
   useEffect(() => {
@@ -73,29 +84,17 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
       bgColor: shop?.bg_color || '#09090B',
       surfaceColor: shop?.surface_color || '#151518',
       textColor: shop?.text_color || '#F5F5F5',
+      paymentEnabled: shop?.payment_enabled === true,
+      paymentMode: shop?.payment_mode || 'DISABLED',
+      pixKey: shop?.pix_key || '',
+      pixKeyType: shop?.pix_key_type || 'EVP',
+      pixReceiverName: shop?.pix_receiver_name || shop?.name || '',
+      pixReceiverCity: shop?.pix_receiver_city || '',
+      depositType: shop?.deposit_type || 'PERCENT',
+      depositValue: Number(shop?.deposit_value ?? 50),
+      paymentInstructions: shop?.payment_instructions || '',
     })
-  }, [
-    shop?.id,
-    shop?.name,
-    shop?.slug,
-    shop?.phone,
-    shop?.address,
-    shop?.default_slot_minutes,
-    shop?.public_booking_enabled,
-    shop?.logo_url,
-    shop?.cover_url,
-    shop?.favicon_url,
-    shop?.slogan,
-    shop?.instagram,
-    shop?.opening_hours_text,
-    shop?.preset_theme,
-    shop?.primary_color,
-    shop?.secondary_color,
-    shop?.accent_color,
-    shop?.bg_color,
-    shop?.surface_color,
-    shop?.text_color,
-  ])
+  }, [shop?.id, shop?.updated_at, bootstrap])
 
   const publicLink = useMemo(() => publicBookingLink(form.slug || shop?.slug), [form.slug, shop?.slug])
   const panelLink = useMemo(() => `${window.location.origin}/app/${form.slug || shop?.slug || 'barbearia-demo'}`, [form.slug, shop?.slug])
@@ -109,8 +108,26 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
     text_color: form.textColor,
   }), [form.presetTheme, form.primaryColor, form.secondaryColor, form.accentColor, form.bgColor, form.surfaceColor, form.textColor])
 
+  const pixPreviewAmount = form.paymentMode === 'DEPOSIT'
+    ? (form.depositType === 'FIXED' ? Number(form.depositValue || 0) : 50)
+    : 50
+
+  const pixPreviewPayload = useMemo(() => buildPixPayload({
+    pixKey: form.pixKey,
+    receiverName: form.pixReceiverName || form.name,
+    receiverCity: form.pixReceiverCity || 'BRASIL',
+    amount: pixPreviewAmount,
+    txid: 'TESTE',
+    description: 'AGENDAMENTO',
+  }), [form.pixKey, form.pixReceiverName, form.pixReceiverCity, form.name, pixPreviewAmount])
+
   function setField(field, value) {
-    setForm((old) => ({ ...old, [field]: value }))
+    setForm((old) => {
+      const next = { ...old, [field]: value }
+      if (field === 'paymentEnabled' && value === false) next.paymentMode = 'DISABLED'
+      if (field === 'paymentEnabled' && value === true && next.paymentMode === 'DISABLED') next.paymentMode = 'OPTIONAL'
+      return next
+    })
   }
 
   async function copyText(text, label = 'Texto copiado.') {
@@ -139,12 +156,16 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
     const cleanSlug = normalizeSlug(form.slug)
     if (!form.name.trim()) return showToast('Informe o nome da barbearia.', 'error')
     if (!cleanSlug) return showToast('Informe um identificador válido para o link público.', 'error')
+    if (form.paymentEnabled && form.paymentMode !== 'DISABLED' && !form.pixKey.trim()) return showToast('Informe a chave Pix ou desative o pagamento.', 'error')
+    if (form.paymentEnabled && form.paymentMode !== 'DISABLED' && !form.pixReceiverName.trim()) return showToast('Informe o nome do recebedor do Pix.', 'error')
+    if (form.paymentEnabled && form.paymentMode !== 'DISABLED' && !form.pixReceiverCity.trim()) return showToast('Informe a cidade do recebedor do Pix.', 'error')
 
     setSaving(true)
     try {
       await updateBarbershopSettings(session.session_token, { ...form, slug: cleanSlug })
       await updateBarbershopBranding(session.session_token, form)
-      showToast('Identidade e configurações salvas com sucesso.')
+      await updateBarbershopPayment(session.session_token, form)
+      showToast('Configurações, identidade e Pix salvos com sucesso.')
       await refreshBootstrap?.()
     } catch (error) {
       showToast(error.message, 'error')
@@ -174,7 +195,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
         <div>
           <span className="eyebrow">Administração</span>
           <h2>Configurações e identidade visual</h2>
-          <p>Personalize a barbearia, o link público, cores, logo, capa, QR Code e dados comerciais.</p>
+          <p>Personalize a barbearia, link público, cores, logo, capa, QR Code e Pix manual.</p>
         </div>
         <div className="heading-actions">
           <a className="btn soft" href={publicLink} target="_blank" rel="noreferrer"><ExternalLink size={17} /> Abrir público</a>
@@ -267,6 +288,77 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
           <div className="section-divider" />
 
           <div className="panel-title">
+            <h3>Pagamento Pix manual</h3>
+            <span>Configure chave Pix, QR Code e regra de cobrança na página pública</span>
+          </div>
+
+          <div className="form-grid payment-form-grid">
+            <label className="check-row settings-check full">
+              <input type="checkbox" checked={form.paymentEnabled} onChange={(e) => setField('paymentEnabled', e.target.checked)} />
+              <span>Ativar Pix na página pública de agendamento</span>
+            </label>
+
+            <label>
+              <span>Regra de pagamento</span>
+              <select value={form.paymentMode} onChange={(e) => setField('paymentMode', e.target.value)} disabled={!form.paymentEnabled}>
+                <option value="DISABLED">Desativado</option>
+                <option value="OPTIONAL">Pix opcional</option>
+                <option value="REQUIRED">Pix obrigatório / valor total</option>
+                <option value="DEPOSIT">Sinal para reservar</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Tipo da chave Pix</span>
+              <select value={form.pixKeyType} onChange={(e) => setField('pixKeyType', e.target.value)} disabled={!form.paymentEnabled}>
+                <option value="CPF">CPF</option>
+                <option value="CNPJ">CNPJ</option>
+                <option value="PHONE">Telefone</option>
+                <option value="EMAIL">E-mail</option>
+                <option value="EVP">Aleatória</option>
+              </select>
+            </label>
+
+            <label className="full">
+              <span>Chave Pix</span>
+              <input value={form.pixKey} onChange={(e) => setField('pixKey', e.target.value)} placeholder="CPF, CNPJ, telefone, e-mail ou chave aleatória" disabled={!form.paymentEnabled} />
+            </label>
+
+            <label>
+              <span>Nome do recebedor</span>
+              <input value={form.pixReceiverName} onChange={(e) => setField('pixReceiverName', e.target.value)} placeholder="Nome que aparecerá no Pix" disabled={!form.paymentEnabled} />
+            </label>
+
+            <label>
+              <span>Cidade do recebedor</span>
+              <input value={form.pixReceiverCity} onChange={(e) => setField('pixReceiverCity', e.target.value)} placeholder="Ex: Nova Iguaçu" disabled={!form.paymentEnabled} />
+            </label>
+
+            {form.paymentMode === 'DEPOSIT' && (
+              <>
+                <label>
+                  <span>Tipo de sinal</span>
+                  <select value={form.depositType} onChange={(e) => setField('depositType', e.target.value)} disabled={!form.paymentEnabled}>
+                    <option value="PERCENT">Percentual</option>
+                    <option value="FIXED">Valor fixo</option>
+                  </select>
+                </label>
+                <label>
+                  <span>{form.depositType === 'FIXED' ? 'Valor do sinal' : 'Percentual do sinal'}</span>
+                  <input type="number" min="0" step="0.01" value={form.depositValue} onChange={(e) => setField('depositValue', e.target.value)} disabled={!form.paymentEnabled} />
+                </label>
+              </>
+            )}
+
+            <label className="full">
+              <span>Instruções para o cliente</span>
+              <textarea value={form.paymentInstructions} onChange={(e) => setField('paymentInstructions', e.target.value)} rows="3" placeholder="Ex: Para confirmar seu horário, envie o comprovante pelo WhatsApp." disabled={!form.paymentEnabled} />
+            </label>
+          </div>
+
+          <div className="section-divider" />
+
+          <div className="panel-title">
             <h3>Preset e cores</h3>
             <span>Escolha um tema pronto ou ajuste manualmente</span>
           </div>
@@ -314,6 +406,25 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
               <span className="preview-chip"><Sparkles size={14} /> {THEME_PRESETS[form.presetTheme]?.name || 'Tema'}</span>
               <span className="preview-chip"><Palette size={14} /> Cores próprias</span>
             </div>
+          </div>
+
+          <div className="panel-card settings-side-card pix-preview-card">
+            <div className="settings-icon"><CreditCard size={24} /></div>
+            <h3>Prévia do Pix</h3>
+            <p>{form.paymentEnabled && form.paymentMode !== 'DISABLED' ? getPaymentModeLabel(form.paymentMode) : 'Pix desativado para clientes.'}</p>
+            {form.paymentEnabled && form.pixKey ? (
+              <>
+                <div className="pix-mini-summary">
+                  <span>Recebedor: <strong>{form.pixReceiverName || form.name || 'Não informado'}</strong></span>
+                  <span>Cidade: <strong>{form.pixReceiverCity || 'Não informada'}</strong></span>
+                  <span>Valor teste: <strong>{formatMoney(pixPreviewAmount)}</strong></span>
+                </div>
+                {pixPreviewPayload && <div className="qr-box"><img src={pixQrCodeUrl(pixPreviewPayload)} alt="QR Code Pix de teste" /></div>}
+                <button className="btn soft full" type="button" onClick={() => copyText(pixPreviewPayload, 'Pix copia e cola de teste copiado.')}><Copy size={16} /> Copiar Pix teste</button>
+              </>
+            ) : (
+              <div className="empty-state small"><KeyRound size={18} /> Configure a chave Pix para gerar QR Code.</div>
+            )}
           </div>
 
           <div className="panel-card settings-side-card">

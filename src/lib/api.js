@@ -93,6 +93,16 @@ export async function updateAppointmentStatus(sessionToken, appointmentId, statu
   return unwrapRpc(res)
 }
 
+export async function markAppointmentPaid(sessionToken, appointmentId, note = '') {
+  const res = await supabase.rpc('internal_mark_appointment_paid', {
+    p_session_token: sessionToken,
+    p_appointment_id: appointmentId,
+    p_note: note,
+  })
+
+  return unwrapRpc(res)
+}
+
 export async function rescheduleAppointment(sessionToken, appointmentId, date, startTime) {
   const res = await supabase.rpc('internal_reschedule_appointment', {
     p_session_token: sessionToken,
@@ -189,6 +199,23 @@ export async function updateBarbershopBranding(sessionToken, payload) {
     p_bg_color: payload.bgColor || '#09090B',
     p_surface_color: payload.surfaceColor || '#151518',
     p_text_color: payload.textColor || '#F5F5F5',
+  })
+
+  return unwrapRpc(res)
+}
+
+export async function updateBarbershopPayment(sessionToken, payload) {
+  const res = await supabase.rpc('internal_update_barbershop_payment', {
+    p_session_token: sessionToken,
+    p_payment_enabled: payload.paymentEnabled === true,
+    p_payment_mode: payload.paymentMode || 'DISABLED',
+    p_pix_key: payload.pixKey || '',
+    p_pix_key_type: payload.pixKeyType || 'EVP',
+    p_pix_receiver_name: payload.pixReceiverName || '',
+    p_pix_receiver_city: payload.pixReceiverCity || '',
+    p_deposit_type: payload.depositType || 'PERCENT',
+    p_deposit_value: Number(payload.depositValue || 0),
+    p_payment_instructions: payload.paymentInstructions || '',
   })
 
   return unwrapRpc(res)

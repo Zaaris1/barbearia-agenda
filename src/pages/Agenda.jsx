@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { CalendarPlus, RefreshCcw } from 'lucide-react'
 import AppointmentCard from '../components/AppointmentCard'
 import Modal from '../components/Modal'
-import { createAppointment, listAppointments, listClients, rescheduleAppointment, updateAppointmentStatus } from '../lib/api'
+import { createAppointment, listAppointments, listClients, markAppointmentPaid, rescheduleAppointment, updateAppointmentStatus } from '../lib/api'
 import { todayISO } from '../lib/dates'
 
 const statusOptions = [
@@ -128,6 +128,17 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
     }
   }
 
+  async function handleMarkPaid(appointment) {
+    const note = window.prompt('Observação do pagamento opcional:', appointment.payment_note || '') || ''
+    try {
+      await markAppointmentPaid(session.session_token, appointment.id, note)
+      showToast('Pagamento marcado como recebido.')
+      await load()
+    } catch (error) {
+      showToast(error.message, 'error')
+    }
+  }
+
   return (
     <section className="page-content">
       <div className="page-heading">
@@ -152,7 +163,7 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
       {!loading && appointments.length === 0 && <div className="empty-state big">Nenhum agendamento encontrado para os filtros selecionados.</div>}
       <div className="appointments-grid">
         {appointments.map((appointment) => (
-          <AppointmentCard key={appointment.id} appointment={appointment} onStatus={handleStatus} onReschedule={openRescheduleModal} />
+          <AppointmentCard key={appointment.id} appointment={appointment} onStatus={handleStatus} onReschedule={openRescheduleModal} onMarkPaid={handleMarkPaid} />
         ))}
       </div>
 

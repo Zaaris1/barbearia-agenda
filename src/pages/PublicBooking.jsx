@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowLeft, CalendarCheck, CalendarDays, CheckCircle2, Clock3, Instagram, MapPin, MessageCircle, Scissors, ShieldCheck, Sparkles, UserRound } from 'lucide-react'
+import { ArrowLeft, CalendarCheck, CalendarDays, CheckCircle2, Clock3, Copy, CreditCard, Instagram, MapPin, MessageCircle, QrCode, Scissors, ShieldCheck, Sparkles, UserRound } from 'lucide-react'
 import { publicCreateAppointment, publicGetAvailableSlots, publicGetShop } from '../lib/api'
 import { formatMoney, todayISO } from '../lib/dates'
 import { applyDocumentBrand, buildThemeStyle, instagramUrl, normalizeUrl, whatsappLink } from '../lib/branding'
+import { buildPixPayload, calculatePaymentAmount, getPaymentModeLabel, pixQrCodeUrl, shouldShowPayment } from '../lib/pix'
 
 function extractSlug() {
   const parts = window.location.pathname.split('/').filter(Boolean)
@@ -25,11 +26,22 @@ export default function PublicBooking({ showToast }) {
   const barbers = shop?.barbers || []
   const selectedService = useMemo(() => services.find((s) => s.id === form.serviceId), [services, form.serviceId])
   const selectedBarber = useMemo(() => barbers.find((b) => b.id === form.barberId), [barbers, form.barberId])
+  const paymentAmountPreview = useMemo(() => calculatePaymentAmount(shop || {}, selectedService?.price || 0), [shop, selectedService])
+  const paymentVisiblePreview = shouldShowPayment(shop || {}, paymentAmountPreview)
   const canSubmit = form.serviceId && form.barberId && form.date && form.startTime && form.clientName.trim() && form.clientPhone.trim()
   const logoUrl = normalizeUrl(shop?.logo_url)
   const coverUrl = normalizeUrl(shop?.cover_url)
   const themeStyle = buildThemeStyle(shop || {})
   const instagramHref = instagramUrl(shop?.instagram)
+
+  async function copyText(text, label = 'Copiado com sucesso.') {
+    try {
+      await navigator.clipboard.writeText(text)
+      showToast(label)
+    } catch {
+      showToast('Não foi possível copiar automaticamente. Copie manualmente.', 'error')
+    }
+  }
 
   async function loadShop() {
     setLoading(true)
@@ -77,12 +89,24 @@ export default function PublicBooking({ showToast }) {
   }
 
   if (done) {
-    const text = `Olá! Solicitei um horário pelo app: ${done.service_name}, dia ${done.date} às ${done.start_time?.slice(0, 5)} com ${done.barber_name}.`
-    const wa = whatsappLink(shop?.phone, text)
+    const paymentAmount = Number(done.payment_amount || calculatePaymentAmount(shop || {}, done.price || selectedService?.price || 0))
+    const showPayment = shouldShowPayment(shop || {}, paymentAmount)
+    const pixPayload = showPayment ? buildPixPayload({
+      pixKey: shop?.pix_key,
+      receiverName: shop?.pix_receiver_name || shop?.name,
+      receiverCity: shop?.pix_receiver_city || 'BRASIL',
+      amount: paymentAmount,
+      txid: done.payment_reference || `AG${String(done.id || '').replace(/-/g, '').slice(0, 18)}`,
+      description: 'AGENDAMENTO',
+    }) : ''
+
+    const baseText = `Olá! Solicitei um horário pelo app: ${done.service_name}, dia ${done.date} às ${done.start_time?.slice(0, 5)} com ${done.barber_name}.`
+    const paymentText = showPayment ? `\n\nPagamento Pix: ${formatMoney(paymentAmount)}. Vou enviar o comprovante por aqui.` : ''
+    const wa = whatsappLink(shop?.phone, `${baseText}${paymentText}`)
 
     return (
       <div className="public-page public-page-pro branded-public" style={themeStyle}>
-        <motion.div className="public-card success-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
+        <motion.div className="public-card success-card payment-success-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
           <div className="success-icon"><CheckCircle2 size={42} /></div>
           <span className="eyebrow centered">Solicitação enviada</span>
           <h1>Seu horário foi solicitado</h1>
@@ -91,8 +115,35 @@ export default function PublicBooking({ showToast }) {
             <span><CalendarDays size={16} /> {done.date} às {done.start_time?.slice(0, 5)}</span>
             <span><Scissors size={16} /> {done.service_name}</span>
             <span><UserRound size={16} /> {done.barber_name}</span>
+            <span><CreditCard size={16} /> {formatMoney(done.price || selectedService?.price || 0)}</span>
           </div>
-          {wa && <a className="btn success full" href={wa} target="_blank" rel="noreferrer"><MessageCircle size={18} /> Enviar mensagem no WhatsApp</a>}
+
+          {showPayment && (
+            <div className="payment-box-public">
+              <div className="payment-box-heading">
+                <div>
+                  <span className="eyebrow">Pagamento Pix</span>
+                  <h2>{done.payment_required ? 'Envie o Pix para reservar' : 'Pagamento Pix disponível'}</h2>
+                </div>
+                <strong>{formatMoney(paymentAmount)}</strong>
+              </div>
+              <p>{shop?.payment_instructions || (done.payment_required ? 'Para agilizar a confirmação, faça o Pix e envie o comprovante pelo WhatsApp.' : 'Você pode pagar agora via Pix ou combinar diretamente com a barbearia.')}</p>
+
+              {pixPayload && <div className="qr-box pix-qr"><img src={pixQrCodeUrl(pixPayload)} alt="QR Code Pix" /></div>}
+
+              <div className="pix-copy-box">
+                <span>{pixPayload || shop?.pix_key}</span>
+                <button className="ghost-icon" type="button" onClick={() => copyText(pixPayload || shop?.pix_key, 'Pix copiado.')} title="Copiar Pix"><Copy size={17} /></button>
+              </div>
+
+              <div className="payment-actions-public">
+                {pixPayload && <button className="btn soft full" type="button" onClick={() => copyText(pixPayload, 'Pix copia e cola copiado.')}><QrCode size={17} /> Copiar Pix copia e cola</button>}
+                <button className="btn soft full" type="button" onClick={() => copyText(shop?.pix_key, 'Chave Pix copiada.')}><Copy size={17} /> Copiar chave Pix</button>
+              </div>
+            </div>
+          )}
+
+          {wa && <a className="btn success full" href={wa} target="_blank" rel="noreferrer"><MessageCircle size={18} /> Enviar comprovante / mensagem</a>}
           <button className="btn primary full" type="button" onClick={() => { setDone(null); setForm((old) => ({ ...old, startTime: '' })); loadSlots(); }}>
             Fazer outro agendamento
           </button>
@@ -120,6 +171,7 @@ export default function PublicBooking({ showToast }) {
             <div><Sparkles size={18} /><span>Atendimento organizado</span></div>
             <div><Clock3 size={18} /><span>Horários calculados automaticamente</span></div>
             <div><ShieldCheck size={18} /><span>Confirmação pelo painel interno</span></div>
+            {shop?.payment_enabled && shop?.payment_mode !== 'DISABLED' && <div><CreditCard size={18} /><span>{getPaymentModeLabel(shop.payment_mode)}</span></div>}
             {shop?.opening_hours_text && <div><CalendarDays size={18} /><span>{shop.opening_hours_text}</span></div>}
             {shop?.address && <div><MapPin size={18} /><span>{shop.address}</span></div>}
           </div>
@@ -194,6 +246,7 @@ export default function PublicBooking({ showToast }) {
                 <span>{selectedService ? `${selectedService.name} • ${selectedService.duration_min}min • ${formatMoney(selectedService.price)}` : 'Serviço não selecionado'}</span>
                 <span>{selectedBarber ? `Com ${selectedBarber.name}` : 'Barbeiro não selecionado'}</span>
                 <span>{form.startTime ? `${form.date} às ${form.startTime}` : 'Horário não selecionado'}</span>
+                {paymentVisiblePreview && <span>Pix: {getPaymentModeLabel(shop?.payment_mode)} • {formatMoney(paymentAmountPreview)}</span>}
               </div>
             )}
 

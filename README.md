@@ -1,66 +1,31 @@
-# Barbearia Agenda V1.3
+# Barbearia Agenda V1.5
 
-App de agendamentos para barbearias em **React + Vite + Supabase + Cloudflare Pages**.
+App de agendamento para barbearias com React + Vite + Supabase + Cloudflare Pages.
 
-## V1.3 - Identidade visual
+## Recursos principais
 
-Inclui:
-
-- Multi-barbearias
+- Multi-barbearias no mesmo app
 - Painel master em `/master`
-- Controle de mensalidades e bloqueio
-- Painel interno por barbearia em `/app/:slug`
-- Agendamento público em `/agendar/:slug`
-- Logo por barbearia
-- Banner/capa por barbearia
-- Favicon dinâmico por barbearia
-- Slogan
-- WhatsApp
-- Instagram
-- Horário de funcionamento em texto
-- Presets visuais prontos
-- Cores personalizadas
-- QR Code do link público
-- Botão copiar/compartilhar link público
-- Página pública redesenhada com identidade da barbearia
+- Painel interno por barbearia em `/app/slug-da-barbearia`
+- Página pública em `/agendar/slug-da-barbearia`
+- Agenda, clientes, barbeiros, serviços e financeiro básico
+- Identidade visual por barbearia: logo, capa, favicon, cores, slogan e Instagram
+- Controle de mensalidades da plataforma com bloqueio
+- Pagamento Pix manual para agendamento público
+- QR Code Pix e Pix copia e cola
+- Marcação manual de pagamento recebido no painel interno
 
-## Instalação/atualização do banco
+## Aplicação no projeto existente
 
-Se você já está na V1.2, rode apenas:
-
-```sql
--- Conteúdo do arquivo database/006_branding_identidade_visual.sql
-```
-
-Não cole o nome do arquivo no Supabase. Abra o arquivo, copie todo o conteúdo e cole no SQL Editor.
-
-## Links principais
-
-Painel master:
+1. Substitua os arquivos deste pacote no GitHub.
+2. Remova `package-lock.json` do GitHub caso ele exista, para evitar erro de `npm clean-install` no Cloudflare.
+3. Rode no Supabase o SQL novo:
 
 ```txt
-/master
+database/008_pix_manual_pagamento.sql
 ```
 
-Painel interno de uma barbearia:
-
-```txt
-/app/barbearia-demo
-```
-
-Agendamento público:
-
-```txt
-/agendar/barbearia-demo
-```
-
-## Variáveis do Cloudflare Pages
-
-```txt
-VITE_SUPABASE_URL=https://seu-projeto.supabase.co
-VITE_SUPABASE_ANON_KEY=sua_chave_publishable
-VITE_DEFAULT_SHOP_SLUG=barbearia-demo
-```
+Abra o arquivo, copie o conteúdo completo e cole no SQL Editor do Supabase.
 
 ## Build
 
@@ -69,7 +34,31 @@ npm install
 npm run build
 ```
 
-## Observação sobre imagens
+## Variáveis no Cloudflare Pages
 
-Nesta versão, logo, capa e favicon são configurados por **URL direta de imagem**.
-Você pode usar links de imagens hospedadas em qualquer lugar público. Futuramente pode ser incluído upload direto via Supabase Storage.
+```txt
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua-chave-publica
+VITE_DEFAULT_SHOP_SLUG=barbearia-demo
+NODE_VERSION=20
+```
+
+## Configuração do Pix
+
+No painel interno da barbearia, entre em:
+
+```txt
+Configurações > Pagamento Pix manual
+```
+
+Configure:
+
+- Ativar Pix
+- Regra de pagamento: opcional, obrigatório/valor total ou sinal
+- Chave Pix
+- Tipo da chave
+- Nome do recebedor
+- Cidade do recebedor
+- Instruções ao cliente
+
+O cliente verá o QR Code e o Pix copia e cola após solicitar o agendamento.

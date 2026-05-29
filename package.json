@@ -1,7 +1,7 @@
 {
-  "name": "barbearia-agenda-v13",
+  "name": "barbearia-agenda-v15",
   "private": true,
-  "version": "1.3.0",
+  "version": "1.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
