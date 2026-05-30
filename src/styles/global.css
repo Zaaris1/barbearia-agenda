@@ -2400,3 +2400,204 @@ body,
     max-width: 100%;
   }
 }
+
+/* V1.7.6 - Correção final de rolagem no mobile/Safari do portal inicial
+   O scroll fica no body, não em um container interno, evitando travamento ao tocar nos cards. */
+@media (max-width: 760px) {
+  html,
+  body {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: auto;
+  }
+
+  #root {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+  }
+
+  .portal-page {
+    position: relative !important;
+    display: block !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    touch-action: auto !important;
+    padding: 10px 10px calc(96px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .portal-shell {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    margin: 0 auto !important;
+    overflow: visible !important;
+  }
+
+  .portal-hero,
+  .portal-access-card {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .portal-hero {
+    min-height: 0 !important;
+    padding: 16px !important;
+    gap: 26px !important;
+  }
+
+  .portal-hero-content h1 {
+    font-size: clamp(2.05rem, 13vw, 3.35rem) !important;
+    line-height: .95 !important;
+  }
+
+  .portal-hero-content p {
+    font-size: .92rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .portal-info-grid {
+    gap: 8px !important;
+  }
+
+  .portal-info-grid div {
+    padding: 10px !important;
+    border-radius: 15px !important;
+  }
+
+  .portal-access-card {
+    padding: 16px !important;
+    border-radius: 24px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .portal-access-heading h2 {
+    font-size: 1.78rem !important;
+  }
+
+  .portal-access-heading p {
+    font-size: .92rem !important;
+  }
+
+  .portal-action-grid {
+    margin: 16px 0 14px !important;
+    gap: 10px !important;
+  }
+
+  .portal-action-card.portal-action-client {
+    min-height: auto !important;
+    padding: 16px !important;
+    border-radius: 22px !important;
+  }
+
+  .portal-action-client em {
+    min-height: 46px !important;
+  }
+
+  .portal-secondary-actions {
+    padding-bottom: 4px !important;
+  }
+}
+
+
+/* V1.7.7 - Correção forte de rolagem mobile do portal inicial
+   A rolagem fica no documento/body, e no mobile removemos filtros pesados que travavam o Safari/Chrome. */
+html.portal-route-active,
+body.portal-route-active {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
+  position: static !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: auto !important;
+  touch-action: pan-y !important;
+}
+
+body.portal-route-active #root {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow: visible !important;
+  position: static !important;
+}
+
+body.portal-route-active .portal-page {
+  min-height: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+  position: relative !important;
+  touch-action: pan-y !important;
+}
+
+body.portal-route-active .portal-shell,
+body.portal-route-active .portal-hero,
+body.portal-route-active .portal-access-card,
+body.portal-route-active .portal-action-card,
+body.portal-route-active .portal-secondary-actions,
+body.portal-route-active .portal-secondary-actions a,
+body.portal-route-active .portal-secondary-actions button {
+  touch-action: pan-y !important;
+}
+
+@media (max-width: 760px) {
+  body.portal-route-active {
+    background: var(--bg) !important;
+  }
+
+  body.portal-route-active .portal-page {
+    display: block !important;
+    width: 100% !important;
+    padding: 10px 10px calc(120px + env(safe-area-inset-bottom)) !important;
+    background:
+      radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 32%),
+      linear-gradient(135deg, var(--bg), color-mix(in srgb, var(--secondary) 72%, #000)) !important;
+  }
+
+  body.portal-route-active .portal-shell {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    overflow: visible !important;
+  }
+
+  body.portal-route-active .portal-hero,
+  body.portal-route-active .portal-access-card,
+  body.portal-route-active .portal-loading-card {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+
+  body.portal-route-active .portal-hero {
+    min-height: 0 !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 18px 42px rgba(0,0,0,.28) !important;
+  }
+
+  body.portal-route-active .portal-access-card {
+    box-shadow: 0 18px 42px rgba(0,0,0,.24) !important;
+  }
+
+  body.portal-route-active .portal-action-card {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: rgba(212,168,87,.18);
+  }
+
+  body.portal-route-active .portal-action-card:hover,
+  body.portal-route-active .portal-action-client:hover,
+  body.portal-route-active .portal-action-barber:hover {
+    transform: none !important;
+    filter: none !important;
+  }
+
+  body.portal-route-active .public-orb {
+    display: none !important;
+  }
+}

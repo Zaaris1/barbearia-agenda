@@ -94,3 +94,19 @@ Correção definitiva do CTA principal do cliente no portal inicial, com fundo d
 ## V1.7.5
 
 Correção de rolagem no portal inicial em celulares: remove travamento de scroll vertical, evita overflow horizontal e mantém o visual aprovado da V1.7.4.
+
+## V1.7.6
+
+Correção final de rolagem no mobile/Safari do portal inicial da barbearia.
+
+Arquivos alterados:
+
+- `src/styles/global.css`
+- `README.md`
+
+Não precisa rodar SQL novo.
+
+
+## V1.7.7
+
+Correção forte de rolagem mobile/Safari no portal inicial da barbearia. Remove animação de entrada do portal, força o scroll no body/documento e reduz efeitos pesados no mobile para evitar travamentos ao rolar.

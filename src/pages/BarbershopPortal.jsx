@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
 import { CalendarCheck, Copy, Instagram, LockKeyhole, MapPin, MessageCircle, QrCode, Scissors, ShieldCheck, Sparkles, UserRound } from 'lucide-react'
 import { publicGetBranding } from '../lib/api'
 import { applyDocumentBrand, buildThemeStyle, instagramUrl, normalizeUrl, whatsappLink } from '../lib/branding'
@@ -39,6 +38,16 @@ export default function BarbershopPortal({ showToast, fallbackSlug }) {
       showToast('Não foi possível copiar automaticamente. Copie manualmente.', 'error')
     }
   }
+
+  useEffect(() => {
+    document.documentElement.classList.add('portal-route-active')
+    document.body.classList.add('portal-route-active')
+
+    return () => {
+      document.documentElement.classList.remove('portal-route-active')
+      document.body.classList.remove('portal-route-active')
+    }
+  }, [])
 
   useEffect(() => {
     let alive = true
@@ -98,7 +107,7 @@ export default function BarbershopPortal({ showToast, fallbackSlug }) {
       <div className="public-orb one" />
       <div className="public-orb two" />
 
-      <motion.main className="portal-shell" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
+      <main className="portal-shell">
         <section
           className="portal-hero"
           style={{ backgroundImage: coverUrl ? `linear-gradient(135deg, rgba(0,0,0,.2), rgba(0,0,0,.9)), url(${coverUrl})` : undefined }}
@@ -166,7 +175,7 @@ export default function BarbershopPortal({ showToast, fallbackSlug }) {
             <button type="button" onClick={() => copyText(urls.booking, 'Link de agendamento copiado.')}><QrCode size={16} /> Copiar agendamento</button>
           </div>
         </section>
-      </motion.main>
+      </main>
     </div>
   )
 }
