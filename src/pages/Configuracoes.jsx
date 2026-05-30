@@ -441,7 +441,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
                 value={form.confirmationTemplate}
                 onChange={(e) => setField('confirmationTemplate', e.target.value)}
                 rows="5"
-                placeholder={'Olá, {cliente}! ✅\n\nSeu agendamento foi confirmado na {barbearia}.\nServiço: {servico}\nBarbeiro: {barbeiro}\nData: {data} às {hora}.\nEndereço: {endereco}'}
+                placeholder={'Olá, {cliente}!\n\nSeu agendamento foi confirmado na {barbearia}.\nServiço: {servico}\nBarbeiro: {barbeiro}\nData: {data} às {hora}.\nEndereço: {endereco}'}
               />
             </label>
 
@@ -451,7 +451,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
                 value={form.reminderTemplate}
                 onChange={(e) => setField('reminderTemplate', e.target.value)}
                 rows="5"
-                placeholder={'Olá, {cliente}! ⏰\n\nLembrete do seu horário na {barbearia}:\n{servico} com {barbeiro}, dia {data} às {hora}.\nTe esperamos!'}
+                placeholder={'Olá, {cliente}!\n\nLembrete do seu horário na {barbearia}:\n{servico} com {barbeiro}, dia {data} às {hora}.\nTe esperamos!'}
               />
             </label>
 

@@ -156,3 +156,13 @@ Variáveis disponíveis:
 {pagamento}
 {valor_pagamento}
 ```
+
+
+## V1.11.1
+
+Correção de caracteres inválidos nas mensagens de WhatsApp, removendo o símbolo � quando templates ou emojis forem corrompidos por encoding.
+
+Arquivos alterados:
+- src/lib/whatsapp.js
+- src/pages/Configuracoes.jsx
+- database/013_corrige_emojis_whatsapp.sql

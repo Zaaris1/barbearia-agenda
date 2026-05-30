@@ -51,10 +51,17 @@ function getAppointmentBase(appointment, barbershop = {}) {
   }
 }
 
+function cleanWhatsappMessage(message) {
+  return String(message || '')
+    .replaceAll('�', '')
+    .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g, '')
+    .replace(/(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '')
+}
+
 function applyTemplate(template, base) {
   if (!template || !String(template).trim()) return ''
 
-  return String(template)
+  return cleanWhatsappMessage(String(template)
     .replaceAll('{cliente}', base.clientName)
     .replaceAll('{barbearia}', base.shopName)
     .replaceAll('{servico}', base.serviceName)
@@ -68,6 +75,7 @@ function applyTemplate(template, base) {
     .replaceAll('{status}', base.status)
     .replaceAll('{pagamento}', base.paymentStatus)
     .replaceAll('{valor_pagamento}', base.paymentAmountText)
+  )
 }
 
 export function buildConfirmationMessage(appointment, barbershop = {}) {
@@ -76,7 +84,7 @@ export function buildConfirmationMessage(appointment, barbershop = {}) {
   if (custom) return custom
 
   const lines = [
-    `Olá, ${base.clientName}! ✅`,
+    `Olá, ${base.clientName}!`,
     '',
     `Seu agendamento foi confirmado pela ${base.shopName}.`,
     '',
@@ -92,7 +100,7 @@ export function buildConfirmationMessage(appointment, barbershop = {}) {
 
   if (base.shopPhone) lines.push('', `Contato da barbearia: ${base.shopPhone}`)
 
-  return lines.join('\n')
+  return cleanWhatsappMessage(lines.join('\n'))
 }
 
 export function buildReminderMessage(appointment, barbershop = {}) {
@@ -101,7 +109,7 @@ export function buildReminderMessage(appointment, barbershop = {}) {
   if (custom) return custom
 
   const lines = [
-    `Olá, ${base.clientName}! ⏰`,
+    `Olá, ${base.clientName}!`,
     '',
     `Passando para lembrar do seu horário na ${base.shopName}.`,
     '',
@@ -116,7 +124,7 @@ export function buildReminderMessage(appointment, barbershop = {}) {
 
   if (base.shopPhone) lines.push('', `Contato da barbearia: ${base.shopPhone}`)
 
-  return lines.join('\n')
+  return cleanWhatsappMessage(lines.join('\n'))
 }
 
 export function buildCancellationMessage(appointment, barbershop = {}) {
@@ -139,7 +147,7 @@ export function buildCancellationMessage(appointment, barbershop = {}) {
 
   if (base.shopPhone) lines.push('', `Contato da barbearia: ${base.shopPhone}`)
 
-  return lines.join('\n')
+  return cleanWhatsappMessage(lines.join('\n'))
 }
 
 export function openWhatsappConfirmation(appointment, barbershop = {}) {
