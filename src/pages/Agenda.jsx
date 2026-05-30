@@ -4,7 +4,7 @@ import AppointmentCard from '../components/AppointmentCard'
 import Modal from '../components/Modal'
 import { createAppointment, listAppointments, listClients, markAppointmentPaid, rescheduleAppointment, updateAppointmentStatus } from '../lib/api'
 import { todayISO } from '../lib/dates'
-import { openWhatsappConfirmation } from '../lib/whatsapp'
+import { openWhatsappConfirmation, openWhatsappReminder } from '../lib/whatsapp'
 
 const statusOptions = [
   { value: '', label: 'Todos os status' },
@@ -129,6 +129,18 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
     showToast('Mensagem de confirmação aberta no WhatsApp.')
   }
 
+
+  function handleSendReminder(appointment) {
+    const opened = openWhatsappReminder(appointment, bootstrap?.barbershop || session?.barbershop || {})
+
+    if (!opened) {
+      showToast('Este cliente não tem WhatsApp cadastrado.', 'error')
+      return
+    }
+
+    showToast('Mensagem de lembrete aberta no WhatsApp.')
+  }
+
   async function handleStatus(appointmentOrId, newStatus) {
     const appointment = typeof appointmentOrId === 'object' ? appointmentOrId : appointments.find((item) => item.id === appointmentOrId)
     const appointmentId = appointment?.id || appointmentOrId
@@ -183,7 +195,7 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
       {!loading && appointments.length === 0 && <div className="empty-state big">Nenhum agendamento encontrado para os filtros selecionados.</div>}
       <div className="appointments-grid">
         {appointments.map((appointment) => (
-          <AppointmentCard key={appointment.id} appointment={appointment} onStatus={handleStatus} onReschedule={openRescheduleModal} onMarkPaid={handleMarkPaid} onSendConfirmation={handleSendConfirmation} />
+          <AppointmentCard key={appointment.id} appointment={appointment} onStatus={handleStatus} onReschedule={openRescheduleModal} onMarkPaid={handleMarkPaid} onSendConfirmation={handleSendConfirmation} onSendReminder={handleSendReminder} />
         ))}
       </div>
 

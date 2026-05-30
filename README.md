@@ -110,3 +110,23 @@ Não precisa rodar SQL novo.
 ## V1.7.7
 
 Correção forte de rolagem mobile/Safari no portal inicial da barbearia. Remove animação de entrada do portal, força o scroll no body/documento e reduz efeitos pesados no mobile para evitar travamentos ao rolar.
+
+## V1.8 - Lembretes WhatsApp e relatórios financeiros
+
+### O que entrou
+
+- Botão **Lembrete** nos cards de agendamento para abrir WhatsApp com mensagem pronta para o cliente.
+- Mensagem de lembrete com cliente, serviço, barbeiro, data, horário, endereço e nome da barbearia.
+- Relatório financeiro mensal no painel da barbearia.
+- Resumo por dia, por barbeiro, por serviço e lista de movimentos do mês.
+- Relatório mensal no painel master com previsão, recebido, pendências/bloqueios e pagamentos registrados.
+
+### SQL necessário
+
+Depois de subir os arquivos, rode no Supabase o conteúdo completo de:
+
+```txt
+database/009_lembretes_relatorios_financeiros.sql
+```
+
+Não cole apenas o caminho no SQL Editor. Abra o arquivo, copie todo o conteúdo e execute.

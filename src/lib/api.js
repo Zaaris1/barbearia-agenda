@@ -265,6 +265,16 @@ export async function publicCreateAppointment(slug, payload) {
   return unwrapRpc(res)
 }
 
+
+export async function getFinancialReport(sessionToken, month) {
+  const res = await supabase.rpc('internal_get_financial_report', {
+    p_session_token: sessionToken,
+    p_month: month || '',
+  })
+
+  return unwrapRpc(res, {})
+}
+
 export async function masterLoginWithPin(pin) {
   const res = await supabase.rpc('master_login_with_pin', {
     p_pin: pin,
@@ -289,6 +299,16 @@ export async function masterListBarbershops(masterSessionToken) {
   const data = unwrapRpc(res, [])
 
   return Array.isArray(data) ? data : []
+}
+
+
+export async function masterGetSubscriptionReport(masterSessionToken, month) {
+  const res = await supabase.rpc('master_get_subscription_report', {
+    p_session_token: masterSessionToken,
+    p_month: month || '',
+  })
+
+  return unwrapRpc(res, {})
 }
 
 export async function masterCreateBarbershop(masterSessionToken, payload) {

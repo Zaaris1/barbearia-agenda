@@ -1,4 +1,4 @@
-import { CalendarClock, CheckCircle2, CircleDollarSign, Clock, CreditCard, Edit3, MessageCircle, PlayCircle, RotateCcw, Send, Scissors, UserRound, XCircle } from 'lucide-react'
+import { BellRing, CalendarClock, CheckCircle2, CircleDollarSign, Clock, CreditCard, Edit3, MessageCircle, PlayCircle, RotateCcw, Send, Scissors, UserRound, XCircle } from 'lucide-react'
 import StatusBadge from './StatusBadge'
 import { formatDateBR, formatMoney } from '../lib/dates'
 import { getPaymentStatusClass, getPaymentStatusLabel } from '../lib/pix'
@@ -10,13 +10,14 @@ function whatsappLink(phone) {
   return `https://wa.me/${normalized}`
 }
 
-export default function AppointmentCard({ appointment, onStatus, onReschedule, onMarkPaid, onSendConfirmation }) {
+export default function AppointmentCard({ appointment, onStatus, onReschedule, onMarkPaid, onSendConfirmation, onSendReminder }) {
   const canConfirm = ['PENDENTE_CONFIRMACAO', 'AGENDADO'].includes(appointment.status)
   const canStart = ['AGENDADO', 'CONFIRMADO'].includes(appointment.status)
   const canFinish = appointment.status === 'EM_ATENDIMENTO'
   const canCancel = ['PENDENTE_CONFIRMACAO', 'AGENDADO', 'CONFIRMADO', 'EM_ATENDIMENTO'].includes(appointment.status)
   const canMiss = ['AGENDADO', 'CONFIRMADO'].includes(appointment.status)
   const canReschedule = ['PENDENTE_CONFIRMACAO', 'AGENDADO', 'CONFIRMADO'].includes(appointment.status)
+  const canSendReminder = ['PENDENTE_CONFIRMACAO', 'AGENDADO', 'CONFIRMADO'].includes(appointment.status)
   const paymentStatus = appointment.payment_status || 'NAO_EXIGIDO'
   const paymentAmount = Number(appointment.payment_amount || 0)
   const canMarkPaid = paymentStatus === 'PENDENTE'
@@ -60,6 +61,7 @@ export default function AppointmentCard({ appointment, onStatus, onReschedule, o
         {canFinish && <button type="button" className="btn mini success" onClick={() => onStatus(appointment, 'CONCLUIDO')}><CheckCircle2 size={15} /> Concluir</button>}
         {canMarkPaid && <button type="button" className="btn mini success" onClick={() => onMarkPaid?.(appointment)}><CreditCard size={15} /> Pago</button>}
         {appointment.status === 'CONFIRMADO' && <button type="button" className="btn mini whatsapp" onClick={() => onSendConfirmation?.(appointment)}><Send size={15} /> Enviar confirmação</button>}
+        {canSendReminder && <button type="button" className="btn mini reminder" onClick={() => onSendReminder?.(appointment)}><BellRing size={15} /> Lembrete</button>}
         {canReschedule && <button type="button" className="btn mini soft" onClick={() => onReschedule(appointment)}><Edit3 size={15} /> Remarcar</button>}
         {canMiss && <button type="button" className="btn mini warning" onClick={() => onStatus(appointment, 'FALTOU')}><RotateCcw size={15} /> Faltou</button>}
         {canCancel && <button type="button" className="btn mini danger" onClick={() => onStatus(appointment, 'CANCELADO')}><XCircle size={15} /> Cancelar</button>}

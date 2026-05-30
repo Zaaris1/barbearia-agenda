@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Banknote, CalendarClock, Copy, ExternalLink, LockKeyhole, LogOut, Plus, RefreshCw, Save, Scissors, ShieldAlert, ShieldCheck, Store, WalletCards } from 'lucide-react'
+import { Banknote, BarChart3, CalendarClock, Copy, ExternalLink, LockKeyhole, LogOut, Plus, RefreshCw, Save, Scissors, ShieldAlert, ShieldCheck, Store, WalletCards } from 'lucide-react'
 import { clearMasterSession, readMasterSession, saveMasterSession } from '../lib/storage'
-import { masterCreateBarbershop, masterListBarbershops, masterLoginWithPin, masterLogout, masterRegisterPayment, masterUpdateBarbershop } from '../lib/api'
+import { masterCreateBarbershop, masterGetSubscriptionReport, masterListBarbershops, masterLoginWithPin, masterLogout, masterRegisterPayment, masterUpdateBarbershop } from '../lib/api'
 import { formatMoney, todayISO } from '../lib/dates'
 
 function normalizeSlug(value) {
@@ -18,6 +18,10 @@ function addMonthsISO(baseDate, months = 1) {
   const date = baseDate ? new Date(`${baseDate}T12:00:00`) : new Date()
   date.setMonth(date.getMonth() + months)
   return date.toISOString().slice(0, 10)
+}
+
+function currentMonth() {
+  return todayISO().slice(0, 7)
 }
 
 function statusClass(status, blocked) {
@@ -48,6 +52,9 @@ export default function MasterPanel({ showToast }) {
   const [editing, setEditing] = useState(null)
   const [payment, setPayment] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [reportMonth, setReportMonth] = useState(currentMonth())
+  const [subscriptionReport, setSubscriptionReport] = useState(null)
+  const [reportLoading, setReportLoading] = useState(false)
 
   const activeCount = shops.filter((s) => s.active && !s.subscription_blocked).length
   const blockedCount = shops.filter((s) => s.subscription_blocked).length
@@ -101,7 +108,21 @@ export default function MasterPanel({ showToast }) {
     }
   }
 
+
+  async function loadSubscriptionReport() {
+    if (!session?.master_session_token) return
+    setReportLoading(true)
+    try {
+      setSubscriptionReport(await masterGetSubscriptionReport(session.master_session_token, reportMonth))
+    } catch (error) {
+      showToast(error.message, 'error')
+    } finally {
+      setReportLoading(false)
+    }
+  }
+
   useEffect(() => { loadShops() }, [session?.master_session_token])
+  useEffect(() => { loadSubscriptionReport() }, [session?.master_session_token, reportMonth])
 
   function setNewField(field, value) {
     setNewShop((old) => ({ ...old, [field]: value }))
@@ -263,6 +284,53 @@ export default function MasterPanel({ showToast }) {
           <div className="stat-card"><WalletCards size={22} /><span>Mensalidades</span><strong>{formatMoney(monthlyTotal)}</strong><small>Previsão mensal ativa</small></div>
           <div className="stat-card"><CalendarClock size={22} /><span>Agendamentos</span><strong>{monthAppointments}</strong><small>No mês atual</small></div>
         </div>
+
+        <section className="panel-card master-report-card">
+          <div className="panel-title with-actions">
+            <div>
+              <h3>Relatório mensal da plataforma</h3>
+              <span>{reportLoading ? 'Atualizando...' : `Competência ${reportMonth}`}</span>
+            </div>
+            <div className="heading-actions">
+              <input type="month" value={reportMonth} onChange={(e) => setReportMonth(e.target.value)} />
+              <button className="btn soft" type="button" onClick={loadSubscriptionReport}><RefreshCw size={16} /> Atualizar</button>
+            </div>
+          </div>
+
+          <div className="stats-grid four compact-stats">
+            <div className="stat-card"><WalletCards size={22} /><span>Previsto</span><strong>{formatMoney(subscriptionReport?.stats?.expected_revenue || 0)}</strong><small>Mensalidades ativas</small></div>
+            <div className="stat-card"><Banknote size={22} /><span>Recebido</span><strong>{formatMoney(subscriptionReport?.stats?.received_revenue || 0)}</strong><small>Pagamentos lançados</small></div>
+            <div className="stat-card"><ShieldAlert size={22} /><span>Pendente/Bloq.</span><strong>{subscriptionReport?.stats?.pending_or_blocked || 0}</strong><small>Clientes que exigem ação</small></div>
+            <div className="stat-card"><BarChart3 size={22} /><span>Ticket médio</span><strong>{formatMoney(subscriptionReport?.stats?.average_fee || 0)}</strong><small>Mensalidade média</small></div>
+          </div>
+
+          <div className="master-report-grid">
+            <div className="finance-table">
+              <div className="panel-subtitle">Mensalidades e vencimentos</div>
+              {(subscriptionReport?.shops || []).length === 0 && <div className="empty-state">Nenhum cliente no relatório.</div>}
+              {(subscriptionReport?.shops || []).map((shop) => (
+                <div className="finance-row master-report-row" key={shop.id}>
+                  <span><b>{shop.name}</b><small>{shop.slug}</small></span>
+                  <small>{shop.subscription_status} • Vence: {shop.subscription_due_date || '-'}</small>
+                  <small>{shop.days_overdue > 0 ? `${shop.days_overdue} dia(s) em atraso` : 'Em dia ou dentro da tolerância'}</small>
+                  <strong>{formatMoney(shop.monthly_fee || 0)}</strong>
+                </div>
+              ))}
+            </div>
+
+            <div className="finance-table">
+              <div className="panel-subtitle">Pagamentos registrados</div>
+              {(subscriptionReport?.payments || []).length === 0 && <div className="empty-state">Nenhum pagamento lançado neste mês.</div>}
+              {(subscriptionReport?.payments || []).map((item) => (
+                <div className="finance-row master-report-row" key={item.id}>
+                  <span><b>{item.barbershop_name}</b><small>{item.paid_at ? new Date(item.paid_at).toLocaleDateString('pt-BR') : '-'}</small></span>
+                  <small>{item.notes || 'Sem observação'}</small>
+                  <strong>{formatMoney(item.amount || 0)}</strong>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
         <div className="master-grid">
           <section className="panel-card master-create-card">
