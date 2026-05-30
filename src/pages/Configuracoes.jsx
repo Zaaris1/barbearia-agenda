@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Copy, CreditCard, ExternalLink, ImageIcon, KeyRound, Palette, QrCode, Save, Send, Settings, ShieldCheck, Sparkles, UploadCloud } from 'lucide-react'
-import { updateBarbershopBranding, updateBarbershopPayment, updateBarbershopSettings } from '../lib/api'
+import { updateBarbershopBranding, updateBarbershopMessages, updateBarbershopPayment, updateBarbershopSettings } from '../lib/api'
 import { buildThemeStyle, instagramUrl, normalizeUrl, presetOptions, publicBookingLink, qrCodeUrl, THEME_PRESETS } from '../lib/branding'
 import { buildPixPayload, getPaymentModeLabel, pixQrCodeUrl } from '../lib/pix'
 import { formatMoney } from '../lib/dates'
@@ -63,6 +63,9 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
     depositType: 'PERCENT',
     depositValue: 50,
     paymentInstructions: '',
+    confirmationTemplate: '',
+    reminderTemplate: '',
+    cancellationTemplate: '',
   })
 
   useEffect(() => {
@@ -95,6 +98,9 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
       depositType: shop?.deposit_type || 'PERCENT',
       depositValue: Number(shop?.deposit_value ?? 50),
       paymentInstructions: shop?.payment_instructions || '',
+      confirmationTemplate: shop?.whatsapp_confirmation_template || '',
+      reminderTemplate: shop?.whatsapp_reminder_template || '',
+      cancellationTemplate: shop?.whatsapp_cancellation_template || '',
     })
   }, [shop?.id, shop?.updated_at, bootstrap])
 
@@ -185,7 +191,8 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
       await updateBarbershopSettings(session.session_token, { ...form, slug: cleanSlug })
       await updateBarbershopBranding(session.session_token, form)
       await updateBarbershopPayment(session.session_token, form)
-      showToast('Configurações, identidade e Pix salvos com sucesso.')
+      await updateBarbershopMessages(session.session_token, form)
+      showToast('Configurações, identidade, Pix e mensagens salvos com sucesso.')
       await refreshBootstrap?.()
     } catch (error) {
       showToast(error.message, 'error')
@@ -405,6 +412,57 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
             <label className="full">
               <span>Instruções para o cliente</span>
               <textarea value={form.paymentInstructions} onChange={(e) => setField('paymentInstructions', e.target.value)} rows="3" placeholder="Ex: Para confirmar seu horário, envie o comprovante pelo WhatsApp." disabled={!form.paymentEnabled} />
+            </label>
+          </div>
+
+          <div className="section-divider" />
+
+          <div className="panel-title">
+            <h3>Mensagens WhatsApp</h3>
+            <span>Personalize os textos enviados para confirmação, lembrete e cancelamento</span>
+          </div>
+
+          <div className="message-template-help full">
+            <strong>Variáveis disponíveis:</strong>
+            <span>{'{cliente}'}</span>
+            <span>{'{barbearia}'}</span>
+            <span>{'{servico}'}</span>
+            <span>{'{barbeiro}'}</span>
+            <span>{'{data}'}</span>
+            <span>{'{hora}'}</span>
+            <span>{'{valor}'}</span>
+            <span>{'{endereco}'}</span>
+          </div>
+
+          <div className="form-grid message-template-grid">
+            <label className="full">
+              <span>Mensagem de confirmação</span>
+              <textarea
+                value={form.confirmationTemplate}
+                onChange={(e) => setField('confirmationTemplate', e.target.value)}
+                rows="5"
+                placeholder={'Olá, {cliente}! ✅\n\nSeu agendamento foi confirmado na {barbearia}.\nServiço: {servico}\nBarbeiro: {barbeiro}\nData: {data} às {hora}.\nEndereço: {endereco}'}
+              />
+            </label>
+
+            <label className="full">
+              <span>Mensagem de lembrete</span>
+              <textarea
+                value={form.reminderTemplate}
+                onChange={(e) => setField('reminderTemplate', e.target.value)}
+                rows="5"
+                placeholder={'Olá, {cliente}! ⏰\n\nLembrete do seu horário na {barbearia}:\n{servico} com {barbeiro}, dia {data} às {hora}.\nTe esperamos!'}
+              />
+            </label>
+
+            <label className="full">
+              <span>Mensagem de cancelamento</span>
+              <textarea
+                value={form.cancellationTemplate}
+                onChange={(e) => setField('cancellationTemplate', e.target.value)}
+                rows="5"
+                placeholder={'Olá, {cliente}.\n\nSeu agendamento na {barbearia} foi cancelado.\nServiço: {servico}\nData: {data} às {hora}.\nPara remarcar, fale conosco.'}
+              />
             </label>
           </div>
 

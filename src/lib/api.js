@@ -268,6 +268,74 @@ export async function publicCreateAppointment(slug, payload) {
   return unwrapRpc(res)
 }
 
+export async function listScheduleBlocks(sessionToken, filters = {}) {
+  const res = await supabase.rpc('internal_list_schedule_blocks', {
+    p_session_token: sessionToken,
+    p_date: filters.date || null,
+    p_barber_id: filters.barberId || null,
+  })
+
+  const data = unwrapRpc(res, [])
+
+  return Array.isArray(data) ? data : []
+}
+
+export async function saveScheduleBlock(sessionToken, payload) {
+  const res = await supabase.rpc('internal_save_schedule_block', {
+    p_session_token: sessionToken,
+    p_block_id: payload.id || null,
+    p_barber_id: payload.barberId || null,
+    p_date: payload.date,
+    p_start_time: payload.startTime || '00:00',
+    p_end_time: payload.endTime || '23:59',
+    p_block_type: payload.blockType || 'BLOQUEIO',
+    p_reason: payload.reason || '',
+    p_all_day: payload.allDay === true,
+  })
+
+  return unwrapRpc(res)
+}
+
+export async function deleteScheduleBlock(sessionToken, blockId) {
+  const res = await supabase.rpc('internal_delete_schedule_block', {
+    p_session_token: sessionToken,
+    p_block_id: blockId,
+  })
+
+  return unwrapRpc(res, { ok: true })
+}
+
+export async function updateBarbershopMessages(sessionToken, payload) {
+  const res = await supabase.rpc('internal_update_barbershop_messages', {
+    p_session_token: sessionToken,
+    p_confirmation_template: payload.confirmationTemplate || '',
+    p_reminder_template: payload.reminderTemplate || '',
+    p_cancellation_template: payload.cancellationTemplate || '',
+  })
+
+  return unwrapRpc(res)
+}
+
+export async function publicFindClientAppointments(slug, phone) {
+  const res = await supabase.rpc('public_find_client_appointments', {
+    p_shop_slug: slug,
+    p_client_phone: phone,
+  })
+
+  return unwrapRpc(res, { shop: null, appointments: [] })
+}
+
+export async function publicCancelClientAppointment(slug, appointmentId, phone, reason = '') {
+  const res = await supabase.rpc('public_cancel_client_appointment', {
+    p_shop_slug: slug,
+    p_appointment_id: appointmentId,
+    p_client_phone: phone,
+    p_reason: reason || 'Cancelado pelo cliente',
+  })
+
+  return unwrapRpc(res)
+}
+
 
 export async function getFinancialReport(sessionToken, month) {
   const res = await supabase.rpc('internal_get_financial_report', {

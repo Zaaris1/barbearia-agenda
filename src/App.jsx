@@ -12,6 +12,7 @@ import Configuracoes from './pages/Configuracoes'
 import PublicBooking from './pages/PublicBooking'
 import MasterPanel from './pages/MasterPanel'
 import BarbershopPortal from './pages/BarbershopPortal'
+import ClientAppointments from './pages/ClientAppointments'
 import { clearSession, readSession, saveSession } from './lib/storage'
 import { getBootstrap, logoutSession } from './lib/api'
 import { applyDocumentBrand } from './lib/branding'
@@ -20,14 +21,16 @@ function getRouteInfo() {
   const search = new URLSearchParams(window.location.search)
   const parts = window.location.pathname.split('/').filter(Boolean)
   const isPublic = parts[0] === 'agendar' || search.get('publico') === '1'
+  const isClientAppointments = parts[0] === 'meus-agendamentos'
   const isMaster = parts[0] === 'master'
   const isApp = parts[0] === 'app'
   const appSlug = isApp && parts[1] ? parts[1] : ''
   const publicSlug = parts[0] === 'agendar' && parts[1] ? parts[1] : ''
-  const portalSlug = !isPublic && !isMaster && !isApp ? (parts[0] || import.meta.env.VITE_DEFAULT_SHOP_SLUG || 'barbearia-demo') : ''
+  const portalSlug = !isPublic && !isClientAppointments && !isMaster && !isApp ? (parts[0] || import.meta.env.VITE_DEFAULT_SHOP_SLUG || 'barbearia-demo') : ''
 
   return {
     isPublic,
+    isClientAppointments,
     isMaster,
     isApp,
     appSlug,
@@ -73,7 +76,7 @@ export default function App() {
   }, [bootstrap?.barbershop, session?.barbershop])
 
   useEffect(() => {
-    if (route.isPublic || route.isMaster || route.isPortal) return
+    if (route.isPublic || route.isClientAppointments || route.isMaster || route.isPortal) return
 
     if (route.appSlug && session?.barbershop?.slug && session.barbershop.slug !== route.appSlug) {
       clearSession()
@@ -83,7 +86,7 @@ export default function App() {
     }
 
     if (session?.session_token) refreshBootstrap()
-  }, [session?.session_token, route.isPublic, route.isMaster, route.isPortal, route.appSlug])
+  }, [session?.session_token, route.isPublic, route.isClientAppointments, route.isMaster, route.isPortal, route.appSlug])
 
   function handleLogin(payload) {
     saveSession(payload)
@@ -109,6 +112,15 @@ export default function App() {
     return (
       <>
         <MasterPanel showToast={showToast} />
+        <Toast toast={toast} onClose={() => setToast(null)} />
+      </>
+    )
+  }
+
+  if (route.isClientAppointments) {
+    return (
+      <>
+        <ClientAppointments showToast={showToast} />
         <Toast toast={toast} onClose={() => setToast(null)} />
       </>
     )

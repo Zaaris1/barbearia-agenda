@@ -1,10 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarPlus, RefreshCcw } from 'lucide-react'
+import { CalendarPlus, CalendarX2, RefreshCcw, Trash2 } from 'lucide-react'
 import AppointmentCard from '../components/AppointmentCard'
 import Modal from '../components/Modal'
-import { createAppointment, listAppointments, listClients, markAppointmentPaid, rescheduleAppointment, updateAppointmentStatus } from '../lib/api'
+import {
+  createAppointment,
+  deleteScheduleBlock,
+  listAppointments,
+  listClients,
+  listScheduleBlocks,
+  markAppointmentPaid,
+  rescheduleAppointment,
+  saveScheduleBlock,
+  updateAppointmentStatus,
+} from '../lib/api'
 import { todayISO } from '../lib/dates'
-import { openWhatsappConfirmation, openWhatsappReminder } from '../lib/whatsapp'
+import { openWhatsappCancellation, openWhatsappConfirmation, openWhatsappReminder } from '../lib/whatsapp'
 
 const statusOptions = [
   { value: '', label: 'Todos os status' },
@@ -15,6 +25,13 @@ const statusOptions = [
   { value: 'CONCLUIDO', label: 'Concluído' },
   { value: 'CANCELADO', label: 'Cancelado' },
   { value: 'FALTOU', label: 'Faltou' },
+]
+
+const blockTypes = [
+  { value: 'BLOQUEIO', label: 'Bloqueio manual' },
+  { value: 'FOLGA', label: 'Folga' },
+  { value: 'ALMOCO', label: 'Almoço' },
+  { value: 'PAUSA', label: 'Pausa' },
 ]
 
 function initialForm(date) {
@@ -31,21 +48,42 @@ function initialForm(date) {
   }
 }
 
+function initialBlockForm(date, barberId = '') {
+  return {
+    barberId,
+    date,
+    startTime: '12:00',
+    endTime: '13:00',
+    blockType: 'ALMOCO',
+    allDay: false,
+    reason: '',
+  }
+}
+
+function blockTypeLabel(type) {
+  return blockTypes.find((item) => item.value === type)?.label || type || 'Bloqueio'
+}
+
 export default function Agenda({ session, bootstrap, showToast, refreshBootstrap }) {
   const [date, setDate] = useState(todayISO())
   const [barberId, setBarberId] = useState('')
   const [status, setStatus] = useState('')
   const [appointments, setAppointments] = useState([])
   const [clients, setClients] = useState([])
+  const [scheduleBlocks, setScheduleBlocks] = useState([])
   const [loading, setLoading] = useState(true)
+  const [blocksLoading, setBlocksLoading] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
+  const [blockModalOpen, setBlockModalOpen] = useState(false)
   const [rescheduleTarget, setRescheduleTarget] = useState(null)
   const [form, setForm] = useState(initialForm(date))
+  const [blockForm, setBlockForm] = useState(initialBlockForm(date, barberId))
   const [saving, setSaving] = useState(false)
+  const [savingBlock, setSavingBlock] = useState(false)
 
   const barbers = bootstrap?.barbers || []
   const services = bootstrap?.services || []
-
+  const shop = bootstrap?.barbershop || session?.barbershop || {}
   const selectedService = useMemo(() => services.find((s) => s.id === form.serviceId), [services, form.serviceId])
 
   async function load() {
@@ -60,6 +98,19 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
     }
   }
 
+  async function loadBlocks() {
+    setBlocksLoading(true)
+    try {
+      const data = await listScheduleBlocks(session.session_token, { date, barberId })
+      setScheduleBlocks(data)
+    } catch (error) {
+      showToast(error.message, 'error')
+      setScheduleBlocks([])
+    } finally {
+      setBlocksLoading(false)
+    }
+  }
+
   async function loadClients() {
     try {
       const data = await listClients(session.session_token, '')
@@ -71,6 +122,7 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
 
   useEffect(() => {
     load()
+    loadBlocks()
   }, [date, barberId, status])
 
   useEffect(() => {
@@ -81,6 +133,11 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
     setRescheduleTarget(null)
     setForm(initialForm(date))
     setModalOpen(true)
+  }
+
+  function openBlockModal() {
+    setBlockForm(initialBlockForm(date, barberId))
+    setBlockModalOpen(true)
   }
 
   function openRescheduleModal(appointment) {
@@ -110,7 +167,7 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
         showToast('Agendamento criado com sucesso.')
       }
       setModalOpen(false)
-      await Promise.all([load(), loadClients(), refreshBootstrap?.()])
+      await Promise.all([load(), loadBlocks(), loadClients(), refreshBootstrap?.()])
     } catch (error) {
       showToast(error.message, 'error')
     } finally {
@@ -118,27 +175,48 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
     }
   }
 
-  function handleSendConfirmation(appointment) {
-    const opened = openWhatsappConfirmation(appointment, bootstrap?.barbershop || session?.barbershop || {})
-
-    if (!opened) {
-      showToast('Este cliente não tem WhatsApp cadastrado.', 'error')
-      return
+  async function handleSaveBlock(e) {
+    e.preventDefault()
+    setSavingBlock(true)
+    try {
+      await saveScheduleBlock(session.session_token, blockForm)
+      showToast('Bloqueio/pausa salvo com sucesso.')
+      setBlockModalOpen(false)
+      await Promise.all([load(), loadBlocks(), refreshBootstrap?.()])
+    } catch (error) {
+      showToast(error.message, 'error')
+    } finally {
+      setSavingBlock(false)
     }
+  }
 
+  async function handleDeleteBlock(block) {
+    if (!window.confirm('Remover este bloqueio da agenda?')) return
+    try {
+      await deleteScheduleBlock(session.session_token, block.id)
+      showToast('Bloqueio removido.')
+      await Promise.all([load(), loadBlocks(), refreshBootstrap?.()])
+    } catch (error) {
+      showToast(error.message, 'error')
+    }
+  }
+
+  function handleSendConfirmation(appointment) {
+    const opened = openWhatsappConfirmation(appointment, shop)
+    if (!opened) return showToast('Este cliente não tem WhatsApp cadastrado.', 'error')
     showToast('Mensagem de confirmação aberta no WhatsApp.')
   }
 
-
   function handleSendReminder(appointment) {
-    const opened = openWhatsappReminder(appointment, bootstrap?.barbershop || session?.barbershop || {})
-
-    if (!opened) {
-      showToast('Este cliente não tem WhatsApp cadastrado.', 'error')
-      return
-    }
-
+    const opened = openWhatsappReminder(appointment, shop)
+    if (!opened) return showToast('Este cliente não tem WhatsApp cadastrado.', 'error')
     showToast('Mensagem de lembrete aberta no WhatsApp.')
+  }
+
+  function handleSendCancellation(appointment) {
+    const opened = openWhatsappCancellation(appointment, shop)
+    if (!opened) return showToast('Este cliente não tem WhatsApp cadastrado.', 'error')
+    showToast('Mensagem de cancelamento aberta no WhatsApp.')
   }
 
   async function handleStatus(appointmentOrId, newStatus) {
@@ -152,6 +230,10 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
 
       if (newStatus === 'CONFIRMADO' && appointment) {
         window.setTimeout(() => handleSendConfirmation({ ...appointment, status: 'CONFIRMADO' }), 250)
+      }
+
+      if (newStatus === 'CANCELADO' && appointment) {
+        window.setTimeout(() => handleSendCancellation({ ...appointment, status: 'CANCELADO' }), 250)
       }
 
       await load()
@@ -177,10 +259,11 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
         <div>
           <span className="eyebrow">Operação diária</span>
           <h2>Agenda</h2>
-          <p>Gerencie horários, status e remarcações do balcão.</p>
+          <p>Gerencie horários, status, remarcações, folgas, almoço, pausas e bloqueios manuais.</p>
         </div>
         <div className="heading-actions">
-          <button className="btn soft" type="button" onClick={load}><RefreshCcw size={17} /> Atualizar</button>
+          <button className="btn soft" type="button" onClick={() => { load(); loadBlocks() }}><RefreshCcw size={17} /> Atualizar</button>
+          <button className="btn soft" type="button" onClick={openBlockModal}><CalendarX2 size={17} /> Bloquear</button>
           <button className="btn primary" type="button" onClick={openCreateModal}><CalendarPlus size={17} /> Novo</button>
         </div>
       </div>
@@ -191,13 +274,71 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
         <label><span>Status</span><select value={status} onChange={(e) => setStatus(e.target.value)}>{statusOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}</select></label>
       </div>
 
+      <div className="schedule-blocks-panel">
+        <div className="panel-title compact-title">
+          <h3>Folgas, pausas e bloqueios do dia</h3>
+          <span>{blocksLoading ? 'Carregando...' : `${scheduleBlocks.length} registro(s)`}</span>
+        </div>
+        {scheduleBlocks.length === 0 ? (
+          <div className="empty-state small">Nenhuma pausa, almoço, folga ou bloqueio para esta data.</div>
+        ) : (
+          <div className="schedule-blocks-list">
+            {scheduleBlocks.map((block) => (
+              <div className={`schedule-block-pill ${String(block.block_type || '').toLowerCase()}`} key={block.id}>
+                <div>
+                  <strong>{blockTypeLabel(block.block_type)}</strong>
+                  <span>{block.barber_name} • {block.start_time} - {block.end_time}</span>
+                  {block.reason && <small>{block.reason}</small>}
+                </div>
+                <button type="button" className="ghost-icon danger" onClick={() => handleDeleteBlock(block)} title="Remover"><Trash2 size={16} /></button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {loading && <div className="loading-card">Carregando agenda...</div>}
       {!loading && appointments.length === 0 && <div className="empty-state big">Nenhum agendamento encontrado para os filtros selecionados.</div>}
       <div className="appointments-grid">
         {appointments.map((appointment) => (
-          <AppointmentCard key={appointment.id} appointment={appointment} onStatus={handleStatus} onReschedule={openRescheduleModal} onMarkPaid={handleMarkPaid} onSendConfirmation={handleSendConfirmation} onSendReminder={handleSendReminder} />
+          <AppointmentCard
+            key={appointment.id}
+            appointment={appointment}
+            onStatus={handleStatus}
+            onReschedule={openRescheduleModal}
+            onMarkPaid={handleMarkPaid}
+            onSendConfirmation={handleSendConfirmation}
+            onSendReminder={handleSendReminder}
+            onSendCancellation={handleSendCancellation}
+          />
         ))}
       </div>
+
+      <Modal
+        open={blockModalOpen}
+        title="Bloquear agenda / registrar pausa"
+        onClose={() => setBlockModalOpen(false)}
+        footer={
+          <>
+            <button className="btn soft" type="button" onClick={() => setBlockModalOpen(false)}>Cancelar</button>
+            <button className="btn primary" type="submit" form="schedule-block-form" disabled={savingBlock}>{savingBlock ? 'Salvando...' : 'Salvar bloqueio'}</button>
+          </>
+        }
+      >
+        <form id="schedule-block-form" className="form-grid" onSubmit={handleSaveBlock}>
+          <label><span>Data</span><input type="date" value={blockForm.date} onChange={(e) => setBlockForm({ ...blockForm, date: e.target.value })} required /></label>
+          <label><span>Barbeiro</span><select value={blockForm.barberId} onChange={(e) => setBlockForm({ ...blockForm, barberId: e.target.value })}><option value="">Todos os barbeiros</option>{barbers.map((b) => <option value={b.id} key={b.id}>{b.name}</option>)}</select></label>
+          <label><span>Tipo</span><select value={blockForm.blockType} onChange={(e) => setBlockForm({ ...blockForm, blockType: e.target.value, allDay: e.target.value === 'FOLGA' })}>{blockTypes.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+          <label className="check-row settings-check"><input type="checkbox" checked={blockForm.allDay} onChange={(e) => setBlockForm({ ...blockForm, allDay: e.target.checked })} /><span>Dia inteiro</span></label>
+          {!blockForm.allDay && blockForm.blockType !== 'FOLGA' && (
+            <>
+              <label><span>Início</span><input type="time" value={blockForm.startTime} onChange={(e) => setBlockForm({ ...blockForm, startTime: e.target.value })} required /></label>
+              <label><span>Fim</span><input type="time" value={blockForm.endTime} onChange={(e) => setBlockForm({ ...blockForm, endTime: e.target.value })} required /></label>
+            </>
+          )}
+          <label className="full"><span>Motivo/observação</span><textarea rows="3" value={blockForm.reason} onChange={(e) => setBlockForm({ ...blockForm, reason: e.target.value })} placeholder="Ex: Almoço, manutenção, compromisso externo, folga semanal..." /></label>
+        </form>
+      </Modal>
 
       <Modal
         open={modalOpen}

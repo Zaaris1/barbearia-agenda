@@ -92,3 +92,67 @@ Quando uma barbearia estiver bloqueada por mensalidade, a tela de login mostra u
 ## Observação Cloudflare
 
 O pacote continua sem `package-lock.json` para evitar o problema do Cloudflare com `npm clean-install`.
+
+## V1.11 — Agenda avançada, meus agendamentos e mensagens WhatsApp personalizadas
+
+Novidades desta versão:
+
+- Folgas, pausas, almoço e bloqueios manuais na agenda.
+- Bloqueios por barbeiro ou para todos os barbeiros.
+- Bloqueio de horários também afeta a página pública de agendamento.
+- Página pública para cliente consultar seus agendamentos pelo WhatsApp.
+- Cliente pode cancelar agendamentos futuros ainda pendentes/agendados/confirmados.
+- Mensagens WhatsApp personalizáveis por barbearia:
+  - confirmação;
+  - lembrete;
+  - cancelamento.
+
+### SQL novo
+
+Depois de substituir os arquivos no GitHub, rode no Supabase:
+
+```txt
+database/012_agenda_cliente_whatsapp.sql
+```
+
+Abra o arquivo, copie todo o conteúdo e cole no SQL Editor.
+
+### Links novos
+
+Para a barbearia demo:
+
+```txt
+https://barbearia-agenda.pages.dev/meus-agendamentos/barbearia-demo
+```
+
+Modelo geral:
+
+```txt
+https://barbearia-agenda.pages.dev/meus-agendamentos/slug-da-barbearia
+```
+
+### Onde configurar mensagens WhatsApp
+
+No painel da barbearia:
+
+```txt
+Configurações > Mensagens WhatsApp
+```
+
+Variáveis disponíveis:
+
+```txt
+{cliente}
+{barbearia}
+{servico}
+{barbeiro}
+{data}
+{hora}
+{hora_fim}
+{valor}
+{endereco}
+{telefone_barbearia}
+{status}
+{pagamento}
+{valor_pagamento}
+```

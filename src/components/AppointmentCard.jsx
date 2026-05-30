@@ -10,7 +10,7 @@ function whatsappLink(phone) {
   return `https://wa.me/${normalized}`
 }
 
-export default function AppointmentCard({ appointment, onStatus, onReschedule, onMarkPaid, onSendConfirmation, onSendReminder }) {
+export default function AppointmentCard({ appointment, onStatus, onReschedule, onMarkPaid, onSendConfirmation, onSendReminder, onSendCancellation }) {
   const canConfirm = ['PENDENTE_CONFIRMACAO', 'AGENDADO'].includes(appointment.status)
   const canStart = ['AGENDADO', 'CONFIRMADO'].includes(appointment.status)
   const canFinish = appointment.status === 'EM_ATENDIMENTO'
@@ -61,6 +61,7 @@ export default function AppointmentCard({ appointment, onStatus, onReschedule, o
         {canFinish && <button type="button" className="btn mini success" onClick={() => onStatus(appointment, 'CONCLUIDO')}><CheckCircle2 size={15} /> Concluir</button>}
         {canMarkPaid && <button type="button" className="btn mini success" onClick={() => onMarkPaid?.(appointment)}><CreditCard size={15} /> Pago</button>}
         {appointment.status === 'CONFIRMADO' && <button type="button" className="btn mini whatsapp" onClick={() => onSendConfirmation?.(appointment)}><Send size={15} /> Enviar confirmação</button>}
+        {appointment.status === 'CANCELADO' && <button type="button" className="btn mini whatsapp" onClick={() => onSendCancellation?.(appointment)}><Send size={15} /> Avisar cancelamento</button>}
         {canSendReminder && <button type="button" className="btn mini reminder" onClick={() => onSendReminder?.(appointment)}><BellRing size={15} /> Lembrete</button>}
         {canReschedule && <button type="button" className="btn mini soft" onClick={() => onReschedule(appointment)}><Edit3 size={15} /> Remarcar</button>}
         {canMiss && <button type="button" className="btn mini warning" onClick={() => onStatus(appointment, 'FALTOU')}><RotateCcw size={15} /> Faltou</button>}

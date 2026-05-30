@@ -28,6 +28,7 @@ export default function BarbershopPortal({ showToast, fallbackSlug }) {
     portal: buildUrl(`/${slug}`),
     booking: buildUrl(`/agendar/${slug}`),
     panel: buildUrl(`/app/${slug}`),
+    client: buildUrl(`/meus-agendamentos/${slug}`),
   }), [slug])
 
   async function copyText(text, label = 'Link copiado com sucesso.') {
@@ -169,6 +170,7 @@ export default function BarbershopPortal({ showToast, fallbackSlug }) {
           </div>
 
           <div className="portal-secondary-actions">
+            <a href={`/meus-agendamentos/${slug}`}><CalendarCheck size={16} /> Meus agendamentos</a>
             {shop?.phone && <a href={whatsappLink(shop.phone, `Olá! Vim pelo link da ${shop?.name || 'barbearia'}.`)} target="_blank" rel="noreferrer"><MessageCircle size={16} /> WhatsApp</a>}
             {instagramHref && <a href={instagramHref} target="_blank" rel="noreferrer"><Instagram size={16} /> Instagram</a>}
             <button type="button" onClick={() => copyText(urls.portal, 'Link da barbearia copiado.')}><Copy size={16} /> Copiar link</button>
