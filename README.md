@@ -1,152 +1,94 @@
-# Barbearia Agenda V1.6
+# Barbearia Agenda V1.10
 
-App de agendamentos para barbearias feito com React + Vite + Supabase + Cloudflare Pages.
+Versão com comissão dos barbeiros, relatório por barbeiro e tela de bloqueio comercial mais profissional.
 
-## V1.6 - Confirmação por WhatsApp
+## Principais recursos acumulados
 
-Nesta versão foi adicionada a confirmação via WhatsApp sem API:
+- Multi-barbearias
+- Painel master
+- Controle de mensalidades e bloqueio
+- Portal inicial cliente/barbeiro
+- Agendamento público
+- Agenda interna
+- Pix manual com QR Code e copia e cola
+- Confirmação por WhatsApp
+- Lembrete por WhatsApp
+- Relatórios financeiros
+- PDF/Salvar relatório
+- Identidade visual por barbearia
+- Upload de logo, banner e favicon pelo painel
+- Comissão dos barbeiros
+- Relatório por barbeiro
+- Tela de bloqueio comercial mais bonita
+- Responsivo/mobile ajustado
 
-- Ao clicar em **Confirmar** no card do agendamento, o status muda para `CONFIRMADO` e o WhatsApp do cliente abre com mensagem pronta.
-- Após o agendamento estar confirmado, o card mostra o botão **Enviar confirmação** para reenviar/abrir a mensagem novamente.
-- A mensagem usa automaticamente nome do cliente, serviço, barbeiro, data, horário, valor, nome da barbearia, endereço e telefone da barbearia quando disponíveis.
-- O telefone do cliente é normalizado para link `wa.me`, adicionando `55` quando necessário.
+## Arquivos alterados na V1.10
 
-## Observação importante
-
-Esta versão não envia a mensagem automaticamente pela API oficial do WhatsApp. Ela abre o WhatsApp com a mensagem preenchida para o barbeiro/admin tocar em enviar.
-
-Isso evita custo com API, aprovação da Meta e necessidade de backend/webhook.
-
-## Arquivos principais alterados
-
-- `src/components/AppointmentCard.jsx`
-- `src/pages/Agenda.jsx`
-- `src/lib/whatsapp.js`
-- `src/styles/global.css`
-
-## Banco de dados
-
-Não precisa rodar SQL novo nesta versão.
-
-## Deploy
-
-Suba/substitua os arquivos no GitHub e aguarde o Cloudflare Pages publicar automaticamente.
-
-Mantenha o `package-lock.json` fora do GitHub se o Cloudflare voltar a travar em `npm clean-install`.
-
-
-## V1.7 - Portal inicial da barbearia
-
-A V1.7 adiciona uma tela inicial única para cada barbearia. Assim, em vez de divulgar dois links separados, você pode divulgar apenas:
+Substitua no GitHub:
 
 ```txt
-https://barbearia-agenda.pages.dev/barbearia-demo
+src/lib/api.js
+src/pages/Barbeiros.jsx
+src/pages/Financeiro.jsx
+src/pages/Login.jsx
+src/styles/global.css
+README.md
 ```
 
-Nessa tela, o visitante escolhe:
+Suba também o SQL novo:
 
 ```txt
-Sou cliente -> /agendar/barbearia-demo
-Sou barbeiro / administrador -> /app/barbearia-demo
+database/011_comissoes_relatorio_barbeiro_bloqueio.sql
 ```
 
-O painel master continua separado em:
+## SQL
+
+Depois de subir os arquivos no GitHub, rode no Supabase somente:
 
 ```txt
-/master
+database/011_comissoes_relatorio_barbeiro_bloqueio.sql
 ```
 
-Links antigos continuam funcionando:
+Abra o arquivo, copie o conteúdo completo e cole no SQL Editor do Supabase.
+
+## Comissão dos barbeiros
+
+No painel da barbearia:
 
 ```txt
-/app/barbearia-demo
-/agendar/barbearia-demo
+Barbeiros > Editar barbeiro > Comissão do barbeiro
 ```
 
-Não é necessário rodar SQL novo para a V1.7.
+Opções:
 
-## V1.7.2 - Refinamento do portal inicial
+- Comissão desativada
+- Comissão percentual sobre atendimentos concluídos
+- Comissão fixa por atendimento concluído
 
-- Card principal de cliente com mais destaque visual.
-- Botão de agendamento mais forte como CTA principal.
-- Acesso de barbeiro/admin mantido como opção secundária e discreta.
-- Ajustes de responsividade para mobile.
+A comissão é calculada no relatório financeiro sobre atendimentos com status `CONCLUIDO`.
 
+## Relatório por barbeiro
 
-## V1.7.2
-
-- Card principal de cliente com contraste corrigido.
-- Botão de agendamento com mais destaque visual.
-- Acesso de barbeiro/admin mantido secundário.
-
-
-## V1.7.4
-
-- Card principal de cliente transformado em CTA visual claro.
-- Botão “Começar agendamento” com aparência real de ação.
-- Card do barbeiro/admin mantido como opção secundária.
-
-
-## V1.7.4
-
-Correção definitiva do CTA principal do cliente no portal inicial, com fundo dourado fixo, texto legível e botão “Começar agendamento” mais evidente.
-
-## V1.7.5
-
-Correção de rolagem no portal inicial em celulares: remove travamento de scroll vertical, evita overflow horizontal e mantém o visual aprovado da V1.7.4.
-
-## V1.7.6
-
-Correção final de rolagem no mobile/Safari do portal inicial da barbearia.
-
-Arquivos alterados:
-
-- `src/styles/global.css`
-- `README.md`
-
-Não precisa rodar SQL novo.
-
-
-## V1.7.7
-
-Correção forte de rolagem mobile/Safari no portal inicial da barbearia. Remove animação de entrada do portal, força o scroll no body/documento e reduz efeitos pesados no mobile para evitar travamentos ao rolar.
-
-## V1.8 - Lembretes WhatsApp e relatórios financeiros
-
-### O que entrou
-
-- Botão **Lembrete** nos cards de agendamento para abrir WhatsApp com mensagem pronta para o cliente.
-- Mensagem de lembrete com cliente, serviço, barbeiro, data, horário, endereço e nome da barbearia.
-- Relatório financeiro mensal no painel da barbearia.
-- Resumo por dia, por barbeiro, por serviço e lista de movimentos do mês.
-- Relatório mensal no painel master com previsão, recebido, pendências/bloqueios e pagamentos registrados.
-
-### SQL necessário
-
-Depois de subir os arquivos, rode no Supabase o conteúdo completo de:
+No menu:
 
 ```txt
-database/009_lembretes_relatorios_financeiros.sql
+Financeiro
 ```
 
-Não cole apenas o caminho no SQL Editor. Abra o arquivo, copie todo o conteúdo e execute.
+Agora a seção `Resultado por barbeiro` mostra:
 
+- faturamento recebido
+- quantidade de concluídos
+- regra de comissão
+- valor da comissão
+- líquido estimado da barbearia
 
-## V1.9 - Upload de identidade e relatórios PDF
+Clique no barbeiro para abrir o relatório detalhado dele no mês.
 
-Novidades:
+## Tela de bloqueio comercial
 
-- Upload direto de logo, capa/banner e favicon pelo painel da barbearia.
-- Bucket público `branding` no Supabase Storage.
-- Botão **Salvar PDF** no relatório financeiro da barbearia.
-- Botão **Salvar PDF** no relatório mensal do painel master.
+Quando uma barbearia estiver bloqueada por mensalidade, a tela de login mostra um card comercial explicando o bloqueio, em vez de apenas um erro simples.
 
-Para aplicar, rode no Supabase o SQL:
+## Observação Cloudflare
 
-```txt
-database/010_uploads_relatorios_pdf.sql
-```
-
-Depois substitua os arquivos no GitHub e aguarde o Cloudflare publicar.
-
-Observação: os relatórios usam a impressão do navegador. Ao clicar em **Salvar PDF**, escolha **Salvar como PDF** na janela de impressão.
+O pacote continua sem `package-lock.json` para evitar o problema do Cloudflare com `npm clean-install`.

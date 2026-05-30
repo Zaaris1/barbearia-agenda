@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ExternalLink, LockKeyhole, Scissors } from 'lucide-react'
+import { ExternalLink, LockKeyhole, MessageCircle, Scissors, ShieldAlert } from 'lucide-react'
 import { loginWithPin, publicGetBranding } from '../lib/api'
-import { applyDocumentBrand, buildThemeStyle, normalizeUrl, publicBookingLink } from '../lib/branding'
+import { applyDocumentBrand, buildThemeStyle, normalizeUrl, publicBookingLink, whatsappLink } from '../lib/branding'
 
 export default function Login({ onLogin, showToast, forcedShopSlug = '' }) {
   const defaultSlug = import.meta.env.VITE_DEFAULT_SHOP_SLUG || 'barbearia-demo'
@@ -10,6 +10,7 @@ export default function Login({ onLogin, showToast, forcedShopSlug = '' }) {
   const [pin, setPin] = useState('')
   const [loading, setLoading] = useState(false)
   const [brand, setBrand] = useState(null)
+  const [blockedMessage, setBlockedMessage] = useState('')
 
   useEffect(() => {
     if (forcedShopSlug) setShopSlug(forcedShopSlug)
@@ -49,11 +50,17 @@ export default function Login({ onLogin, showToast, forcedShopSlug = '' }) {
     setLoading(true)
     try {
       const cleanSlug = shopSlug.trim().toLowerCase()
+      setBlockedMessage('')
       const result = await loginWithPin(cleanSlug, pin.trim())
       if (!result?.session_token) throw new Error('Login não retornou sessão.')
       onLogin(result)
     } catch (error) {
-      showToast(error.message || 'PIN inválido.', 'error')
+      const message = error.message || 'PIN inválido.'
+      if (message.toLowerCase().includes('bloque') || message.toLowerCase().includes('pendência financeira') || message.toLowerCase().includes('pendencia financeira')) {
+        setBlockedMessage(message)
+      } else {
+        showToast(message, 'error')
+      }
     } finally {
       setLoading(false)
     }
@@ -70,6 +77,22 @@ export default function Login({ onLogin, showToast, forcedShopSlug = '' }) {
         <span className="eyebrow centered">Agenda premium</span>
         <h1>{brand?.name || 'Barbearia Agenda'}</h1>
         <p>{brand?.slogan || 'Entre com o PIN do administrador ou barbeiro para acessar o painel interno.'}</p>
+
+        {blockedMessage && (
+          <div className="commercial-block-card">
+            <div className="commercial-block-icon"><ShieldAlert size={24} /></div>
+            <div>
+              <strong>Acesso temporariamente bloqueado</strong>
+              <p>{blockedMessage}</p>
+              <small>Regularize a mensalidade para liberar painel, agenda e link público da barbearia.</small>
+            </div>
+            {brand?.phone && (
+              <a className="btn primary full" href={whatsappLink(brand.phone, `Olá! Preciso regularizar o acesso da ${brand?.name || 'barbearia'}.`)} target="_blank" rel="noreferrer">
+                <MessageCircle size={16} /> Falar com suporte
+              </a>
+            )}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="form-stack">
           <label>

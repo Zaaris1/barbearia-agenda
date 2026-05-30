@@ -164,6 +164,9 @@ export async function saveBarber(sessionToken, payload) {
     p_days_working: payload.daysWorking || ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'],
     p_service_ids: payload.serviceIds || null,
     p_color: payload.color || '#d4a857',
+    p_commission_enabled: payload.commissionEnabled === true,
+    p_commission_type: payload.commissionType || 'PERCENT',
+    p_commission_value: Number(payload.commissionValue || 0),
   })
 
   return unwrapRpc(res)
