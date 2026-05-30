@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Banknote, CalendarDays, CheckCircle2, Clock3, Scissors, UserRound, WalletCards } from 'lucide-react'
+import { Banknote, CalendarDays, CheckCircle2, Clock3, Printer, Scissors, UserRound, WalletCards } from 'lucide-react'
 import StatCard from '../components/StatCard'
 import { getFinancialReport } from '../lib/api'
 import { formatDateBR, formatMoney, todayISO } from '../lib/dates'
@@ -22,7 +22,7 @@ function statusLabel(status) {
   return labels[status] || status || '-'
 }
 
-export default function Financeiro({ session, showToast }) {
+export default function Financeiro({ session, showToast, bootstrap }) {
   const [month, setMonth] = useState(currentMonth())
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -46,8 +46,12 @@ export default function Financeiro({ session, showToast }) {
   const byService = data?.by_service || []
   const appointments = data?.appointments || []
 
+  function printReport() {
+    window.print()
+  }
+
   return (
-    <section className="page-content">
+    <section className="page-content print-finance-report">
       <div className="page-heading">
         <div>
           <span className="eyebrow">Caixa e relatórios</span>
@@ -57,7 +61,14 @@ export default function Financeiro({ session, showToast }) {
         <div className="heading-actions">
           <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
           <button className="btn soft" type="button" onClick={load}>Atualizar</button>
+          <button className="btn primary" type="button" onClick={printReport}><Printer size={16} /> Salvar PDF</button>
         </div>
+      </div>
+
+      <div className="print-only print-report-header">
+        <h1>{bootstrap?.barbershop?.name || session?.barbershop?.name || 'Barbearia'}</h1>
+        <p>Relatório financeiro mensal • Competência {month}</p>
+        <small>Gerado em {new Date().toLocaleString('pt-BR')}</small>
       </div>
 
       {loading && <div className="loading-card">Carregando relatório financeiro...</div>}

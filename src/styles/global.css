@@ -2706,3 +2706,187 @@ body.portal-route-active .portal-secondary-actions button {
     flex-direction: column;
   }
 }
+
+
+/* V1.9 - Upload de identidade visual */
+.branding-upload-grid .upload-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.upload-card strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-color, #f5f5f5);
+}
+
+.upload-card small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted, #a1a1aa);
+  line-height: 1.45;
+}
+
+.upload-btn {
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.upload-btn input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.print-only {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .branding-upload-grid .upload-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .upload-card .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* V1.9 - Relatórios printáveis / salvar PDF */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  html,
+  body,
+  #root {
+    background: #fff !important;
+    color: #111 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .print-finance-report,
+  .print-finance-report *,
+  .print-master-report,
+  .print-master-report * {
+    visibility: visible !important;
+  }
+
+  .print-finance-report,
+  .print-master-report {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .print-report-header {
+    border-bottom: 2px solid #111 !important;
+    margin-bottom: 18px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .print-report-header h1 {
+    margin: 0 0 4px !important;
+    color: #111 !important;
+    font-size: 24px !important;
+  }
+
+  .print-report-header p,
+  .print-report-header small {
+    color: #333 !important;
+    margin: 0 !important;
+  }
+
+  .heading-actions,
+  .btn,
+  .bottom-nav,
+  .app-sidebar,
+  .app-topbar,
+  .master-topbar,
+  .master-grid,
+  .master-editor,
+  .master-actions,
+  .page-heading .eyebrow,
+  .page-heading p {
+    display: none !important;
+  }
+
+  .page-heading,
+  .master-heading,
+  .panel-title {
+    break-inside: avoid !important;
+  }
+
+  .panel-card,
+  .stat-card,
+  .finance-row {
+    background: #fff !important;
+    color: #111 !important;
+    border: 1px solid #d7d7d7 !important;
+    box-shadow: none !important;
+    break-inside: avoid !important;
+  }
+
+  .panel-card {
+    margin-bottom: 12px !important;
+    padding: 14px !important;
+  }
+
+  .stat-card strong,
+  .stat-card span,
+  .stat-card small,
+  .panel-title h3,
+  .panel-title span,
+  .finance-row span,
+  .finance-row small,
+  .finance-row strong,
+  .finance-row b,
+  .panel-subtitle {
+    color: #111 !important;
+  }
+
+  .stats-grid,
+  .report-grid,
+  .master-report-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .finance-table {
+    gap: 6px !important;
+  }
+
+  a {
+    color: #111 !important;
+    text-decoration: none !important;
+  }
+}

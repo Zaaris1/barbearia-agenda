@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Copy, CreditCard, ExternalLink, ImageIcon, KeyRound, Palette, QrCode, Save, Send, Settings, ShieldCheck, Sparkles } from 'lucide-react'
+import { Copy, CreditCard, ExternalLink, ImageIcon, KeyRound, Palette, QrCode, Save, Send, Settings, ShieldCheck, Sparkles, UploadCloud } from 'lucide-react'
 import { updateBarbershopBranding, updateBarbershopPayment, updateBarbershopSettings } from '../lib/api'
 import { buildThemeStyle, instagramUrl, normalizeUrl, presetOptions, publicBookingLink, qrCodeUrl, THEME_PRESETS } from '../lib/branding'
 import { buildPixPayload, getPaymentModeLabel, pixQrCodeUrl } from '../lib/pix'
 import { formatMoney } from '../lib/dates'
+import { uploadBrandingImage } from '../lib/uploads'
 
 function normalizeSlug(value) {
   return String(value || '')
@@ -32,6 +33,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
   const shop = bootstrap?.barbershop || session?.barbershop || {}
   const isAdmin = session?.user?.role === 'ADMIN'
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState('')
   const [form, setForm] = useState({
     name: '',
     slug: '',
@@ -148,6 +150,23 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
       } catch {}
     }
     copyText(publicLink, 'Link público copiado para compartilhar.')
+  }
+
+  async function handleBrandUpload(field, kind, file) {
+    if (!file) return
+
+    const cleanSlug = normalizeSlug(form.slug || shop?.slug || 'barbearia')
+    setUploading(field)
+
+    try {
+      const url = await uploadBrandingImage(cleanSlug, kind, file)
+      setField(field, url)
+      showToast('Imagem enviada. Clique em Salvar tudo para gravar na barbearia.')
+    } catch (error) {
+      showToast(error.message, 'error')
+    } finally {
+      setUploading('')
+    }
   }
 
   async function save(e) {
@@ -268,22 +287,54 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
 
           <div className="panel-title">
             <h3>Logo, capa e favicon</h3>
-            <span>Use links diretos de imagem por enquanto</span>
+            <span>Envie imagens pelo painel ou cole uma URL pronta</span>
           </div>
 
-          <div className="form-grid">
+          <div className="form-grid branding-upload-grid">
             <label className="full">
               <span>URL da logo</span>
               <input value={form.logoUrl} onChange={(e) => setField('logoUrl', e.target.value)} placeholder="https://.../logo.png" />
             </label>
+            <div className="upload-card full">
+              <div>
+                <strong><ImageIcon size={17} /> Enviar logo</strong>
+                <small>PNG transparente, JPG, WEBP ou SVG. Ideal: quadrada.</small>
+              </div>
+              <label className="btn soft upload-btn">
+                <UploadCloud size={16} /> {uploading === 'logoUrl' ? 'Enviando...' : 'Selecionar'}
+                <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon" onChange={(e) => handleBrandUpload('logoUrl', 'logo', e.target.files?.[0])} disabled={uploading === 'logoUrl'} />
+              </label>
+            </div>
+
             <label className="full">
               <span>URL da capa/banner</span>
               <input value={form.coverUrl} onChange={(e) => setField('coverUrl', e.target.value)} placeholder="https://.../capa.jpg" />
             </label>
+            <div className="upload-card full">
+              <div>
+                <strong><ImageIcon size={17} /> Enviar capa/banner</strong>
+                <small>Imagem horizontal. Ideal: 1600x600 ou 1920x700.</small>
+              </div>
+              <label className="btn soft upload-btn">
+                <UploadCloud size={16} /> {uploading === 'coverUrl' ? 'Enviando...' : 'Selecionar'}
+                <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => handleBrandUpload('coverUrl', 'capa', e.target.files?.[0])} disabled={uploading === 'coverUrl'} />
+              </label>
+            </div>
+
             <label className="full">
               <span>URL do favicon</span>
               <input value={form.faviconUrl} onChange={(e) => setField('faviconUrl', e.target.value)} placeholder="https://.../favicon.png" />
             </label>
+            <div className="upload-card full">
+              <div>
+                <strong><ImageIcon size={17} /> Enviar favicon</strong>
+                <small>Ícone quadrado. Ideal: 512x512 em PNG.</small>
+              </div>
+              <label className="btn soft upload-btn">
+                <UploadCloud size={16} /> {uploading === 'faviconUrl' ? 'Enviando...' : 'Selecionar'}
+                <input type="file" accept="image/png,image/jpeg,image/webp,image/x-icon" onChange={(e) => handleBrandUpload('faviconUrl', 'favicon', e.target.files?.[0])} disabled={uploading === 'faviconUrl'} />
+              </label>
+            </div>
           </div>
 
           <div className="section-divider" />

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Banknote, BarChart3, CalendarClock, Copy, ExternalLink, LockKeyhole, LogOut, Plus, RefreshCw, Save, Scissors, ShieldAlert, ShieldCheck, Store, WalletCards } from 'lucide-react'
+import { Banknote, BarChart3, CalendarClock, Copy, ExternalLink, LockKeyhole, LogOut, Plus, Printer, RefreshCw, Save, Scissors, ShieldAlert, ShieldCheck, Store, WalletCards } from 'lucide-react'
 import { clearMasterSession, readMasterSession, saveMasterSession } from '../lib/storage'
 import { masterCreateBarbershop, masterGetSubscriptionReport, masterListBarbershops, masterLoginWithPin, masterLogout, masterRegisterPayment, masterUpdateBarbershop } from '../lib/api'
 import { formatMoney, todayISO } from '../lib/dates'
@@ -214,6 +214,10 @@ export default function MasterPanel({ showToast }) {
     }
   }
 
+  function printMasterReport() {
+    window.print()
+  }
+
   async function copy(text) {
     try {
       await navigator.clipboard.writeText(text)
@@ -285,7 +289,7 @@ export default function MasterPanel({ showToast }) {
           <div className="stat-card"><CalendarClock size={22} /><span>Agendamentos</span><strong>{monthAppointments}</strong><small>No mês atual</small></div>
         </div>
 
-        <section className="panel-card master-report-card">
+        <section className="panel-card master-report-card print-master-report">
           <div className="panel-title with-actions">
             <div>
               <h3>Relatório mensal da plataforma</h3>
@@ -294,7 +298,14 @@ export default function MasterPanel({ showToast }) {
             <div className="heading-actions">
               <input type="month" value={reportMonth} onChange={(e) => setReportMonth(e.target.value)} />
               <button className="btn soft" type="button" onClick={loadSubscriptionReport}><RefreshCw size={16} /> Atualizar</button>
+              <button className="btn primary" type="button" onClick={printMasterReport}><Printer size={16} /> Salvar PDF</button>
             </div>
+          </div>
+
+          <div className="print-only print-report-header">
+            <h1>Relatório mensal da plataforma</h1>
+            <p>Competência {reportMonth}</p>
+            <small>Gerado em {new Date().toLocaleString('pt-BR')}</small>
           </div>
 
           <div className="stats-grid four compact-stats">

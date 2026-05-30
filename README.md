@@ -130,3 +130,23 @@ database/009_lembretes_relatorios_financeiros.sql
 ```
 
 Não cole apenas o caminho no SQL Editor. Abra o arquivo, copie todo o conteúdo e execute.
+
+
+## V1.9 - Upload de identidade e relatórios PDF
+
+Novidades:
+
+- Upload direto de logo, capa/banner e favicon pelo painel da barbearia.
+- Bucket público `branding` no Supabase Storage.
+- Botão **Salvar PDF** no relatório financeiro da barbearia.
+- Botão **Salvar PDF** no relatório mensal do painel master.
+
+Para aplicar, rode no Supabase o SQL:
+
+```txt
+database/010_uploads_relatorios_pdf.sql
+```
+
+Depois substitua os arquivos no GitHub e aguarde o Cloudflare publicar.
+
+Observação: os relatórios usam a impressão do navegador. Ao clicar em **Salvar PDF**, escolha **Salvar como PDF** na janela de impressão.
