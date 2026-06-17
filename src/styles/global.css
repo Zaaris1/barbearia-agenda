@@ -3281,3 +3281,175 @@ body.portal-route-active .portal-secondary-actions button {
     align-items: flex-start;
   }
 }
+
+/* V1.11.3 - Configuracoes em abas e painel interno mais operacional */
+.branded-config {
+  gap: 16px;
+}
+
+.settings-tabs {
+  display: flex;
+  gap: 8px;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .045);
+  scrollbar-width: none;
+}
+
+.settings-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.settings-tabs button {
+  flex: 0 0 auto;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  padding: 9px 13px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.settings-tabs button.active {
+  color: #0b0b0c;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--brand-primary, var(--gold)), var(--brand-accent, var(--gold-2)));
+}
+
+.settings-tabs button:not(.active):hover {
+  color: var(--text);
+  border-color: var(--border);
+  background: rgba(255, 255, 255, .055);
+}
+
+.settings-tab-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.settings-tab-panel .panel-title {
+  margin-bottom: 0;
+}
+
+.settings-card {
+  min-height: 470px;
+}
+
+.settings-side-stack {
+  position: sticky;
+  top: 18px;
+}
+
+.settings-side-stack .settings-side-card h3 {
+  font-size: 1.18rem;
+}
+
+.settings-side-stack .settings-side-card p {
+  font-size: .9rem;
+}
+
+.settings-side-stack .qr-box {
+  margin: 8px 0;
+}
+
+.settings-side-stack .qr-box img {
+  width: min(100%, 190px);
+}
+
+.settings-side-stack .settings-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+}
+
+@media (max-width: 980px) {
+  .settings-side-stack {
+    position: static;
+  }
+}
+
+@media (max-width: 860px) {
+  .main-area {
+    padding-bottom: 108px;
+  }
+
+  .bottom-nav {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    display: flex;
+    gap: 6px;
+    padding: 7px;
+    border-radius: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .bottom-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bottom-nav button {
+    flex: 0 0 72px;
+    min-width: 72px;
+    min-height: 54px;
+    padding: 6px 4px;
+    border-radius: 14px;
+    scroll-snap-align: start;
+    font-size: .66rem;
+    line-height: 1.15;
+  }
+
+  .bottom-nav button span {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .settings-tabs {
+    margin: -4px 0 0;
+  }
+
+  .settings-tabs button {
+    flex-basis: 118px;
+  }
+
+  .settings-card {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .settings-tabs {
+    border-radius: 16px;
+    padding: 5px;
+  }
+
+  .settings-tabs button {
+    flex-basis: 104px;
+    min-height: 38px;
+    padding: 8px 10px;
+    font-size: .82rem;
+  }
+
+  .settings-tabs button svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .settings-side-stack .brand-preview-card,
+  .settings-side-stack .settings-side-card {
+    border-radius: 20px;
+  }
+}

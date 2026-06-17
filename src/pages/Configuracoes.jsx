@@ -29,11 +29,20 @@ function setPresetColors(presetId, setForm) {
   }))
 }
 
+const SETTINGS_TABS = [
+  { id: 'dados', label: 'Dados', icon: Settings },
+  { id: 'midia', label: 'Imagens', icon: ImageIcon },
+  { id: 'pix', label: 'Pix', icon: CreditCard },
+  { id: 'mensagens', label: 'Mensagens', icon: Send },
+  { id: 'cores', label: 'Cores', icon: Palette },
+]
+
 export default function Configuracoes({ session, bootstrap, showToast, refreshBootstrap }) {
   const shop = bootstrap?.barbershop || session?.barbershop || {}
   const isAdmin = session?.user?.role === 'ADMIN'
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState('')
+  const [activeTab, setActiveTab] = useState('dados')
   const [form, setForm] = useState({
     name: '',
     slug: '',
@@ -129,6 +138,11 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
     txid: 'TESTE',
     description: 'AGENDAMENTO',
   }), [form.pixKey, form.pixKeyType, form.pixReceiverName, form.pixReceiverCity, form.name, pixPreviewAmount])
+
+  const showBrandPreview = activeTab === 'midia' || activeTab === 'cores'
+  const showPixPreview = activeTab === 'pix'
+  const showLinkCard = activeTab === 'dados' || activeTab === 'mensagens'
+  const showInstagramCard = activeTab === 'dados' && form.instagram
 
   function setField(field, value) {
     setForm((old) => {
@@ -229,8 +243,29 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
         </div>
       </div>
 
+      <div className="settings-tabs" role="tablist" aria-label="Secoes de configuracoes">
+        {SETTINGS_TABS.map((tab) => {
+          const Icon = tab.icon
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              className={activeTab === tab.id ? 'active' : ''}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <Icon size={16} />
+              <span>{tab.label}</span>
+            </button>
+          )
+        })}
+      </div>
+
       <div className="settings-grid wide-settings-grid">
         <form id="settings-form" className="panel-card settings-card" onSubmit={save}>
+          {activeTab === 'dados' && (
+            <div className="settings-tab-panel">
           <div className="panel-title">
             <h3>Dados principais</h3>
             <span>Nome, contato, link e funcionamento</span>
@@ -289,8 +324,11 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
             </label>
           </div>
 
-          <div className="section-divider" />
+            </div>
+          )}
 
+          {activeTab === 'midia' && (
+            <div className="settings-tab-panel">
           <div className="panel-title">
             <h3>Logo, capa e favicon</h3>
             <span>Envie imagens pelo painel ou cole uma URL pronta</span>
@@ -343,8 +381,11 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
             </div>
           </div>
 
-          <div className="section-divider" />
+            </div>
+          )}
 
+          {activeTab === 'pix' && (
+            <div className="settings-tab-panel">
           <div className="panel-title">
             <h3>Pagamento Pix manual</h3>
             <span>Configure chave Pix, QR Code e regra de cobrança na página pública</span>
@@ -414,8 +455,11 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
             </label>
           </div>
 
-          <div className="section-divider" />
+            </div>
+          )}
 
+          {activeTab === 'mensagens' && (
+            <div className="settings-tab-panel">
           <div className="panel-title">
             <h3>Mensagens WhatsApp</h3>
             <span>Personalize os textos enviados para confirmação, lembrete e cancelamento</span>
@@ -465,8 +509,11 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
             </label>
           </div>
 
-          <div className="section-divider" />
+            </div>
+          )}
 
+          {activeTab === 'cores' && (
+            <div className="settings-tab-panel">
           <div className="panel-title">
             <h3>Preset e cores</h3>
             <span>Escolha um tema pronto ou ajuste manualmente</span>
@@ -499,10 +546,13 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
             <label><span>Card</span><input type="color" value={form.surfaceColor} onChange={(e) => setField('surfaceColor', e.target.value)} /></label>
             <label><span>Texto</span><input type="color" value={form.textColor} onChange={(e) => setField('textColor', e.target.value)} /></label>
           </div>
+            </div>
+          )}
         </form>
 
         <div className="settings-side-stack">
-          <div className="panel-card brand-preview-card" style={themeStyle}>
+          {showBrandPreview && (
+            <div className="panel-card brand-preview-card" style={themeStyle}>
             <div className="preview-cover" style={{ backgroundImage: normalizeUrl(form.coverUrl) ? `linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.82)), url(${normalizeUrl(form.coverUrl)})` : undefined }}>
               <div className="preview-logo">
                 {normalizeUrl(form.logoUrl) ? <img src={normalizeUrl(form.logoUrl)} alt="Logo" /> : <ImageIcon size={28} />}
@@ -515,9 +565,11 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
               <span className="preview-chip"><Sparkles size={14} /> {THEME_PRESETS[form.presetTheme]?.name || 'Tema'}</span>
               <span className="preview-chip"><Palette size={14} /> Cores próprias</span>
             </div>
-          </div>
+            </div>
+          )}
 
-          <div className="panel-card settings-side-card pix-preview-card">
+          {showPixPreview && (
+            <div className="panel-card settings-side-card pix-preview-card">
             <div className="settings-icon"><CreditCard size={24} /></div>
             <h3>Prévia do Pix</h3>
             <p>{form.paymentEnabled && form.paymentMode !== 'DISABLED' ? getPaymentModeLabel(form.paymentMode) : 'Pix desativado para clientes.'}</p>
@@ -534,9 +586,11 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
             ) : (
               <div className="empty-state small"><KeyRound size={18} /> Configure a chave Pix para gerar QR Code.</div>
             )}
-          </div>
+            </div>
+          )}
 
-          <div className="panel-card settings-side-card">
+          {showLinkCard && (
+            <div className="panel-card settings-side-card">
             <div className="settings-icon"><QrCode size={24} /></div>
             <h3>QR Code e link público</h3>
             <p>Use este QR Code em balcão, espelho, recepção, cartão e Instagram.</p>
@@ -557,9 +611,10 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
               <ShieldCheck size={18} />
               <span>Clientes não acessam dashboard, financeiro, lista de clientes ou dados internos.</span>
             </div>
-          </div>
+            </div>
+          )}
 
-          {form.instagram && (
+          {showInstagramCard && (
             <div className="panel-card notice-card">
               <strong>Instagram detectado</strong>
               <a href={instagramUrl(form.instagram)} target="_blank" rel="noreferrer">Abrir perfil configurado</a>
