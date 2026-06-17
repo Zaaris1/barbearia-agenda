@@ -316,6 +316,40 @@ export async function updateBarbershopMessages(sessionToken, payload) {
   return unwrapRpc(res)
 }
 
+export async function listAccessUsers(sessionToken) {
+  const res = await supabase.rpc('internal_list_app_users', {
+    p_session_token: sessionToken,
+  })
+
+  const data = unwrapRpc(res, [])
+
+  return Array.isArray(data) ? data : []
+}
+
+export async function saveAccessUser(sessionToken, payload) {
+  const res = await supabase.rpc('internal_save_app_user', {
+    p_session_token: sessionToken,
+    p_user_id: payload.id || null,
+    p_name: payload.name,
+    p_phone: payload.phone || '',
+    p_role: payload.role || 'BARBER',
+    p_active: payload.active !== false,
+    p_pin: payload.pin || '',
+  })
+
+  return unwrapRpc(res)
+}
+
+export async function changeOwnPin(sessionToken, currentPin, newPin) {
+  const res = await supabase.rpc('internal_change_own_pin', {
+    p_session_token: sessionToken,
+    p_current_pin: currentPin,
+    p_new_pin: newPin,
+  })
+
+  return unwrapRpc(res, { ok: true })
+}
+
 export async function publicFindClientAppointments(slug, phone) {
   const res = await supabase.rpc('public_find_client_appointments', {
     p_shop_slug: slug,
@@ -392,7 +426,7 @@ export async function masterCreateBarbershop(masterSessionToken, payload) {
     p_monthly_fee: Number(payload.monthlyFee || 0),
     p_subscription_due_date: payload.subscriptionDueDate || null,
     p_admin_name: payload.adminName || 'Administrador',
-    p_admin_pin: payload.adminPin || '1234',
+    p_admin_pin: payload.adminPin || '',
   })
 
   return unwrapRpc(res)

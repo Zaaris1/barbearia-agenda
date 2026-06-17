@@ -3375,6 +3375,90 @@ body.portal-route-active .portal-secondary-actions button {
   margin-bottom: 0;
 }
 
+.access-management-grid {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(340px, 1.1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.access-user-list,
+.access-editor-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.access-user-card {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, .09);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .045);
+  color: var(--text);
+  text-align: left;
+}
+
+.access-user-card.active,
+.access-user-card:hover {
+  border-color: rgba(212,168,87,.34);
+  background: rgba(212,168,87,.08);
+}
+
+.access-user-card.inactive {
+  opacity: .66;
+}
+
+.access-user-card strong,
+.access-user-card small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.access-user-card small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: .8rem;
+}
+
+.access-user-avatar {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: rgba(212,168,87,.14);
+  color: var(--gold-2);
+  font-weight: 950;
+}
+
+.access-editor-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, .09);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .035);
+}
+
+.access-active-check {
+  min-height: 48px;
+  align-content: center;
+}
+
+.access-actions {
+  justify-content: flex-end;
+}
+
+.access-security-note {
+  margin-top: 0;
+}
+
 .settings-card {
   min-height: 470px;
 }
@@ -3462,6 +3546,19 @@ body.portal-route-active .portal-secondary-actions button {
 
   .settings-card {
     min-height: auto;
+  }
+
+  .access-management-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .access-user-card {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .access-user-card .mini-status {
+    grid-column: 2;
+    justify-self: start;
   }
 }
 

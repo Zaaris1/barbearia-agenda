@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Copy, CreditCard, ExternalLink, ImageIcon, KeyRound, Palette, QrCode, Save, Send, Settings, ShieldCheck, Sparkles, UploadCloud } from 'lucide-react'
-import { updateBarbershopBranding, updateBarbershopMessages, updateBarbershopPayment, updateBarbershopSettings } from '../lib/api'
+import { Copy, CreditCard, ExternalLink, ImageIcon, KeyRound, Palette, QrCode, RefreshCw, Save, Send, Settings, ShieldCheck, Sparkles, UploadCloud, UserPlus, Users } from 'lucide-react'
+import { changeOwnPin, listAccessUsers, saveAccessUser, updateBarbershopBranding, updateBarbershopMessages, updateBarbershopPayment, updateBarbershopSettings } from '../lib/api'
 import { buildThemeStyle, instagramUrl, normalizeUrl, presetOptions, publicBookingLink, qrCodeUrl, THEME_PRESETS } from '../lib/branding'
 import { buildPixPayload, getPaymentModeLabel, pixQrCodeUrl } from '../lib/pix'
 import { formatMoney } from '../lib/dates'
@@ -35,7 +35,17 @@ const SETTINGS_TABS = [
   { id: 'pix', label: 'Pix', icon: CreditCard },
   { id: 'mensagens', label: 'Mensagens', icon: Send },
   { id: 'cores', label: 'Cores', icon: Palette },
+  { id: 'acessos', label: 'Acessos', icon: Users },
 ]
+
+const emptyAccessForm = {
+  id: '',
+  name: '',
+  phone: '',
+  role: 'BARBER',
+  active: true,
+  pin: '',
+}
 
 export default function Configuracoes({ session, bootstrap, showToast, refreshBootstrap }) {
   const shop = bootstrap?.barbershop || session?.barbershop || {}
@@ -43,6 +53,12 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState('')
   const [activeTab, setActiveTab] = useState('dados')
+  const [accessUsers, setAccessUsers] = useState([])
+  const [accessLoading, setAccessLoading] = useState(false)
+  const [accessSaving, setAccessSaving] = useState(false)
+  const [accessForm, setAccessForm] = useState(emptyAccessForm)
+  const [pinSaving, setPinSaving] = useState(false)
+  const [pinForm, setPinForm] = useState({ currentPin: '', newPin: '', confirmPin: '' })
   const [form, setForm] = useState({
     name: '',
     slug: '',
@@ -113,6 +129,12 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
     })
   }, [shop?.id, shop?.updated_at, bootstrap])
 
+  useEffect(() => {
+    if (activeTab === 'acessos' && isAdmin) {
+      loadAccessUsers()
+    }
+  }, [activeTab, isAdmin, session?.session_token])
+
   const publicLink = useMemo(() => publicBookingLink(form.slug || shop?.slug), [form.slug, shop?.slug])
   const panelLink = useMemo(() => `${window.location.origin}/app/${form.slug || shop?.slug || 'barbearia-demo'}`, [form.slug, shop?.slug])
   const themeStyle = useMemo(() => buildThemeStyle({
@@ -143,6 +165,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
   const showPixPreview = activeTab === 'pix'
   const showLinkCard = activeTab === 'dados' || activeTab === 'mensagens'
   const showInstagramCard = activeTab === 'dados' && form.instagram
+  const accessFormIsSelf = accessForm.id && accessForm.id === session?.user?.id
 
   function setField(field, value) {
     setForm((old) => {
@@ -151,6 +174,77 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
       if (field === 'paymentEnabled' && value === true && next.paymentMode === 'DISABLED') next.paymentMode = 'OPTIONAL'
       return next
     })
+  }
+
+  function pinLooksValid(value) {
+    return /^[0-9]{4,12}$/.test(String(value || '').trim())
+  }
+
+  function roleLabel(role) {
+    return role === 'ADMIN' ? 'Administrador' : 'Barbeiro'
+  }
+
+  function resetAccessForm() {
+    setAccessForm(emptyAccessForm)
+  }
+
+  function editAccessUser(user) {
+    setAccessForm({
+      id: user.id,
+      name: user.name || '',
+      phone: user.phone || '',
+      role: user.role || 'BARBER',
+      active: user.active !== false,
+      pin: '',
+    })
+  }
+
+  async function loadAccessUsers() {
+    if (!session?.session_token) return
+    setAccessLoading(true)
+    try {
+      setAccessUsers(await listAccessUsers(session.session_token))
+    } catch (error) {
+      showToast(error.message, 'error')
+    } finally {
+      setAccessLoading(false)
+    }
+  }
+
+  async function handleAccessSave() {
+    if (!accessForm.name.trim()) return showToast('Informe o nome do usuário.', 'error')
+    if (!accessForm.id && !pinLooksValid(accessForm.pin)) return showToast('Informe um PIN inicial com 4 a 12 números.', 'error')
+    if (accessForm.id && accessForm.pin && !pinLooksValid(accessForm.pin)) return showToast('O novo PIN deve ter de 4 a 12 números.', 'error')
+
+    setAccessSaving(true)
+    try {
+      await saveAccessUser(session.session_token, accessForm)
+      showToast(accessForm.id ? 'Acesso atualizado com sucesso.' : 'Acesso criado com sucesso.')
+      resetAccessForm()
+      await loadAccessUsers()
+      await refreshBootstrap?.()
+    } catch (error) {
+      showToast(error.message, 'error')
+    } finally {
+      setAccessSaving(false)
+    }
+  }
+
+  async function handleOwnPinChange() {
+    if (!pinForm.currentPin.trim()) return showToast('Informe seu PIN atual.', 'error')
+    if (!pinLooksValid(pinForm.newPin)) return showToast('O novo PIN deve ter de 4 a 12 números.', 'error')
+    if (pinForm.newPin !== pinForm.confirmPin) return showToast('A confirmação do PIN não confere.', 'error')
+
+    setPinSaving(true)
+    try {
+      await changeOwnPin(session.session_token, pinForm.currentPin.trim(), pinForm.newPin.trim())
+      setPinForm({ currentPin: '', newPin: '', confirmPin: '' })
+      showToast('Seu PIN foi alterado com sucesso.')
+    } catch (error) {
+      showToast(error.message, 'error')
+    } finally {
+      setPinSaving(false)
+    }
   }
 
   async function copyText(text, label = 'Texto copiado.') {
@@ -190,6 +284,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
 
   async function save(e) {
     e.preventDefault()
+    if (activeTab === 'acessos') return
     if (!isAdmin) return showToast('Somente administrador pode alterar configurações.', 'error')
 
     const cleanSlug = normalizeSlug(form.slug)
@@ -239,7 +334,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
         </div>
         <div className="heading-actions">
           <a className="btn soft" href={publicLink} target="_blank" rel="noreferrer"><ExternalLink size={17} /> Abrir público</a>
-          <button className="btn primary" type="submit" form="settings-form" disabled={saving}><Save size={17} /> {saving ? 'Salvando...' : 'Salvar tudo'}</button>
+          {activeTab !== 'acessos' && <button className="btn primary" type="submit" form="settings-form" disabled={saving}><Save size={17} /> {saving ? 'Salvando...' : 'Salvar tudo'}</button>}
         </div>
       </div>
 
@@ -546,6 +641,104 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
             <label><span>Card</span><input type="color" value={form.surfaceColor} onChange={(e) => setField('surfaceColor', e.target.value)} /></label>
             <label><span>Texto</span><input type="color" value={form.textColor} onChange={(e) => setField('textColor', e.target.value)} /></label>
           </div>
+            </div>
+          )}
+
+          {activeTab === 'acessos' && (
+            <div className="settings-tab-panel access-tab-panel">
+              <div className="panel-title with-actions">
+                <div>
+                  <h3>Acessos e PINs</h3>
+                  <span>{accessLoading ? 'Atualizando...' : `${accessUsers.length} usuário(s) cadastrados`}</span>
+                </div>
+                <button className="btn soft" type="button" onClick={loadAccessUsers} disabled={accessLoading}>
+                  <RefreshCw size={16} /> Atualizar
+                </button>
+              </div>
+
+              <div className="access-management-grid">
+                <div className="access-user-list">
+                  {accessUsers.length === 0 && !accessLoading && <div className="empty-state">Nenhum usuário cadastrado.</div>}
+                  {accessUsers.map((user) => (
+                    <button
+                      type="button"
+                      className={`access-user-card ${!user.active ? 'inactive' : ''} ${accessForm.id === user.id ? 'active' : ''}`}
+                      key={user.id}
+                      onClick={() => editAccessUser(user)}
+                    >
+                      <span className="access-user-avatar">{user.name?.slice(0, 1) || 'U'}</span>
+                      <span>
+                        <strong>{user.name}</strong>
+                        <small>{user.phone || 'Sem telefone'}{user.barber_id ? ' • vinculado a barbeiro' : ''}</small>
+                      </span>
+                      <em className={`mini-status ${user.active ? 'ok' : 'danger'}`}>{user.active ? roleLabel(user.role) : 'Inativo'}</em>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="access-editor-stack">
+                  <div className="access-editor-card">
+                    <div className="panel-subtitle">{accessForm.id ? 'Editar usuário' : 'Novo usuário'}</div>
+                    <div className="form-grid">
+                      <label>
+                        <span>Nome</span>
+                        <input value={accessForm.name} onChange={(e) => setAccessForm({ ...accessForm, name: e.target.value })} placeholder="Nome do usuário" />
+                      </label>
+                      <label>
+                        <span>WhatsApp</span>
+                        <input value={accessForm.phone} onChange={(e) => setAccessForm({ ...accessForm, phone: e.target.value })} placeholder="(00) 00000-0000" />
+                      </label>
+                      <label>
+                        <span>Perfil</span>
+                        <select value={accessForm.role} onChange={(e) => setAccessForm({ ...accessForm, role: e.target.value })} disabled={Boolean(accessFormIsSelf)}>
+                          <option value="BARBER">Barbeiro</option>
+                          <option value="ADMIN">Administrador</option>
+                        </select>
+                      </label>
+                      <label>
+                        <span>{accessForm.id ? 'Novo PIN' : 'PIN inicial'}</span>
+                        <input value={accessForm.pin} onChange={(e) => setAccessForm({ ...accessForm, pin: e.target.value })} type="password" inputMode="numeric" placeholder={accessForm.id ? 'Opcional' : '4 a 12 números'} />
+                      </label>
+                      <label className="check-row access-active-check full">
+                        <input type="checkbox" checked={accessForm.active} onChange={(e) => setAccessForm({ ...accessForm, active: e.target.checked })} disabled={Boolean(accessFormIsSelf)} />
+                        <span>Usuário ativo</span>
+                      </label>
+                    </div>
+                    <div className="heading-actions access-actions">
+                      {accessForm.id && <button className="btn soft" type="button" onClick={resetAccessForm}>Novo</button>}
+                      <button className="btn primary" type="button" onClick={handleAccessSave} disabled={accessSaving}>
+                        <UserPlus size={16} /> {accessSaving ? 'Salvando...' : accessForm.id ? 'Salvar acesso' : 'Criar acesso'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="access-editor-card">
+                    <div className="panel-subtitle">Trocar meu PIN</div>
+                    <div className="form-grid">
+                      <label>
+                        <span>PIN atual</span>
+                        <input value={pinForm.currentPin} onChange={(e) => setPinForm({ ...pinForm, currentPin: e.target.value })} type="password" inputMode="numeric" />
+                      </label>
+                      <label>
+                        <span>Novo PIN</span>
+                        <input value={pinForm.newPin} onChange={(e) => setPinForm({ ...pinForm, newPin: e.target.value })} type="password" inputMode="numeric" placeholder="4 a 12 números" />
+                      </label>
+                      <label className="full">
+                        <span>Confirmar novo PIN</span>
+                        <input value={pinForm.confirmPin} onChange={(e) => setPinForm({ ...pinForm, confirmPin: e.target.value })} type="password" inputMode="numeric" />
+                      </label>
+                    </div>
+                    <button className="btn soft full" type="button" onClick={handleOwnPinChange} disabled={pinSaving}>
+                      <KeyRound size={16} /> {pinSaving ? 'Alterando...' : 'Alterar meu PIN'}
+                    </button>
+                  </div>
+
+                  <div className="security-note access-security-note">
+                    <ShieldCheck size={18} />
+                    <span>PINs não são exibidos no painel. O administrador pode redefinir um PIN novo, mas não consultar o PIN atual.</span>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </form>

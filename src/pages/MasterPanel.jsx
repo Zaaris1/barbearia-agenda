@@ -39,7 +39,7 @@ const emptyNewShop = {
   monthlyFee: 97,
   subscriptionDueDate: addMonthsISO(todayISO(), 1),
   adminName: 'Administrador',
-  adminPin: '1234',
+  adminPin: '',
 }
 
 export default function MasterPanel({ showToast }) {
@@ -259,9 +259,9 @@ export default function MasterPanel({ showToast }) {
             <button className="btn primary full" type="submit" disabled={loadingLogin}>{loadingLogin ? 'Entrando...' : 'Entrar no Master'}</button>
           </form>
           <div className="demo-box">
-            <strong>PIN inicial</strong>
-            <span>Master: 9999</span>
-            <span>Troque depois pelo SQL indicado no arquivo 005.</span>
+            <strong>Acesso protegido</strong>
+            <span>Use o PIN master cadastrado na plataforma.</span>
+            <span>Trocas de PIN devem ser feitas por fluxo seguro ou SQL administrativo.</span>
           </div>
         </motion.div>
       </div>
@@ -368,7 +368,7 @@ export default function MasterPanel({ showToast }) {
               </div>
               <div className="form-grid two">
                 <label><span>Nome do admin</span><input value={newShop.adminName} onChange={(e) => setNewField('adminName', e.target.value)} /></label>
-                <label><span>PIN do admin</span><input value={newShop.adminPin} onChange={(e) => setNewField('adminPin', e.target.value)} inputMode="numeric" /></label>
+                <label><span>PIN do admin</span><input value={newShop.adminPin} onChange={(e) => setNewField('adminPin', e.target.value)} inputMode="numeric" placeholder="Defina o PIN inicial" /></label>
               </div>
               <button className="btn primary full" type="submit" disabled={saving}><Plus size={17} /> {saving ? 'Criando...' : 'Criar barbearia'}</button>
             </form>
