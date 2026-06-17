@@ -327,7 +327,7 @@ export async function listAccessUsers(sessionToken) {
 }
 
 export async function saveAccessUser(sessionToken, payload) {
-  const res = await supabase.rpc('internal_save_app_user', {
+  const res = await supabase.rpc('internal_save_app_user_v2', {
     p_session_token: sessionToken,
     p_user_id: payload.id || null,
     p_name: payload.name,
@@ -335,6 +335,7 @@ export async function saveAccessUser(sessionToken, payload) {
     p_role: payload.role || 'BARBER',
     p_active: payload.active !== false,
     p_pin: payload.pin || '',
+    p_is_professional: payload.role === 'BARBER' || payload.isProfessional === true,
   })
 
   return unwrapRpc(res)

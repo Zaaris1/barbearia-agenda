@@ -43,6 +43,7 @@ const emptyAccessForm = {
   name: '',
   phone: '',
   role: 'BARBER',
+  isProfessional: true,
   active: true,
   pin: '',
 }
@@ -185,8 +186,20 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
     return labels[role] || 'Barbeiro'
   }
 
+  function accessProfessionalChecked(data = accessForm) {
+    return data.role === 'BARBER' || data.isProfessional === true
+  }
+
   function resetAccessForm() {
     setAccessForm(emptyAccessForm)
+  }
+
+  function setAccessRole(role) {
+    setAccessForm((old) => ({
+      ...old,
+      role,
+      isProfessional: role === 'BARBER' ? true : Boolean(old.id) && old.isProfessional,
+    }))
   }
 
   function editAccessUser(user) {
@@ -195,6 +208,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
       name: user.name || '',
       phone: user.phone || '',
       role: user.role || 'BARBER',
+      isProfessional: user.role === 'BARBER' || user.is_professional === true,
       active: user.active !== false,
       pin: '',
     })
@@ -670,7 +684,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
                       <span className="access-user-avatar">{user.name?.slice(0, 1) || 'U'}</span>
                       <span>
                         <strong>{user.name}</strong>
-                        <small>{user.phone || 'Sem telefone'}{user.barber_id ? ' • vinculado a barbeiro' : ''}</small>
+                        <small>{user.phone || 'Sem telefone'}{user.is_professional ? ' • atende na agenda' : ''}</small>
                       </span>
                       <em className={`mini-status ${user.active ? 'ok' : 'danger'}`}>{user.active ? roleLabel(user.role) : 'Inativo'}</em>
                     </button>
@@ -691,7 +705,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
                       </label>
                       <label>
                         <span>Perfil</span>
-                        <select value={accessForm.role} onChange={(e) => setAccessForm({ ...accessForm, role: e.target.value })} disabled={Boolean(accessFormIsSelf)}>
+                        <select value={accessForm.role} onChange={(e) => setAccessRole(e.target.value)} disabled={Boolean(accessFormIsSelf)}>
                           <option value="BARBER">Barbeiro</option>
                           <option value="ATTENDANT">Atendente</option>
                           <option value="ADMIN">Administrador</option>
@@ -704,6 +718,15 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
                       <label className="check-row access-active-check full">
                         <input type="checkbox" checked={accessForm.active} onChange={(e) => setAccessForm({ ...accessForm, active: e.target.checked })} disabled={Boolean(accessFormIsSelf)} />
                         <span>Usuário ativo</span>
+                      </label>
+                      <label className="check-row access-active-check full">
+                        <input
+                          type="checkbox"
+                          checked={accessProfessionalChecked()}
+                          onChange={(e) => setAccessForm({ ...accessForm, isProfessional: e.target.checked })}
+                          disabled={accessForm.role === 'BARBER'}
+                        />
+                        <span>Também atende clientes</span>
                       </label>
                     </div>
                     <div className="heading-actions access-actions">
