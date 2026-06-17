@@ -81,7 +81,12 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
   const [saving, setSaving] = useState(false)
   const [savingBlock, setSavingBlock] = useState(false)
 
-  const barbers = bootstrap?.barbers || []
+  const allBarbers = bootstrap?.barbers || []
+  const role = session?.user?.role || 'BARBER'
+  const canManageAllBarbers = role === 'ADMIN' || role === 'ATTENDANT'
+  const barbers = useMemo(() => (
+    canManageAllBarbers ? allBarbers : allBarbers.filter((barber) => barber.user_id === session?.user?.id)
+  ), [allBarbers, canManageAllBarbers, session?.user?.id])
   const services = bootstrap?.services || []
   const shop = bootstrap?.barbershop || session?.barbershop || {}
   const selectedService = useMemo(() => services.find((s) => s.id === form.serviceId), [services, form.serviceId])
@@ -129,14 +134,20 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
     loadClients()
   }, [])
 
+  useEffect(() => {
+    if (canManageAllBarbers) return
+    const ownBarberId = barbers[0]?.id || ''
+    if (barberId !== ownBarberId) setBarberId(ownBarberId)
+  }, [barberId, barbers, canManageAllBarbers])
+
   function openCreateModal() {
     setRescheduleTarget(null)
-    setForm(initialForm(date))
+    setForm({ ...initialForm(date), barberId: canManageAllBarbers ? '' : barbers[0]?.id || '' })
     setModalOpen(true)
   }
 
   function openBlockModal() {
-    setBlockForm(initialBlockForm(date, barberId))
+    setBlockForm(initialBlockForm(date, canManageAllBarbers ? barberId : barbers[0]?.id || ''))
     setBlockModalOpen(true)
   }
 
@@ -270,7 +281,7 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
 
       <div className="filters-card">
         <label><span>Data</span><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></label>
-        <label><span>Barbeiro</span><select value={barberId} onChange={(e) => setBarberId(e.target.value)}><option value="">Todos</option>{barbers.map((b) => <option value={b.id} key={b.id}>{b.name}</option>)}</select></label>
+        <label><span>Barbeiro</span><select value={barberId} onChange={(e) => setBarberId(e.target.value)}>{canManageAllBarbers && <option value="">Todos</option>}{barbers.map((b) => <option value={b.id} key={b.id}>{b.name}</option>)}</select></label>
         <label><span>Status</span><select value={status} onChange={(e) => setStatus(e.target.value)}>{statusOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}</select></label>
       </div>
 
@@ -327,7 +338,7 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
       >
         <form id="schedule-block-form" className="form-grid" onSubmit={handleSaveBlock}>
           <label><span>Data</span><input type="date" value={blockForm.date} onChange={(e) => setBlockForm({ ...blockForm, date: e.target.value })} required /></label>
-          <label><span>Barbeiro</span><select value={blockForm.barberId} onChange={(e) => setBlockForm({ ...blockForm, barberId: e.target.value })}><option value="">Todos os barbeiros</option>{barbers.map((b) => <option value={b.id} key={b.id}>{b.name}</option>)}</select></label>
+          <label><span>Barbeiro</span><select value={blockForm.barberId} onChange={(e) => setBlockForm({ ...blockForm, barberId: e.target.value })}>{canManageAllBarbers && <option value="">Todos os barbeiros</option>}{barbers.map((b) => <option value={b.id} key={b.id}>{b.name}</option>)}</select></label>
           <label><span>Tipo</span><select value={blockForm.blockType} onChange={(e) => setBlockForm({ ...blockForm, blockType: e.target.value, allDay: e.target.value === 'FOLGA' })}>{blockTypes.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
           <label className="check-row settings-check"><input type="checkbox" checked={blockForm.allDay} onChange={(e) => setBlockForm({ ...blockForm, allDay: e.target.checked })} /><span>Dia inteiro</span></label>
           {!blockForm.allDay && blockForm.blockType !== 'FOLGA' && (

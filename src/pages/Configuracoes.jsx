@@ -181,7 +181,8 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
   }
 
   function roleLabel(role) {
-    return role === 'ADMIN' ? 'Administrador' : 'Barbeiro'
+    const labels = { ADMIN: 'Administrador', BARBER: 'Barbeiro', ATTENDANT: 'Atendente' }
+    return labels[role] || 'Barbeiro'
   }
 
   function resetAccessForm() {
@@ -692,6 +693,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
                         <span>Perfil</span>
                         <select value={accessForm.role} onChange={(e) => setAccessForm({ ...accessForm, role: e.target.value })} disabled={Boolean(accessFormIsSelf)}>
                           <option value="BARBER">Barbeiro</option>
+                          <option value="ATTENDANT">Atendente</option>
                           <option value="ADMIN">Administrador</option>
                         </select>
                       </label>

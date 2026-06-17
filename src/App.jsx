@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
-import AppShell from './components/AppShell'
+import AppShell, { homePageForRole, isPageAllowedForRole } from './components/AppShell'
 import Toast from './components/Toast'
 import { clearSession, readSession, saveSession } from './lib/storage'
 import { getBootstrap, logoutSession } from './lib/api'
@@ -107,9 +107,17 @@ export default function App() {
     if (session?.session_token) refreshBootstrap()
   }, [session?.session_token, route.isPublic, route.isClientAppointments, route.isMaster, route.isPortal, route.appSlug])
 
+  useEffect(() => {
+    if (!session?.user?.role) return
+    if (!isPageAllowedForRole(session.user.role, page)) {
+      setPage(homePageForRole(session.user.role))
+    }
+  }, [session?.user?.role, page])
+
   function handleLogin(payload) {
     saveSession(payload)
     setSession(payload)
+    setPage(homePageForRole(payload.user?.role))
     showToast(`Bem-vindo, ${payload.user?.name || 'usuário'}!`)
 
     const slug = payload?.barbershop?.slug
@@ -183,11 +191,12 @@ export default function App() {
   }
 
   const commonProps = { session, bootstrap, showToast, refreshBootstrap }
-  const ActivePage = internalPages[page] || Dashboard
+  const activePageId = isPageAllowedForRole(session?.user?.role, page) ? page : homePageForRole(session?.user?.role)
+  const ActivePage = internalPages[activePageId] || Dashboard
 
   return (
     <>
-      <AppShell session={session} bootstrap={bootstrap} page={page} setPage={setPage} onLogout={handleLogout}>
+      <AppShell session={session} bootstrap={bootstrap} page={activePageId} setPage={setPage} onLogout={handleLogout}>
         {bootLoading && !bootstrap ? <div className="loading-card">Preparando o painel...</div> : null}
         <LazyRoute>
           <ActivePage {...commonProps} />

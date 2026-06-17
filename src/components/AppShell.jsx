@@ -3,14 +3,38 @@ import BottomNav from './BottomNav'
 import { buildThemeStyle, normalizeUrl } from '../lib/branding'
 
 const baseMenu = [
-  { id: 'dashboard', label: 'Dashboard', icon: Home },
-  { id: 'agenda', label: 'Agenda', icon: CalendarDays },
-  { id: 'clientes', label: 'Clientes', icon: Users },
-  { id: 'servicos', label: 'Serviços', icon: Scissors },
-  { id: 'barbeiros', label: 'Barbeiros', icon: UserRoundCog, adminOnly: true },
-  { id: 'financeiro', label: 'Financeiro', icon: WalletCards },
-  { id: 'configuracoes', label: 'Configurações', icon: Settings, adminOnly: true },
+  { id: 'dashboard', label: 'Dashboard', icon: Home, roles: ['ADMIN', 'BARBER', 'ATTENDANT'] },
+  { id: 'agenda', label: 'Agenda', icon: CalendarDays, roles: ['ADMIN', 'BARBER', 'ATTENDANT'] },
+  { id: 'clientes', label: 'Clientes', icon: Users, roles: ['ADMIN', 'ATTENDANT'] },
+  { id: 'servicos', label: 'Serviços', icon: Scissors, roles: ['ADMIN'] },
+  { id: 'barbeiros', label: 'Barbeiros', icon: UserRoundCog, roles: ['ADMIN'] },
+  { id: 'financeiro', label: 'Financeiro', icon: WalletCards, roles: ['ADMIN'] },
+  { id: 'configuracoes', label: 'Configurações', icon: Settings, roles: ['ADMIN'] },
 ]
+
+export const ROLE_LABELS = {
+  ADMIN: 'Administrador',
+  BARBER: 'Barbeiro',
+  ATTENDANT: 'Atendente',
+}
+
+function normalizeRole(role) {
+  return ROLE_LABELS[role] ? role : 'BARBER'
+}
+
+export function allowedPagesForRole(role) {
+  const normalizedRole = normalizeRole(role)
+  return baseMenu.filter((item) => item.roles.includes(normalizedRole)).map((item) => item.id)
+}
+
+export function homePageForRole(role) {
+  const pages = allowedPagesForRole(role)
+  return pages[0] || 'dashboard'
+}
+
+export function isPageAllowedForRole(role, page) {
+  return allowedPagesForRole(role).includes(page)
+}
 
 function statusClass(status) {
   const normalized = String(status || 'ATIVO').toLowerCase()
@@ -20,10 +44,10 @@ function statusClass(status) {
 }
 
 export default function AppShell({ session, bootstrap, page, setPage, onLogout, children }) {
-  const isAdmin = session?.user?.role === 'ADMIN'
-  const menu = baseMenu.filter((item) => !item.adminOnly || isAdmin)
+  const role = normalizeRole(session?.user?.role)
+  const menu = baseMenu.filter((item) => item.roles.includes(role))
   const shop = bootstrap?.barbershop || session?.barbershop || {}
-  const roleLabel = isAdmin ? 'Administrador' : 'Barbeiro'
+  const roleLabel = ROLE_LABELS[role]
   const shopInitial = (shop?.name || 'B').trim().slice(0, 1).toUpperCase()
   const subscriptionStatus = shop?.subscription_status || 'ATIVO'
   const logoUrl = normalizeUrl(shop?.logo_url)
