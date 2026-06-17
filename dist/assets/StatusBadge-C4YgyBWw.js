@@ -1,0 +1,1 @@
+import{j as e}from"./vendor-react-Bb048-hH.js";const n={PENDENTE_CONFIRMACAO:"Pendente",AGENDADO:"Agendado",CONFIRMADO:"Confirmado",EM_ATENDIMENTO:"Em atendimento",CONCLUIDO:"Concluído",CANCELADO:"Cancelado",FALTOU:"Faltou"};function t({status:a}){return e.jsx("span",{className:`status-badge status-${a}`,children:n[a]||a})}export{t as S};

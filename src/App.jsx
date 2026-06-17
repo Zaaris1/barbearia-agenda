@@ -1,21 +1,40 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import AppShell from './components/AppShell'
 import Toast from './components/Toast'
-import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
-import Agenda from './pages/Agenda'
-import Clientes from './pages/Clientes'
-import Servicos from './pages/Servicos'
-import Barbeiros from './pages/Barbeiros'
-import Financeiro from './pages/Financeiro'
-import Configuracoes from './pages/Configuracoes'
-import PublicBooking from './pages/PublicBooking'
-import MasterPanel from './pages/MasterPanel'
-import BarbershopPortal from './pages/BarbershopPortal'
-import ClientAppointments from './pages/ClientAppointments'
 import { clearSession, readSession, saveSession } from './lib/storage'
 import { getBootstrap, logoutSession } from './lib/api'
 import { applyDocumentBrand } from './lib/branding'
+
+const Login = lazy(() => import('./pages/Login'))
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Agenda = lazy(() => import('./pages/Agenda'))
+const Clientes = lazy(() => import('./pages/Clientes'))
+const Servicos = lazy(() => import('./pages/Servicos'))
+const Barbeiros = lazy(() => import('./pages/Barbeiros'))
+const Financeiro = lazy(() => import('./pages/Financeiro'))
+const Configuracoes = lazy(() => import('./pages/Configuracoes'))
+const PublicBooking = lazy(() => import('./pages/PublicBooking'))
+const MasterPanel = lazy(() => import('./pages/MasterPanel'))
+const BarbershopPortal = lazy(() => import('./pages/BarbershopPortal'))
+const ClientAppointments = lazy(() => import('./pages/ClientAppointments'))
+
+const internalPages = {
+  dashboard: Dashboard,
+  agenda: Agenda,
+  clientes: Clientes,
+  servicos: Servicos,
+  barbeiros: Barbeiros,
+  financeiro: Financeiro,
+  configuracoes: Configuracoes,
+}
+
+function RouteFallback() {
+  return <div className="loading-card route-loading">Carregando tela...</div>
+}
+
+function LazyRoute({ children }) {
+  return <Suspense fallback={<RouteFallback />}>{children}</Suspense>
+}
 
 function getRouteInfo() {
   const search = new URLSearchParams(window.location.search)
@@ -111,7 +130,9 @@ export default function App() {
   if (route.isMaster) {
     return (
       <>
-        <MasterPanel showToast={showToast} />
+        <LazyRoute>
+          <MasterPanel showToast={showToast} />
+        </LazyRoute>
         <Toast toast={toast} onClose={() => setToast(null)} />
       </>
     )
@@ -120,7 +141,9 @@ export default function App() {
   if (route.isClientAppointments) {
     return (
       <>
-        <ClientAppointments showToast={showToast} />
+        <LazyRoute>
+          <ClientAppointments showToast={showToast} />
+        </LazyRoute>
         <Toast toast={toast} onClose={() => setToast(null)} />
       </>
     )
@@ -129,7 +152,9 @@ export default function App() {
   if (route.isPublic) {
     return (
       <>
-        <PublicBooking showToast={showToast} />
+        <LazyRoute>
+          <PublicBooking showToast={showToast} />
+        </LazyRoute>
         <Toast toast={toast} onClose={() => setToast(null)} />
       </>
     )
@@ -138,7 +163,9 @@ export default function App() {
   if (route.isPortal) {
     return (
       <>
-        <BarbershopPortal showToast={showToast} fallbackSlug={route.portalSlug} />
+        <LazyRoute>
+          <BarbershopPortal showToast={showToast} fallbackSlug={route.portalSlug} />
+        </LazyRoute>
         <Toast toast={toast} onClose={() => setToast(null)} />
       </>
     )
@@ -147,25 +174,24 @@ export default function App() {
   if (!session) {
     return (
       <>
-        <Login onLogin={handleLogin} showToast={showToast} forcedShopSlug={route.appSlug} />
+        <LazyRoute>
+          <Login onLogin={handleLogin} showToast={showToast} forcedShopSlug={route.appSlug} />
+        </LazyRoute>
         <Toast toast={toast} onClose={() => setToast(null)} />
       </>
     )
   }
 
   const commonProps = { session, bootstrap, showToast, refreshBootstrap }
+  const ActivePage = internalPages[page] || Dashboard
 
   return (
     <>
       <AppShell session={session} bootstrap={bootstrap} page={page} setPage={setPage} onLogout={handleLogout}>
         {bootLoading && !bootstrap ? <div className="loading-card">Preparando o painel...</div> : null}
-        {page === 'dashboard' && <Dashboard {...commonProps} />}
-        {page === 'agenda' && <Agenda {...commonProps} />}
-        {page === 'clientes' && <Clientes {...commonProps} />}
-        {page === 'servicos' && <Servicos {...commonProps} />}
-        {page === 'barbeiros' && <Barbeiros {...commonProps} />}
-        {page === 'financeiro' && <Financeiro {...commonProps} />}
-        {page === 'configuracoes' && <Configuracoes {...commonProps} />}
+        <LazyRoute>
+          <ActivePage {...commonProps} />
+        </LazyRoute>
       </AppShell>
       <Toast toast={toast} onClose={() => setToast(null)} />
     </>
