@@ -73,7 +73,7 @@ export default function Financeiro({ session, showToast, bootstrap }) {
         <div>
           <span className="eyebrow">Caixa e relatórios</span>
           <h2>Financeiro</h2>
-          <p>Acompanhe faturamento mensal, comissão dos barbeiros, recebidos, pendências e ranking de serviços.</p>
+          <p>Acompanhe faturamento mensal, comissão dos profissionais, recebidos, pendências e ranking de serviços.</p>
         </div>
         <div className="heading-actions">
           <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
@@ -93,7 +93,7 @@ export default function Financeiro({ session, showToast, bootstrap }) {
       <div className="stats-grid four">
         <StatCard icon={Banknote} label="Previsto no mês" value={formatMoney(stats.estimated_revenue || 0)} hint="Agendamentos não cancelados" />
         <StatCard icon={CheckCircle2} label="Recebido" value={formatMoney(stats.received_revenue || 0)} hint="Atendimentos concluídos" />
-        <StatCard icon={WalletCards} label="Comissões" value={formatMoney(stats.commission_total || 0)} hint="Valor estimado dos barbeiros" />
+        <StatCard icon={WalletCards} label="Comissões" value={formatMoney(stats.commission_total || 0)} hint="Valor estimado dos profissionais" />
         <StatCard icon={Clock3} label="Líquido estimado" value={formatMoney(stats.net_after_commission || 0)} hint="Recebido - comissões" />
       </div>
 
@@ -106,7 +106,7 @@ export default function Financeiro({ session, showToast, bootstrap }) {
 
       <div className="report-grid">
         <section className="panel-card">
-          <div className="panel-title"><h3>Resultado por barbeiro</h3><span>{byBarber.length} registro(s)</span></div>
+          <div className="panel-title"><h3>Resultado por profissional</h3><span>{byBarber.length} registro(s)</span></div>
           <div className="finance-table">
             {byBarber.length === 0 && <div className="empty-state">Nenhum dado para este mês.</div>}
             {byBarber.map((item) => (
@@ -138,7 +138,7 @@ export default function Financeiro({ session, showToast, bootstrap }) {
       {selectedBarber && (
         <section className="panel-card wide barber-detail-report">
           <div className="panel-title">
-            <h3>Relatório do barbeiro: {selectedBarber.barber_name}</h3>
+            <h3>Relatório do profissional: {selectedBarber.barber_name}</h3>
             <span>{barberAppointments.length} movimento(s)</span>
           </div>
           <div className="barber-commission-summary">

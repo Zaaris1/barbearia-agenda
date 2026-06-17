@@ -85,7 +85,7 @@ export default function Login({ onLogin, showToast, forcedShopSlug = '' }) {
         </div>
         <span className="eyebrow centered">Agenda premium</span>
         <h1>{brand?.name || 'Barbearia Agenda'}</h1>
-        <p>{brand?.slogan || 'Entre com o PIN do administrador ou barbeiro para acessar o painel interno.'}</p>
+        <p>{brand?.slogan || 'Entre com o PIN do gestor ou profissional para acessar o painel interno.'}</p>
 
         {blockedMessage && (
           <div className="commercial-block-card">

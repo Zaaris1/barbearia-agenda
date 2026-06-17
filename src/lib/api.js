@@ -426,7 +426,7 @@ export async function masterCreateBarbershop(masterSessionToken, payload) {
     p_address: payload.address || '',
     p_monthly_fee: Number(payload.monthlyFee || 0),
     p_subscription_due_date: payload.subscriptionDueDate || null,
-    p_admin_name: payload.adminName || 'Administrador',
+    p_admin_name: payload.adminName || 'Gestor',
     p_admin_pin: payload.adminPin || '',
   })
 

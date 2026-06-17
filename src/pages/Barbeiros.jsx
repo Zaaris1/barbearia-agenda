@@ -74,7 +74,7 @@ export default function Barbeiros({ session, bootstrap, showToast, refreshBootst
     setSaving(true)
     try {
       await saveBarber(session.session_token, form)
-      showToast('Barbeiro salvo com sucesso.')
+      showToast('Profissional salvo com sucesso.')
       setModalOpen(false)
       await refreshBootstrap()
     } catch (error) {
@@ -89,10 +89,10 @@ export default function Barbeiros({ session, bootstrap, showToast, refreshBootst
       <div className="page-heading">
         <div>
           <span className="eyebrow">Equipe</span>
-          <h2>Barbeiros</h2>
+          <h2>Profissionais</h2>
           <p>Controle PIN, horários, serviços e comissão de cada profissional.</p>
         </div>
-        <button className="btn primary" onClick={openNew} type="button"><Plus size={17} /> Novo barbeiro</button>
+        <button className="btn primary" onClick={openNew} type="button"><Plus size={17} /> Novo profissional</button>
       </div>
 
       <div className="list-grid">
@@ -112,11 +112,11 @@ export default function Barbeiros({ session, bootstrap, showToast, refreshBootst
         ))}
       </div>
 
-      <Modal open={modalOpen} title={form.id ? 'Editar barbeiro' : 'Novo barbeiro'} onClose={() => setModalOpen(false)} footer={<><button className="btn soft" type="button" onClick={() => setModalOpen(false)}>Cancelar</button><button className="btn primary" type="submit" form="barber-form" disabled={saving}>{saving ? 'Salvando...' : 'Salvar'}</button></>}>
+      <Modal open={modalOpen} title={form.id ? 'Editar profissional' : 'Novo profissional'} onClose={() => setModalOpen(false)} footer={<><button className="btn soft" type="button" onClick={() => setModalOpen(false)}>Cancelar</button><button className="btn primary" type="submit" form="barber-form" disabled={saving}>{saving ? 'Salvando...' : 'Salvar'}</button></>}>
         <form id="barber-form" onSubmit={handleSave} className="form-grid">
           <label><span>Nome</span><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></label>
           <label><span>WhatsApp</span><input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></label>
-          <label><span>Perfil</span><select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}><option value="BARBER">Barbeiro</option><option value="ADMIN">Admin</option></select></label>
+          <label><span>Perfil</span><select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}><option value="BARBER">Profissional</option><option value="ADMIN">Gestor</option></select></label>
           <label><span>PIN {form.id ? '(preencha só para alterar)' : ''}</span><input value={form.pin} onChange={(e) => setForm({ ...form, pin: e.target.value })} type="password" inputMode="numeric" required={!form.id} /></label>
           <label><span>Início</span><input type="time" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} /></label>
           <label><span>Fim</span><input type="time" value={form.endTime} onChange={(e) => setForm({ ...form, endTime: e.target.value })} /></label>
@@ -125,11 +125,11 @@ export default function Barbeiros({ session, bootstrap, showToast, refreshBootst
 
           <div className="full commission-settings-box">
             <div className="panel-title compact">
-              <h3><Percent size={16} /> Comissão do barbeiro</h3>
+              <h3><Percent size={16} /> Comissão do profissional</h3>
               <span>{form.commissionEnabled ? 'Ativada' : 'Desativada'}</span>
             </div>
             <div className="form-grid compact-form-grid">
-              <label className="check-row"><input type="checkbox" checked={form.commissionEnabled} onChange={(e) => setForm({ ...form, commissionEnabled: e.target.checked })} /> Calcular comissão para este barbeiro</label>
+              <label className="check-row"><input type="checkbox" checked={form.commissionEnabled} onChange={(e) => setForm({ ...form, commissionEnabled: e.target.checked })} /> Calcular comissão para este profissional</label>
               <label><span>Tipo de comissão</span><select value={form.commissionType} onChange={(e) => setForm({ ...form, commissionType: e.target.value })}><option value="PERCENT">Percentual (%)</option><option value="FIXED">Valor fixo por atendimento</option></select></label>
               <label><span>{form.commissionType === 'FIXED' ? 'Valor fixo' : 'Percentual'}</span><input type="number" min="0" max={form.commissionType === 'PERCENT' ? '100' : undefined} step="0.01" value={form.commissionValue} onChange={(e) => setForm({ ...form, commissionValue: e.target.value })} /></label>
             </div>

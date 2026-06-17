@@ -21,7 +21,7 @@ function getAppointmentBase(appointment, barbershop = {}) {
   const shopName = barbershop?.name || appointment?.barbershop_name || 'Barbearia'
   const clientName = appointment?.client_name || 'cliente'
   const serviceName = appointment?.service_name || 'Serviço'
-  const barberName = appointment?.barber_name || 'Barbeiro'
+  const barberName = appointment?.barber_name || 'Profissional'
   const date = appointment?.date ? formatDateBR(appointment.date) : ''
   const startTime = appointment?.start_time?.slice(0, 5) || appointment?.startTime || ''
   const endTime = appointment?.end_time?.slice(0, 5) || appointment?.endTime || ''
@@ -65,6 +65,7 @@ function applyTemplate(template, base) {
     .replaceAll('{cliente}', base.clientName)
     .replaceAll('{barbearia}', base.shopName)
     .replaceAll('{servico}', base.serviceName)
+    .replaceAll('{profissional}', base.barberName)
     .replaceAll('{barbeiro}', base.barberName)
     .replaceAll('{data}', base.date)
     .replaceAll('{hora}', base.startTime)
@@ -89,7 +90,7 @@ export function buildConfirmationMessage(appointment, barbershop = {}) {
     `Seu agendamento foi confirmado pela ${base.shopName}.`,
     '',
     `Serviço: ${base.serviceName}`,
-    `Barbeiro: ${base.barberName}`,
+    `Profissional: ${base.barberName}`,
     base.date ? `Data: ${base.date}` : '',
     base.startTime ? `Horário: ${base.startTime}` : '',
     base.price > 0 ? `Valor: ${base.priceText}` : '',
@@ -114,7 +115,7 @@ export function buildReminderMessage(appointment, barbershop = {}) {
     `Passando para lembrar do seu horário na ${base.shopName}.`,
     '',
     `Serviço: ${base.serviceName}`,
-    `Barbeiro: ${base.barberName}`,
+    `Profissional: ${base.barberName}`,
     base.date ? `Data: ${base.date}` : '',
     base.startTime ? `Horário: ${base.startTime}` : '',
     base.address ? `Endereço: ${base.address}` : '',
@@ -138,7 +139,7 @@ export function buildCancellationMessage(appointment, barbershop = {}) {
     `Seu agendamento na ${base.shopName} foi cancelado.`,
     '',
     `Serviço: ${base.serviceName}`,
-    `Barbeiro: ${base.barberName}`,
+    `Profissional: ${base.barberName}`,
     base.date ? `Data: ${base.date}` : '',
     base.startTime ? `Horário: ${base.startTime}` : '',
     '',

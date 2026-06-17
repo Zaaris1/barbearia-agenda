@@ -281,7 +281,7 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
 
       <div className="filters-card">
         <label><span>Data</span><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></label>
-        <label><span>Barbeiro</span><select value={barberId} onChange={(e) => setBarberId(e.target.value)}>{canManageAllBarbers && <option value="">Todos</option>}{barbers.map((b) => <option value={b.id} key={b.id}>{b.name}</option>)}</select></label>
+        <label><span>Profissional</span><select value={barberId} onChange={(e) => setBarberId(e.target.value)}>{canManageAllBarbers && <option value="">Todos</option>}{barbers.map((b) => <option value={b.id} key={b.id}>{b.name}</option>)}</select></label>
         <label><span>Status</span><select value={status} onChange={(e) => setStatus(e.target.value)}>{statusOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}</select></label>
       </div>
 
@@ -338,7 +338,7 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
       >
         <form id="schedule-block-form" className="form-grid" onSubmit={handleSaveBlock}>
           <label><span>Data</span><input type="date" value={blockForm.date} onChange={(e) => setBlockForm({ ...blockForm, date: e.target.value })} required /></label>
-          <label><span>Barbeiro</span><select value={blockForm.barberId} onChange={(e) => setBlockForm({ ...blockForm, barberId: e.target.value })}>{canManageAllBarbers && <option value="">Todos os barbeiros</option>}{barbers.map((b) => <option value={b.id} key={b.id}>{b.name}</option>)}</select></label>
+          <label><span>Profissional</span><select value={blockForm.barberId} onChange={(e) => setBlockForm({ ...blockForm, barberId: e.target.value })}>{canManageAllBarbers && <option value="">Todos os profissionais</option>}{barbers.map((b) => <option value={b.id} key={b.id}>{b.name}</option>)}</select></label>
           <label><span>Tipo</span><select value={blockForm.blockType} onChange={(e) => setBlockForm({ ...blockForm, blockType: e.target.value, allDay: e.target.value === 'FOLGA' })}>{blockTypes.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
           <label className="check-row settings-check"><input type="checkbox" checked={blockForm.allDay} onChange={(e) => setBlockForm({ ...blockForm, allDay: e.target.checked })} /><span>Dia inteiro</span></label>
           {!blockForm.allDay && blockForm.blockType !== 'FOLGA' && (
@@ -368,7 +368,7 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
               <label className="full"><span>Cliente existente</span><select value={form.clientId} onChange={(e) => handleClientSelect(e.target.value)}><option value="">Novo cliente / digitar manualmente</option>{clients.map((c) => <option key={c.id} value={c.id}>{c.name} - {c.phone}</option>)}</select></label>
               <label><span>Nome do cliente</span><input value={form.clientName} onChange={(e) => setForm({ ...form, clientName: e.target.value })} required /></label>
               <label><span>WhatsApp</span><input value={form.clientPhone} onChange={(e) => setForm({ ...form, clientPhone: e.target.value })} placeholder="(00) 00000-0000" /></label>
-              <label><span>Barbeiro</span><select value={form.barberId} onChange={(e) => setForm({ ...form, barberId: e.target.value })} required><option value="">Selecione</option>{barbers.map((b) => <option value={b.id} key={b.id}>{b.name}</option>)}</select></label>
+              <label><span>Profissional</span><select value={form.barberId} onChange={(e) => setForm({ ...form, barberId: e.target.value })} required><option value="">Selecione</option>{barbers.map((b) => <option value={b.id} key={b.id}>{b.name}</option>)}</select></label>
               <label><span>Serviço</span><select value={form.serviceId} onChange={(e) => setForm({ ...form, serviceId: e.target.value })} required><option value="">Selecione</option>{services.map((s) => <option value={s.id} key={s.id}>{s.name} • {s.duration_min}min</option>)}</select></label>
             </>
           )}

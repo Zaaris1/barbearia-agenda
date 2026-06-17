@@ -220,7 +220,7 @@ export default function PublicBooking({ showToast }) {
               </select>
             </label>
             <label>
-              <span>Barbeiro</span>
+              <span>Profissional</span>
               <select value={form.barberId} onChange={(e) => setForm({ ...form, barberId: e.target.value })} required>
                 <option value="">Selecione</option>
                 {barbers.map((barber) => <option value={barber.id} key={barber.id}>{barber.name}</option>)}
@@ -235,7 +235,7 @@ export default function PublicBooking({ showToast }) {
               <span>Horários disponíveis {selectedService ? `• ${selectedService.duration_min}min` : ''}</span>
               {slotsLoading && <div className="empty-state small">Buscando horários...</div>}
               {!slotsLoading && !form.serviceId && <div className="empty-state small">Escolha um serviço para começar.</div>}
-              {!slotsLoading && form.serviceId && !form.barberId && <div className="empty-state small">Escolha o barbeiro para ver os horários.</div>}
+              {!slotsLoading && form.serviceId && !form.barberId && <div className="empty-state small">Escolha o profissional para ver os horários.</div>}
               {!slotsLoading && form.serviceId && form.barberId && slots.length === 0 && <div className="empty-state small">Nenhum horário livre encontrado para esta data.</div>}
               <div className="slot-buttons">
                 {slots.map((slot) => (
@@ -254,7 +254,7 @@ export default function PublicBooking({ showToast }) {
               <div className="public-summary">
                 <strong>Resumo</strong>
                 <span>{selectedService ? `${selectedService.name} • ${selectedService.duration_min}min • ${formatMoney(selectedService.price)}` : 'Serviço não selecionado'}</span>
-                <span>{selectedBarber ? `Com ${selectedBarber.name}` : 'Barbeiro não selecionado'}</span>
+                <span>{selectedBarber ? `Com ${selectedBarber.name}` : 'Profissional não selecionado'}</span>
                 <span>{form.startTime ? `${form.date} às ${form.startTime}` : 'Horário não selecionado'}</span>
                 {paymentVisiblePreview && <span>Pix: {getPaymentModeLabel(shop?.payment_mode)} • {formatMoney(paymentAmountPreview)}</span>}
               </div>

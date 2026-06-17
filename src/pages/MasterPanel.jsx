@@ -38,7 +38,7 @@ const emptyNewShop = {
   address: '',
   monthlyFee: 97,
   subscriptionDueDate: addMonthsISO(todayISO(), 1),
-  adminName: 'Administrador',
+  adminName: 'Gestor',
   adminPin: '',
 }
 
@@ -137,7 +137,7 @@ export default function MasterPanel({ showToast }) {
     e.preventDefault()
     if (!newShop.name.trim()) return showToast('Informe o nome da barbearia.', 'error')
     if (!normalizeSlug(newShop.slug)) return showToast('Informe o identificador público.', 'error')
-    if (!newShop.adminPin.trim()) return showToast('Informe o PIN do administrador inicial.', 'error')
+    if (!newShop.adminPin.trim()) return showToast('Informe o PIN do gestor inicial.', 'error')
 
     setSaving(true)
     try {
@@ -367,8 +367,8 @@ export default function MasterPanel({ showToast }) {
                 <label><span>Primeiro vencimento</span><input type="date" value={newShop.subscriptionDueDate} onChange={(e) => setNewField('subscriptionDueDate', e.target.value)} /></label>
               </div>
               <div className="form-grid two">
-                <label><span>Nome do admin</span><input value={newShop.adminName} onChange={(e) => setNewField('adminName', e.target.value)} /></label>
-                <label><span>PIN do admin</span><input value={newShop.adminPin} onChange={(e) => setNewField('adminPin', e.target.value)} inputMode="numeric" placeholder="Defina o PIN inicial" /></label>
+                <label><span>Nome do gestor</span><input value={newShop.adminName} onChange={(e) => setNewField('adminName', e.target.value)} /></label>
+                <label><span>PIN do gestor</span><input value={newShop.adminPin} onChange={(e) => setNewField('adminPin', e.target.value)} inputMode="numeric" placeholder="Defina o PIN inicial" /></label>
               </div>
               <button className="btn primary full" type="submit" disabled={saving}><Plus size={17} /> {saving ? 'Criando...' : 'Criar barbearia'}</button>
             </form>

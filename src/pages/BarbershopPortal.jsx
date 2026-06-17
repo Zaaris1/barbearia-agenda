@@ -153,7 +153,7 @@ export default function BarbershopPortal({ showToast, fallbackSlug }) {
               <div>
                 <span className="portal-action-kicker">Cliente</span>
                 <strong>Agendar horário</strong>
-                <span>Escolha serviço, barbeiro, data e horário em poucos segundos.</span>
+                <span>Escolha serviço, profissional, data e horário em poucos segundos.</span>
               </div>
               <em>{bookingDisabled ? 'Indisponível' : 'Começar agendamento'}</em>
             </a>
@@ -163,7 +163,7 @@ export default function BarbershopPortal({ showToast, fallbackSlug }) {
               <div>
                 <span className="portal-action-kicker">Equipe</span>
                 <strong>Entrar no painel</strong>
-                <span>Acesso de barbeiro ou administrador.</span>
+                <span>Acesso de profissional ou gestor.</span>
               </div>
               <em>Usar PIN</em>
             </a>

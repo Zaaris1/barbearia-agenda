@@ -115,7 +115,7 @@ export default function ClientAppointments({ showToast }) {
                       <StatusBadge status={appointment.status} />
                     </div>
                     <div className="client-appointment-meta">
-                      <span>Barbeiro: <strong>{appointment.barber_name}</strong></span>
+                      <span>Profissional: <strong>{appointment.barber_name}</strong></span>
                       <span>Valor: <strong>{formatMoney(appointment.price)}</strong></span>
                       <span className={`payment-pill inline ${getPaymentStatusClass(appointment.payment_status)}`}>{getPaymentStatusLabel(appointment.payment_status)} {Number(appointment.payment_amount || 0) > 0 ? `• ${formatMoney(appointment.payment_amount)}` : ''}</span>
                     </div>

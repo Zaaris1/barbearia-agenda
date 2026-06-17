@@ -7,14 +7,14 @@ const baseMenu = [
   { id: 'agenda', label: 'Agenda', icon: CalendarDays, roles: ['ADMIN', 'BARBER', 'ATTENDANT'] },
   { id: 'clientes', label: 'Clientes', icon: Users, roles: ['ADMIN', 'ATTENDANT'] },
   { id: 'servicos', label: 'Serviços', icon: Scissors, roles: ['ADMIN'] },
-  { id: 'barbeiros', label: 'Barbeiros', icon: UserRoundCog, roles: ['ADMIN'] },
+  { id: 'barbeiros', label: 'Equipe', icon: UserRoundCog, roles: ['ADMIN'] },
   { id: 'financeiro', label: 'Financeiro', icon: WalletCards, roles: ['ADMIN'] },
   { id: 'configuracoes', label: 'Configurações', icon: Settings, roles: ['ADMIN'] },
 ]
 
 export const ROLE_LABELS = {
-  ADMIN: 'Administrador',
-  BARBER: 'Barbeiro',
+  ADMIN: 'Gestor',
+  BARBER: 'Profissional',
   ATTENDANT: 'Atendente',
 }
 

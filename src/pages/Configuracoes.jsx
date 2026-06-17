@@ -182,8 +182,8 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
   }
 
   function roleLabel(role) {
-    const labels = { ADMIN: 'Administrador', BARBER: 'Barbeiro', ATTENDANT: 'Atendente' }
-    return labels[role] || 'Barbeiro'
+    const labels = { ADMIN: 'Gestor', BARBER: 'Profissional', ATTENDANT: 'Atendente' }
+    return labels[role] || 'Profissional'
   }
 
   function accessProfessionalChecked(data = accessForm) {
@@ -300,7 +300,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
   async function save(e) {
     e.preventDefault()
     if (activeTab === 'acessos') return
-    if (!isAdmin) return showToast('Somente administrador pode alterar configurações.', 'error')
+    if (!isAdmin) return showToast('Somente gestor pode alterar configurações.', 'error')
 
     const cleanSlug = normalizeSlug(form.slug)
     if (!form.name.trim()) return showToast('Informe o nome da barbearia.', 'error')
@@ -329,12 +329,12 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
       <section className="page-content">
         <div className="page-heading">
           <div>
-            <span className="eyebrow">Administração</span>
+            <span className="eyebrow">Gestão</span>
             <h2>Configurações</h2>
-            <p>Somente o administrador pode alterar os dados principais da barbearia.</p>
+            <p>Somente o gestor pode alterar os dados principais da barbearia.</p>
           </div>
         </div>
-        <div className="empty-state big">Acesse com PIN de administrador para visualizar esta área.</div>
+        <div className="empty-state big">Acesse com PIN de gestor para visualizar esta área.</div>
       </section>
     )
   }
@@ -343,7 +343,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
     <section className="page-content branded-config" style={themeStyle}>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">Administração</span>
+          <span className="eyebrow">Gestão</span>
           <h2>Configurações e identidade visual</h2>
           <p>Personalize a barbearia, link público, cores, logo, capa, QR Code e Pix manual.</p>
         </div>
@@ -580,7 +580,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
             <span>{'{cliente}'}</span>
             <span>{'{barbearia}'}</span>
             <span>{'{servico}'}</span>
-            <span>{'{barbeiro}'}</span>
+            <span>{'{profissional}'}</span>
             <span>{'{data}'}</span>
             <span>{'{hora}'}</span>
             <span>{'{valor}'}</span>
@@ -594,7 +594,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
                 value={form.confirmationTemplate}
                 onChange={(e) => setField('confirmationTemplate', e.target.value)}
                 rows="5"
-                placeholder={'Olá, {cliente}!\n\nSeu agendamento foi confirmado na {barbearia}.\nServiço: {servico}\nBarbeiro: {barbeiro}\nData: {data} às {hora}.\nEndereço: {endereco}'}
+                placeholder={'Olá, {cliente}!\n\nSeu agendamento foi confirmado na {barbearia}.\nServiço: {servico}\nProfissional: {profissional}\nData: {data} às {hora}.\nEndereço: {endereco}'}
               />
             </label>
 
@@ -604,7 +604,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
                 value={form.reminderTemplate}
                 onChange={(e) => setField('reminderTemplate', e.target.value)}
                 rows="5"
-                placeholder={'Olá, {cliente}!\n\nLembrete do seu horário na {barbearia}:\n{servico} com {barbeiro}, dia {data} às {hora}.\nTe esperamos!'}
+                placeholder={'Olá, {cliente}!\n\nLembrete do seu horário na {barbearia}:\n{servico} com {profissional}, dia {data} às {hora}.\nTe esperamos!'}
               />
             </label>
 
@@ -706,9 +706,9 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
                       <label>
                         <span>Perfil</span>
                         <select value={accessForm.role} onChange={(e) => setAccessRole(e.target.value)} disabled={Boolean(accessFormIsSelf)}>
-                          <option value="BARBER">Barbeiro</option>
+                          <option value="BARBER">Profissional</option>
                           <option value="ATTENDANT">Atendente</option>
-                          <option value="ADMIN">Administrador</option>
+                          <option value="ADMIN">Gestor</option>
                         </select>
                       </label>
                       <label>
@@ -760,7 +760,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
 
                   <div className="security-note access-security-note">
                     <ShieldCheck size={18} />
-                    <span>PINs não são exibidos no painel. O administrador pode redefinir um PIN novo, mas não consultar o PIN atual.</span>
+                    <span>PINs não são exibidos no painel. O gestor pode redefinir um PIN novo, mas não consultar o PIN atual.</span>
                   </div>
                 </div>
               </div>
