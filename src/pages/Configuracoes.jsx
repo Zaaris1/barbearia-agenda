@@ -161,11 +161,10 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
   async function handleBrandUpload(field, kind, file) {
     if (!file) return
 
-    const cleanSlug = normalizeSlug(form.slug || shop?.slug || 'barbearia')
     setUploading(field)
 
     try {
-      const url = await uploadBrandingImage(cleanSlug, kind, file)
+      const url = await uploadBrandingImage(session.session_token, kind, file)
       setField(field, url)
       showToast('Imagem enviada. Clique em Salvar tudo para gravar na barbearia.')
     } catch (error) {

@@ -1,36 +1,5 @@
 import { supabase } from './supabase'
 
-const ACCEPTED_EXTENSIONS = {
-  'image/png': 'png',
-  'image/jpeg': 'jpg',
-  'image/jpg': 'jpg',
-  'image/webp': 'webp',
-  'image/svg+xml': 'svg',
-  'image/x-icon': 'ico',
-}
-
-function normalizeSlug(value) {
-  return String(value || 'barbearia')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '') || 'barbearia'
-}
-
-function extensionFromFile(file) {
-  const fromMime = ACCEPTED_EXTENSIONS[file?.type]
-  if (fromMime) return fromMime
-
-  const name = String(file?.name || '')
-  const ext = name.split('.').pop()?.toLowerCase()
-  if (['png', 'jpg', 'jpeg', 'webp', 'svg', 'ico'].includes(ext)) {
-    return ext === 'jpeg' ? 'jpg' : ext
-  }
-
-  return 'png'
-}
-
 function validateImageFile(file) {
   if (!file) throw new Error('Selecione uma imagem.')
 
@@ -45,26 +14,59 @@ function validateImageFile(file) {
   }
 }
 
-export async function uploadBrandingImage(shopSlug, kind, file) {
+async function createUploadPath(sessionToken, kind, file) {
+  if (!sessionToken) {
+    throw new Error('Sessao expirada. Faca login novamente.')
+  }
+
+  const { data, error } = await supabase.rpc('internal_create_branding_upload', {
+    p_session_token: sessionToken,
+    p_kind: kind || 'imagem',
+    p_file_name: file?.name || '',
+    p_content_type: file?.type || '',
+    p_file_size: file?.size || 0,
+  })
+
+  if (error) {
+    throw new Error(error.message || 'Nao foi possivel preparar o envio da imagem.')
+  }
+
+  if (!data?.path) {
+    throw new Error('Nao foi possivel preparar o envio da imagem.')
+  }
+
+  return data.path
+}
+
+async function markUploadUsed(sessionToken, path) {
+  const { error } = await supabase.rpc('internal_mark_branding_upload_used', {
+    p_session_token: sessionToken,
+    p_path: path,
+  })
+
+  if (error) {
+    console.warn('Nao foi possivel finalizar o token de upload.', error)
+  }
+}
+
+export async function uploadBrandingImage(sessionToken, kind, file) {
   validateImageFile(file)
 
-  const cleanSlug = normalizeSlug(shopSlug)
-  const cleanKind = normalizeSlug(kind || 'imagem')
-  const ext = extensionFromFile(file)
-  const stamp = Date.now()
-  const path = `${cleanSlug}/${cleanKind}-${stamp}.${ext}`
+  const path = await createUploadPath(sessionToken, kind, file)
 
   const { error } = await supabase.storage
     .from('branding')
     .upload(path, file, {
       cacheControl: '3600',
-      upsert: true,
+      upsert: false,
       contentType: file.type || undefined,
     })
 
   if (error) {
     throw new Error(error.message || 'Não foi possível enviar a imagem.')
   }
+
+  await markUploadUsed(sessionToken, path)
 
   const { data } = supabase.storage.from('branding').getPublicUrl(path)
 
