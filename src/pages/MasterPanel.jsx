@@ -45,6 +45,7 @@ const emptyNewShop = {
 export default function MasterPanel({ showToast }) {
   const [session, setSession] = useState(() => readMasterSession())
   const [pin, setPin] = useState('')
+  const [loginMessage, setLoginMessage] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [loading, setLoading] = useState(false)
   const [shops, setShops] = useState([])
@@ -66,18 +67,22 @@ export default function MasterPanel({ showToast }) {
   async function login(e) {
     e.preventDefault()
     if (!pin.trim()) {
+      setLoginMessage('Informe o PIN master.')
       showToast('Informe o PIN master.', 'error')
       return
     }
     setLoadingLogin(true)
     try {
+      setLoginMessage('')
       const result = await masterLoginWithPin(pin.trim())
       if (!result?.master_session_token) throw new Error('Login master não retornou sessão.')
       saveMasterSession(result)
       setSession(result)
       showToast('Painel master acessado com sucesso.')
     } catch (error) {
-      showToast(error.message, 'error')
+      const message = error.message || 'PIN master inválido.'
+      setLoginMessage(message)
+      showToast(message, 'error')
     } finally {
       setLoadingLogin(false)
     }
@@ -242,9 +247,15 @@ export default function MasterPanel({ showToast }) {
               <span>PIN master</span>
               <div className="input-icon">
                 <LockKeyhole size={18} />
-                <input value={pin} onChange={(e) => setPin(e.target.value)} placeholder="Digite o PIN master" type="password" inputMode="numeric" autoFocus />
+                <input value={pin} onChange={(e) => { setPin(e.target.value); setLoginMessage('') }} placeholder="Digite o PIN master" type="password" inputMode="numeric" autoFocus />
               </div>
             </label>
+            {loginMessage && (
+              <div className="login-attempt-warning compact">
+                <ShieldAlert size={18} />
+                <span>{loginMessage}</span>
+              </div>
+            )}
             <button className="btn primary full" type="submit" disabled={loadingLogin}>{loadingLogin ? 'Entrando...' : 'Entrar no Master'}</button>
           </form>
           <div className="demo-box">

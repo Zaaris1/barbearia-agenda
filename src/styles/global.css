@@ -3031,6 +3031,30 @@ body.portal-route-active .portal-secondary-actions button {
   line-height: 1.45;
 }
 
+.login-attempt-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid rgba(245,158,11,.28);
+  border-radius: 16px;
+  background: rgba(245,158,11,.12);
+  color: #fde68a;
+  font-size: .9rem;
+  font-weight: 760;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.login-attempt-warning svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.login-attempt-warning.compact {
+  margin-top: -2px;
+}
+
 @media (max-width: 760px) {
   .compact-form-grid,
   .barber-commission-summary {

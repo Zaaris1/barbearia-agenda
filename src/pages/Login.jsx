@@ -11,6 +11,7 @@ export default function Login({ onLogin, showToast, forcedShopSlug = '' }) {
   const [loading, setLoading] = useState(false)
   const [brand, setBrand] = useState(null)
   const [blockedMessage, setBlockedMessage] = useState('')
+  const [accessMessage, setAccessMessage] = useState('')
 
   useEffect(() => {
     if (forcedShopSlug) setShopSlug(forcedShopSlug)
@@ -44,6 +45,7 @@ export default function Login({ onLogin, showToast, forcedShopSlug = '' }) {
   async function handleSubmit(e) {
     e.preventDefault()
     if (!shopSlug.trim() || !pin.trim()) {
+      setAccessMessage('Informe a barbearia e o PIN.')
       showToast('Informe a barbearia e o PIN.', 'error')
       return
     }
@@ -51,14 +53,21 @@ export default function Login({ onLogin, showToast, forcedShopSlug = '' }) {
     try {
       const cleanSlug = shopSlug.trim().toLowerCase()
       setBlockedMessage('')
+      setAccessMessage('')
       const result = await loginWithPin(cleanSlug, pin.trim())
       if (!result?.session_token) throw new Error('Login não retornou sessão.')
       onLogin(result)
     } catch (error) {
       const message = error.message || 'PIN inválido.'
-      if (message.toLowerCase().includes('bloque') || message.toLowerCase().includes('pendência financeira') || message.toLowerCase().includes('pendencia financeira')) {
+      const normalizedMessage = message.toLowerCase()
+      const isSubscriptionBlock = normalizedMessage.includes('pendência financeira')
+        || normalizedMessage.includes('pendencia financeira')
+        || normalizedMessage.includes('mensalidade')
+      if (isSubscriptionBlock) {
         setBlockedMessage(message)
+        setAccessMessage('')
       } else {
+        setAccessMessage(message)
         showToast(message, 'error')
       }
     } finally {
@@ -97,15 +106,21 @@ export default function Login({ onLogin, showToast, forcedShopSlug = '' }) {
         <form onSubmit={handleSubmit} className="form-stack">
           <label>
             <span>Identificador da barbearia</span>
-            <input value={shopSlug} onChange={(e) => setShopSlug(e.target.value)} placeholder="barbearia-demo" autoComplete="organization" disabled={Boolean(forcedShopSlug)} />
+            <input value={shopSlug} onChange={(e) => { setShopSlug(e.target.value); setAccessMessage(''); setBlockedMessage('') }} placeholder="barbearia-demo" autoComplete="organization" disabled={Boolean(forcedShopSlug)} />
           </label>
           <label>
             <span>PIN de acesso</span>
             <div className="input-icon">
               <LockKeyhole size={18} />
-              <input value={pin} onChange={(e) => setPin(e.target.value)} placeholder="Digite o PIN" type="password" inputMode="numeric" autoComplete="current-password" autoFocus />
+              <input value={pin} onChange={(e) => { setPin(e.target.value); setAccessMessage('') }} placeholder="Digite o PIN" type="password" inputMode="numeric" autoComplete="current-password" autoFocus />
             </div>
           </label>
+          {accessMessage && (
+            <div className="login-attempt-warning">
+              <ShieldAlert size={18} />
+              <span>{accessMessage}</span>
+            </div>
+          )}
           <button className="btn primary full" type="submit" disabled={loading}>
             {loading ? 'Entrando...' : 'Entrar no painel'}
           </button>
