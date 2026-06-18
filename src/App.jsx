@@ -190,7 +190,7 @@ export default function App() {
     )
   }
 
-  const commonProps = { session, bootstrap, showToast, refreshBootstrap }
+  const commonProps = { session, bootstrap, showToast, refreshBootstrap, setPage }
   const activePageId = isPageAllowedForRole(session?.user?.role, page) ? page : homePageForRole(session?.user?.role)
   const ActivePage = internalPages[activePageId] || Dashboard
 
