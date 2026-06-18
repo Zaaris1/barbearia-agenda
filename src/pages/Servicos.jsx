@@ -4,8 +4,9 @@ import Modal from '../components/Modal'
 import { saveService } from '../lib/api'
 import { formatMoney } from '../lib/dates'
 
-export default function Servicos({ session, bootstrap, showToast, refreshBootstrap }) {
+export default function Servicos({ session, bootstrap, showToast, refreshBootstrap, pageParams }) {
   const services = bootstrap?.services_all || bootstrap?.services || []
+  const guidedFocus = pageParams?.source === 'activation'
   const [modalOpen, setModalOpen] = useState(false)
   const [form, setForm] = useState({ id: '', name: '', durationMin: 30, price: 0, active: true })
   const [saving, setSaving] = useState(false)
@@ -46,7 +47,21 @@ export default function Servicos({ session, bootstrap, showToast, refreshBootstr
         <button className="btn primary" onClick={openNew} type="button"><Plus size={17} /> Novo serviço</button>
       </div>
 
+      {guidedFocus && (
+        <div className="guided-focus-note">
+          <Plus size={17} />
+          <span>Etapa do checklist: <strong>{pageParams?.title || 'Serviços e preços'}</strong>. Cadastre pelo menos um serviço ativo com preço.</span>
+        </div>
+      )}
+
       <div className="list-grid service-grid">
+        {services.length === 0 && (
+          <div className="empty-state onboarding-empty">
+            <strong>Monte o cardápio de serviços</strong>
+            <span>Comece por Corte, Barba ou Corte + Barba, com duração e valor. Esses serviços aparecem no link público.</span>
+            <button className="btn primary" type="button" onClick={openNew}><Plus size={17} /> Criar primeiro serviço</button>
+          </div>
+        )}
         {services.map((service) => (
           <button type="button" className={`data-card ${!service.active ? 'inactive' : ''}`} key={service.id} onClick={() => openEdit(service)}>
             <div>

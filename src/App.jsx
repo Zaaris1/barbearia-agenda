@@ -64,6 +64,7 @@ export default function App() {
   const [session, setSession] = useState(() => readSession())
   const [bootstrap, setBootstrap] = useState(null)
   const [page, setPage] = useState('dashboard')
+  const [pageParams, setPageParams] = useState({})
   const [toast, setToast] = useState(null)
   const [bootLoading, setBootLoading] = useState(false)
 
@@ -84,6 +85,7 @@ export default function App() {
       clearSession()
       setSession(null)
       setBootstrap(null)
+      setPageParams({})
     } finally {
       setBootLoading(false)
     }
@@ -101,6 +103,7 @@ export default function App() {
       clearSession()
       setSession(null)
       setBootstrap(null)
+      setPageParams({})
       return
     }
 
@@ -110,14 +113,24 @@ export default function App() {
   useEffect(() => {
     if (!session?.user?.role) return
     if (!isPageAllowedForRole(session.user.role, page)) {
+      setPageParams({})
       setPage(homePageForRole(session.user.role))
     }
   }, [session?.user?.role, page])
 
+  function goToPage(nextPage, params = {}) {
+    setPageParams(params)
+    setPage(nextPage)
+  }
+
+  function handleSetPage(nextPage) {
+    goToPage(nextPage)
+  }
+
   function handleLogin(payload) {
     saveSession(payload)
     setSession(payload)
-    setPage(homePageForRole(payload.user?.role))
+    goToPage(homePageForRole(payload.user?.role))
     showToast(`Bem-vindo, ${payload.user?.name || 'usuário'}!`)
 
     const slug = payload?.barbershop?.slug
@@ -133,6 +146,7 @@ export default function App() {
     clearSession()
     setSession(null)
     setBootstrap(null)
+    setPageParams({})
   }
 
   if (route.isMaster) {
@@ -190,13 +204,13 @@ export default function App() {
     )
   }
 
-  const commonProps = { session, bootstrap, showToast, refreshBootstrap, setPage }
+  const commonProps = { session, bootstrap, showToast, refreshBootstrap, setPage: handleSetPage, goToPage, pageParams }
   const activePageId = isPageAllowedForRole(session?.user?.role, page) ? page : homePageForRole(session?.user?.role)
   const ActivePage = internalPages[activePageId] || Dashboard
 
   return (
     <>
-      <AppShell session={session} bootstrap={bootstrap} page={activePageId} setPage={setPage} onLogout={handleLogout}>
+      <AppShell session={session} bootstrap={bootstrap} page={activePageId} setPage={handleSetPage} onLogout={handleLogout}>
         {bootLoading && !bootstrap ? <div className="loading-card">Preparando o painel...</div> : null}
         <LazyRoute>
           <ActivePage {...commonProps} />

@@ -305,6 +305,39 @@ textarea { resize: vertical; }
   font-weight: 850;
   white-space: nowrap;
 }
+.activation-ready-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.guided-focus-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(212,168,87,.28);
+  background: rgba(212,168,87,.09);
+  color: var(--muted);
+  line-height: 1.4;
+}
+.guided-focus-note svg { color: var(--gold-2); flex: 0 0 auto; }
+.guided-focus-note strong { color: var(--text); }
+.guided-focus-card {
+  border-color: rgba(212,168,87,.28);
+  box-shadow: 0 16px 50px rgba(0,0,0,.18), 0 0 0 1px rgba(212,168,87,.08);
+}
+.onboarding-empty {
+  grid-column: 1 / -1;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 30px;
+}
+.onboarding-empty strong { color: var(--text); font-size: 1.1rem; }
+.onboarding-empty span { max-width: 560px; line-height: 1.45; }
 
 .filters-card { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
 .appointments-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -431,6 +464,7 @@ textarea { resize: vertical; }
   .toast { left: 12px; right: 12px; bottom: 86px; max-width: none; }
   .activation-summary { flex-direction: column; }
   .activation-meter { width: 100%; min-width: 0; text-align: left; }
+  .activation-ready-actions { justify-content: flex-start; }
   .activation-item { grid-template-columns: 38px minmax(0, 1fr); }
   .activation-icon { width: 38px; height: 38px; }
   .activation-state { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
@@ -3441,6 +3475,12 @@ body.portal-route-active .portal-secondary-actions button {
   color: #0b0b0c;
   border-color: transparent;
   background: linear-gradient(135deg, var(--brand-primary, var(--gold)), var(--brand-accent, var(--gold-2)));
+}
+
+.settings-tabs button.guided:not(.active) {
+  color: var(--gold-2);
+  border-color: rgba(212,168,87,.3);
+  background: rgba(212,168,87,.08);
 }
 
 .settings-tabs button:not(.active):hover {

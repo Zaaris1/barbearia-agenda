@@ -48,7 +48,7 @@ const emptyAccessForm = {
   pin: '',
 }
 
-export default function Configuracoes({ session, bootstrap, showToast, refreshBootstrap }) {
+export default function Configuracoes({ session, bootstrap, showToast, refreshBootstrap, pageParams }) {
   const shop = bootstrap?.barbershop || session?.barbershop || {}
   const isAdmin = session?.user?.role === 'ADMIN'
   const [saving, setSaving] = useState(false)
@@ -136,6 +136,13 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
     }
   }, [activeTab, isAdmin, session?.session_token])
 
+  useEffect(() => {
+    if (pageParams?.source !== 'activation') return
+    if (SETTINGS_TABS.some((tab) => tab.id === pageParams?.tab)) {
+      setActiveTab(pageParams.tab)
+    }
+  }, [pageParams?.source, pageParams?.tab])
+
   const publicLink = useMemo(() => publicBookingLink(form.slug || shop?.slug), [form.slug, shop?.slug])
   const panelLink = useMemo(() => `${window.location.origin}/app/${form.slug || shop?.slug || 'barbearia-demo'}`, [form.slug, shop?.slug])
   const themeStyle = useMemo(() => buildThemeStyle({
@@ -167,6 +174,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
   const showLinkCard = activeTab === 'dados' || activeTab === 'mensagens'
   const showInstagramCard = activeTab === 'dados' && form.instagram
   const accessFormIsSelf = accessForm.id && accessForm.id === session?.user?.id
+  const guidedFocus = pageParams?.source === 'activation'
 
   function setField(field, value) {
     setForm((old) => {
@@ -356,13 +364,14 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
       <div className="settings-tabs" role="tablist" aria-label="Secoes de configuracoes">
         {SETTINGS_TABS.map((tab) => {
           const Icon = tab.icon
+          const tabClass = [activeTab === tab.id ? 'active' : '', guidedFocus && pageParams?.tab === tab.id ? 'guided' : ''].filter(Boolean).join(' ')
           return (
             <button
               key={tab.id}
               type="button"
               role="tab"
               aria-selected={activeTab === tab.id}
-              className={activeTab === tab.id ? 'active' : ''}
+              className={tabClass}
               onClick={() => setActiveTab(tab.id)}
             >
               <Icon size={16} />
@@ -373,7 +382,13 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
       </div>
 
       <div className="settings-grid wide-settings-grid">
-        <form id="settings-form" className="panel-card settings-card" onSubmit={save}>
+        <form id="settings-form" className={`panel-card settings-card ${guidedFocus ? 'guided-focus-card' : ''}`} onSubmit={save}>
+          {guidedFocus && (
+            <div className="guided-focus-note">
+              <Sparkles size={17} />
+              <span>Etapa do checklist: <strong>{pageParams?.title || 'configuração pendente'}</strong>. Ajuste os campos desta aba e salve.</span>
+            </div>
+          )}
           {activeTab === 'dados' && (
             <div className="settings-tab-panel">
           <div className="panel-title">

@@ -29,9 +29,15 @@ function commissionLabel(barber) {
   return `${Number(barber.commission_value || 0).toFixed(2).replace('.', ',')}% dos concluídos`
 }
 
-export default function Barbeiros({ session, bootstrap, showToast, refreshBootstrap }) {
+function roleLabel(role) {
+  const labels = { ADMIN: 'Gestor', BARBER: 'Profissional', ATTENDANT: 'Atendente' }
+  return labels[role] || 'Profissional'
+}
+
+export default function Barbeiros({ session, bootstrap, showToast, refreshBootstrap, pageParams }) {
   const barbers = bootstrap?.barbers_all || bootstrap?.barbers || []
   const services = bootstrap?.services_all || bootstrap?.services || []
+  const guidedFocus = pageParams?.source === 'activation'
   const [modalOpen, setModalOpen] = useState(false)
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
@@ -95,7 +101,21 @@ export default function Barbeiros({ session, bootstrap, showToast, refreshBootst
         <button className="btn primary" onClick={openNew} type="button"><Plus size={17} /> Novo profissional</button>
       </div>
 
+      {guidedFocus && (
+        <div className="guided-focus-note">
+          <Plus size={17} />
+          <span>Etapa do checklist: <strong>{pageParams?.title || 'Equipe de atendimento'}</strong>. Deixe pelo menos um profissional ativo com dias e horários definidos.</span>
+        </div>
+      )}
+
       <div className="list-grid">
+        {barbers.length === 0 && (
+          <div className="empty-state onboarding-empty">
+            <strong>Cadastre quem atende clientes</strong>
+            <span>Se o dono também atende, cadastre-o como profissional ou gestor ativo, com jornada e serviços vinculados.</span>
+            <button className="btn primary" type="button" onClick={openNew}><Plus size={17} /> Criar primeiro profissional</button>
+          </div>
+        )}
         {barbers.map((barber) => (
           <button type="button" className={`data-card barber-card ${!barber.active ? 'inactive' : ''}`} key={barber.id} onClick={() => openEdit(barber)}>
             <div className="barber-avatar" style={{ '--barber-color': barber.color || '#d4a857' }}>{barber.name?.slice(0, 1)}</div>
@@ -105,7 +125,7 @@ export default function Barbeiros({ session, bootstrap, showToast, refreshBootst
               <small className="commission-card-hint"><WalletCards size={13} /> {commissionLabel(barber)}</small>
             </div>
             <div className="data-meta right">
-              <span>{barber.role || 'BARBER'}</span>
+              <span>{roleLabel(barber.role)}</span>
               <small>{barber.active ? 'Ativo' : 'Inativo'}</small>
             </div>
           </button>

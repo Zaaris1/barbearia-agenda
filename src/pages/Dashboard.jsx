@@ -54,6 +54,7 @@ function buildActivationChecklist(bootstrap, session) {
       done: profileReady,
       icon: Store,
       page: 'configuracoes',
+      tab: 'dados',
       actionLabel: 'Abrir dados',
     },
     {
@@ -63,6 +64,7 @@ function buildActivationChecklist(bootstrap, session) {
       done: servicesReady,
       icon: Scissors,
       page: 'servicos',
+      focus: 'services',
       actionLabel: 'Abrir serviços',
     },
     {
@@ -72,6 +74,7 @@ function buildActivationChecklist(bootstrap, session) {
       done: professionalsReady,
       icon: Users,
       page: 'barbeiros',
+      focus: 'team',
       actionLabel: 'Abrir equipe',
     },
     {
@@ -81,6 +84,7 @@ function buildActivationChecklist(bootstrap, session) {
       done: scheduleReady,
       icon: Clock3,
       page: 'barbeiros',
+      focus: 'schedule',
       actionLabel: 'Ajustar horários',
     },
     {
@@ -90,6 +94,7 @@ function buildActivationChecklist(bootstrap, session) {
       done: paymentReady,
       icon: CreditCard,
       page: 'configuracoes',
+      tab: 'pix',
       actionLabel: 'Abrir Pix',
     },
     {
@@ -99,6 +104,7 @@ function buildActivationChecklist(bootstrap, session) {
       done: messagesReady,
       icon: MessageCircle,
       page: 'configuracoes',
+      tab: 'mensagens',
       actionLabel: 'Abrir mensagens',
     },
     {
@@ -108,8 +114,9 @@ function buildActivationChecklist(bootstrap, session) {
       done: publicReady,
       icon: Link2,
       page: 'configuracoes',
-      href: hasText(shop?.slug) ? publicBookingLink(shop.slug) : '',
-      actionLabel: hasText(shop?.slug) ? 'Abrir link' : 'Abrir dados',
+      tab: 'dados',
+      href: publicReady ? publicBookingLink(shop.slug) : '',
+      actionLabel: publicReady ? 'Abrir link' : 'Abrir dados',
     },
   ]
 
@@ -124,7 +131,7 @@ function buildActivationChecklist(bootstrap, session) {
   }
 }
 
-function ActivationAction({ item, setPage }) {
+function ActivationAction({ item, goToPage }) {
   if (item.href) {
     return (
       <a className="activation-action" href={item.href} target="_blank" rel="noreferrer">
@@ -135,14 +142,14 @@ function ActivationAction({ item, setPage }) {
   }
 
   return (
-    <button className="activation-action" type="button" onClick={() => setPage?.(item.page)}>
+    <button className="activation-action" type="button" onClick={() => goToPage?.(item.page, { source: 'activation', tab: item.tab, focus: item.focus || item.id, title: item.title })}>
       {item.actionLabel}
       <ArrowRight size={14} />
     </button>
   )
 }
 
-export default function Dashboard({ session, bootstrap, showToast, setPage }) {
+export default function Dashboard({ session, bootstrap, showToast, goToPage }) {
   const [date, setDate] = useState(todayISO())
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -168,6 +175,18 @@ export default function Dashboard({ session, bootstrap, showToast, setPage }) {
   const topServices = data?.top_services || []
   const freeSlots = data?.next_free_slots || []
   const activation = session?.user?.role === 'ADMIN' && bootstrap ? buildActivationChecklist(bootstrap, session) : null
+  const activationShop = bootstrap?.barbershop || session?.barbershop || {}
+  const activationPublicLink = hasText(activationShop?.slug) ? publicBookingLink(activationShop.slug) : ''
+  const activationComplete = Boolean(activation && !activation.nextItem && activationPublicLink)
+
+  async function copyActivationPublicLink() {
+    try {
+      await navigator.clipboard.writeText(activationPublicLink)
+      showToast('Link público copiado para compartilhar.')
+    } catch {
+      showToast('Não foi possível copiar automaticamente.', 'error')
+    }
+  }
 
   return (
     <section className="page-content">
@@ -192,6 +211,12 @@ export default function Dashboard({ session, bootstrap, showToast, setPage }) {
               <strong>{activation.doneCount}/{activation.items.length}</strong>
               <span>{activation.percent}% pronto</span>
               <div className="activation-progress"><span style={{ width: `${activation.percent}%` }} /></div>
+              {activationComplete && (
+                <div className="activation-ready-actions">
+                  <button className="activation-action" type="button" onClick={copyActivationPublicLink}>Copiar link</button>
+                  <a className="activation-action" href={activationPublicLink} target="_blank" rel="noreferrer">Abrir link</a>
+                </div>
+              )}
             </div>
           </div>
 
@@ -207,7 +232,7 @@ export default function Dashboard({ session, bootstrap, showToast, setPage }) {
                   </div>
                   <div className="activation-state">
                     {item.done ? <CheckCircle2 size={18} /> : <CircleAlert size={18} />}
-                    <ActivationAction item={item} setPage={setPage} />
+                    <ActivationAction item={item} goToPage={goToPage} />
                   </div>
                 </div>
               )
