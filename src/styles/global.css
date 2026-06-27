@@ -3700,6 +3700,13 @@ body.portal-route-active .portal-secondary-actions button {
   background: rgba(255,255,255,.045);
 }
 
+.client-appointment-card.expired-open {
+  border-color: rgba(245, 158, 11, .28);
+  background:
+    linear-gradient(135deg, rgba(245, 158, 11, .08), rgba(255,255,255,.045)),
+    rgba(255,255,255,.045);
+}
+
 .client-appointment-top {
   display: flex;
   justify-content: space-between;
@@ -3734,6 +3741,35 @@ body.portal-route-active .portal-secondary-actions button {
   display: inline-flex;
   width: fit-content;
   padding: 7px 10px;
+}
+
+.client-appointment-expired-note {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(245, 158, 11, .22);
+  background: rgba(245, 158, 11, .09);
+}
+
+.client-appointment-expired-note span {
+  color: rgba(255,255,255,.76);
+  line-height: 1.45;
+  font-size: .9rem;
+}
+
+.client-appointment-expired-note a {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 11px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, .12);
+  color: #86efac;
+  text-decoration: none;
+  font-weight: 850;
 }
 
 .public-error-message {

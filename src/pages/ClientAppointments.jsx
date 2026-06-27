@@ -3,7 +3,7 @@ import { CalendarClock, MessageCircle, RefreshCcw, Scissors, Search, XCircle } f
 import StatusBadge from '../components/StatusBadge'
 import { publicCancelClientAppointment, publicFindClientAppointments } from '../lib/api'
 import { applyDocumentBrand, buildThemeStyle, normalizeUrl, whatsappLink } from '../lib/branding'
-import { formatDateBR, formatMoney } from '../lib/dates'
+import { formatDateBR, formatMoney, timeToMinutes } from '../lib/dates'
 import { getPaymentStatusClass, getPaymentStatusLabel } from '../lib/pix'
 
 function getSlug() {
@@ -13,7 +13,48 @@ function getSlug() {
 }
 
 function canClientCancel(appointment) {
-  return ['PENDENTE_CONFIRMACAO', 'AGENDADO', 'CONFIRMADO'].includes(appointment.status)
+  return isOpenClientStatus(appointment.status) && !isAppointmentPastOrStarted(appointment)
+}
+
+function isOpenClientStatus(status) {
+  return ['PENDENTE_CONFIRMACAO', 'AGENDADO', 'CONFIRMADO'].includes(status)
+}
+
+function getSaoPauloNowParts() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date()).reduce((acc, part) => {
+    if (part.type !== 'literal') acc[part.type] = part.value
+    return acc
+  }, {})
+
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    minutes: timeToMinutes(`${parts.hour}:${parts.minute}`),
+  }
+}
+
+function isAppointmentPastOrStarted(appointment) {
+  const date = appointment?.date || ''
+  const startTime = appointment?.start_time?.slice(0, 5) || ''
+  if (!date || !startTime) return false
+
+  const now = getSaoPauloNowParts()
+  if (date < now.date) return true
+  if (date > now.date) return false
+  return timeToMinutes(startTime) <= now.minutes
+}
+
+function getResultTitle(nextAppointmentsCount, expiredOpenCount) {
+  if (nextAppointmentsCount > 0) return 'Próximos horários'
+  if (expiredOpenCount > 0) return 'Horários aguardando atualização'
+  return 'Nenhum horário ativo'
 }
 
 export default function ClientAppointments({ showToast }) {
@@ -33,7 +74,8 @@ export default function ClientAppointments({ showToast }) {
     if (shop) applyDocumentBrand(shop)
   }, [shop?.id])
 
-  const nextAppointments = useMemo(() => appointments.filter((item) => !['CANCELADO', 'FALTOU', 'CONCLUIDO'].includes(item.status)), [appointments])
+  const nextAppointments = useMemo(() => appointments.filter((item) => isOpenClientStatus(item.status) && !isAppointmentPastOrStarted(item)), [appointments])
+  const expiredOpenAppointments = useMemo(() => appointments.filter((item) => isOpenClientStatus(item.status) && isAppointmentPastOrStarted(item)), [appointments])
 
   async function searchAppointments(e) {
     e.preventDefault()
@@ -97,7 +139,7 @@ export default function ClientAppointments({ showToast }) {
               <div className="client-results-heading">
                 <div>
                   <span className="eyebrow">Resultado</span>
-                  <h2>{nextAppointments.length > 0 ? 'Próximos horários' : 'Nenhum horário ativo'}</h2>
+                  <h2>{getResultTitle(nextAppointments.length, expiredOpenAppointments.length)}</h2>
                 </div>
                 <button className="btn soft" type="button" onClick={() => publicFindClientAppointments(slug, phone).then(setResult)}><RefreshCcw size={16} /> Atualizar</button>
               </div>
@@ -105,24 +147,35 @@ export default function ClientAppointments({ showToast }) {
               {appointments.length === 0 && <div className="empty-state big">Nenhum agendamento foi encontrado com este WhatsApp.</div>}
 
               <div className="client-appointments-list">
-                {appointments.map((appointment) => (
-                  <article className="client-appointment-card" key={appointment.id}>
-                    <div className="client-appointment-top">
-                      <div>
-                        <strong>{appointment.service_name}</strong>
-                        <span><CalendarClock size={15} /> {formatDateBR(appointment.date)} às {appointment.start_time?.slice(0, 5)}</span>
+                {appointments.map((appointment) => {
+                  const expiredOpen = isOpenClientStatus(appointment.status) && isAppointmentPastOrStarted(appointment)
+                  const whatsappMessage = `Olá! Consultei meus agendamentos e preciso de ajuda com o horário de ${formatDateBR(appointment.date)} às ${appointment.start_time?.slice(0, 5)}.`
+
+                  return (
+                    <article className={`client-appointment-card ${expiredOpen ? 'expired-open' : ''}`} key={appointment.id}>
+                      <div className="client-appointment-top">
+                        <div>
+                          <strong>{appointment.service_name}</strong>
+                          <span><CalendarClock size={15} /> {formatDateBR(appointment.date)} às {appointment.start_time?.slice(0, 5)}</span>
+                        </div>
+                        <StatusBadge status={appointment.status} />
                       </div>
-                      <StatusBadge status={appointment.status} />
-                    </div>
-                    <div className="client-appointment-meta">
-                      <span>Profissional: <strong>{appointment.barber_name}</strong></span>
-                      <span>Valor: <strong>{formatMoney(appointment.price)}</strong></span>
-                      <span className={`payment-pill inline ${getPaymentStatusClass(appointment.payment_status)}`}>{getPaymentStatusLabel(appointment.payment_status)} {Number(appointment.payment_amount || 0) > 0 ? `• ${formatMoney(appointment.payment_amount)}` : ''}</span>
-                    </div>
-                    {appointment.notes && <p className="appointment-notes">{appointment.notes}</p>}
-                    {canClientCancel(appointment) && <button className="btn danger full" type="button" onClick={() => cancelAppointment(appointment)}><XCircle size={16} /> Cancelar agendamento</button>}
-                  </article>
-                ))}
+                      <div className="client-appointment-meta">
+                        <span>Profissional: <strong>{appointment.barber_name}</strong></span>
+                        <span>Valor: <strong>{formatMoney(appointment.price)}</strong></span>
+                        <span className={`payment-pill inline ${getPaymentStatusClass(appointment.payment_status)}`}>{getPaymentStatusLabel(appointment.payment_status)} {Number(appointment.payment_amount || 0) > 0 ? `• ${formatMoney(appointment.payment_amount)}` : ''}</span>
+                      </div>
+                      {appointment.notes && <p className="appointment-notes">{appointment.notes}</p>}
+                      {expiredOpen && (
+                        <div className="client-appointment-expired-note">
+                          <span>Este horário já passou ou está em andamento. O cancelamento pelo cliente fica bloqueado; fale com a barbearia para atualizar esse atendimento.</span>
+                          {shop?.phone && <a href={whatsappLink(shop.phone, whatsappMessage)} target="_blank" rel="noreferrer"><MessageCircle size={16} /> Falar no WhatsApp</a>}
+                        </div>
+                      )}
+                      {canClientCancel(appointment) && <button className="btn danger full" type="button" onClick={() => cancelAppointment(appointment)}><XCircle size={16} /> Cancelar agendamento</button>}
+                    </article>
+                  )
+                })}
               </div>
             </div>
           )}

@@ -1,1 +1,0 @@
-function o(){const t=new Date,n=t.getFullYear(),r=String(t.getMonth()+1).padStart(2,"0"),e=String(t.getDate()).padStart(2,"0");return`${n}-${r}-${e}`}function a(t){if(!t)return"-";const[n,r,e]=t.split("-");return`${e}/${r}/${n}`}function c(t){return Number(t||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}export{a,c as f,o as t};
