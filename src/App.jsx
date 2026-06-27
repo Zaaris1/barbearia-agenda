@@ -17,6 +17,7 @@ const PublicBooking = lazy(() => import('./pages/PublicBooking'))
 const MasterPanel = lazy(() => import('./pages/MasterPanel'))
 const BarbershopPortal = lazy(() => import('./pages/BarbershopPortal'))
 const ClientAppointments = lazy(() => import('./pages/ClientAppointments'))
+const LandingPage = lazy(() => import('./pages/LandingPage'))
 
 const internalPages = {
   dashboard: Dashboard,
@@ -43,11 +44,13 @@ function getRouteInfo() {
   const isClientAppointments = parts[0] === 'meus-agendamentos'
   const isMaster = parts[0] === 'master'
   const isApp = parts[0] === 'app'
+  const isLanding = parts.length === 0
   const appSlug = isApp && parts[1] ? parts[1] : ''
   const publicSlug = parts[0] === 'agendar' && parts[1] ? parts[1] : ''
-  const portalSlug = !isPublic && !isClientAppointments && !isMaster && !isApp ? (parts[0] || import.meta.env.VITE_DEFAULT_SHOP_SLUG || 'barbearia-demo') : ''
+  const portalSlug = !isLanding && !isPublic && !isClientAppointments && !isMaster && !isApp ? parts[0] : ''
 
   return {
+    isLanding,
     isPublic,
     isClientAppointments,
     isMaster,
@@ -97,7 +100,7 @@ export default function App() {
   }, [bootstrap?.barbershop, session?.barbershop])
 
   useEffect(() => {
-    if (route.isPublic || route.isClientAppointments || route.isMaster || route.isPortal) return
+    if (route.isLanding || route.isPublic || route.isClientAppointments || route.isMaster || route.isPortal) return
 
     if (route.appSlug && session?.barbershop?.slug && session.barbershop.slug !== route.appSlug) {
       clearSession()
@@ -108,7 +111,7 @@ export default function App() {
     }
 
     if (session?.session_token) refreshBootstrap()
-  }, [session?.session_token, route.isPublic, route.isClientAppointments, route.isMaster, route.isPortal, route.appSlug])
+  }, [session?.session_token, route.isLanding, route.isPublic, route.isClientAppointments, route.isMaster, route.isPortal, route.appSlug])
 
   useEffect(() => {
     if (!session?.user?.role) return
@@ -154,6 +157,17 @@ export default function App() {
       <>
         <LazyRoute>
           <MasterPanel showToast={showToast} />
+        </LazyRoute>
+        <Toast toast={toast} onClose={() => setToast(null)} />
+      </>
+    )
+  }
+
+  if (route.isLanding) {
+    return (
+      <>
+        <LazyRoute>
+          <LandingPage showToast={showToast} />
         </LazyRoute>
         <Toast toast={toast} onClose={() => setToast(null)} />
       </>
