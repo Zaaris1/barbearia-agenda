@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, CalendarCheck, CalendarDays, CheckCircle2, Clock3, Copy, CreditCard, Instagram, MapPin, MessageCircle, QrCode, Scissors, ShieldCheck, Sparkles, UserRound } from 'lucide-react'
 import { publicCreateAppointment, publicGetAvailableSlots, publicGetShop } from '../lib/api'
-import { formatMoney, todayISO } from '../lib/dates'
+import { formatDateBR, formatMoney, todayISO } from '../lib/dates'
 import { applyDocumentBrand, buildThemeStyle, instagramUrl, normalizeUrl, whatsappLink } from '../lib/branding'
 import { buildPixPayload, calculatePaymentAmount, getPaymentModeLabel, pixQrCodeUrl, shouldShowPayment } from '../lib/pix'
 
@@ -33,6 +33,16 @@ export default function PublicBooking({ showToast }) {
   const coverUrl = normalizeUrl(shop?.cover_url)
   const themeStyle = buildThemeStyle(shop || {})
   const instagramHref = instagramUrl(shop?.instagram)
+  const clientAppointmentsLink = `/meus-agendamentos/${slug}`
+  const summaryDate = form.date ? formatDateBR(form.date) : ''
+  const highlightedServices = services.slice(0, 8)
+  const bookingSteps = [
+    { id: 'service', label: 'Serviço', done: Boolean(form.serviceId), value: selectedService?.name || 'Escolha' },
+    { id: 'professional', label: 'Profissional', done: Boolean(form.barberId), value: selectedBarber?.name || 'Escolha' },
+    { id: 'time', label: 'Horário', done: Boolean(form.startTime), value: form.startTime ? `${summaryDate} às ${form.startTime}` : 'Selecione' },
+    { id: 'client', label: 'Contato', done: Boolean(form.clientName.trim() && form.clientPhone.trim()), value: form.clientName.trim() || 'Informe' },
+  ]
+  const bookingReadyLabel = canSubmit ? 'Solicitar agendamento' : 'Complete para solicitar'
 
   async function copyText(text, label = 'Copiado com sucesso.') {
     try {
@@ -101,9 +111,19 @@ export default function PublicBooking({ showToast }) {
       description: 'AGENDAMENTO',
     }) : ''
 
-    const baseText = `Olá! Solicitei um horário pelo app: ${done.service_name}, dia ${done.date} às ${done.start_time?.slice(0, 5)} com ${done.barber_name}.`
+    const doneDate = formatDateBR(done.date)
+    const doneTime = done.start_time?.slice(0, 5)
+    const baseText = `Olá! Solicitei um horário pelo app: ${done.service_name}, dia ${doneDate} às ${doneTime} com ${done.barber_name}.`
     const paymentText = showPayment ? `\n\nPagamento Pix: ${formatMoney(paymentAmount)}. Vou enviar o comprovante por aqui.` : ''
     const wa = whatsappLink(shop?.phone, `${baseText}${paymentText}`)
+    const summaryText = [
+      `Barbearia: ${shop?.name || 'Barbearia'}`,
+      `Serviço: ${done.service_name}`,
+      `Profissional: ${done.barber_name}`,
+      `Data: ${doneDate}`,
+      `Horário: ${doneTime}`,
+      `Valor: ${formatMoney(done.price || selectedService?.price || 0)}`,
+    ].join('\n')
 
     return (
       <div className="public-page public-page-pro branded-public payment-result-page" style={themeStyle}>
@@ -113,7 +133,7 @@ export default function PublicBooking({ showToast }) {
           <h1>Seu horário foi solicitado</h1>
           <p>A barbearia recebeu seu pedido. Aguarde a confirmação pelo WhatsApp antes de considerar o horário confirmado.</p>
           <div className="booking-summary">
-            <span><CalendarDays size={16} /> {done.date} às {done.start_time?.slice(0, 5)}</span>
+            <span><CalendarDays size={16} /> {doneDate} às {doneTime}</span>
             <span><Scissors size={16} /> {done.service_name}</span>
             <span><UserRound size={16} /> {done.barber_name}</span>
             <span><CreditCard size={16} /> {formatMoney(done.price || selectedService?.price || 0)}</span>
@@ -153,7 +173,11 @@ export default function PublicBooking({ showToast }) {
             </div>
           )}
 
-          {wa && <a className="btn success full" href={wa} target="_blank" rel="noreferrer"><MessageCircle size={18} /> Enviar comprovante / mensagem</a>}
+          <div className="public-success-actions">
+            {wa && <a className="btn success full" href={wa} target="_blank" rel="noreferrer"><MessageCircle size={18} /> Enviar mensagem no WhatsApp</a>}
+            <a className="btn soft full" href={clientAppointmentsLink}><CalendarCheck size={18} /> Consultar meus agendamentos</a>
+            <button className="btn soft full" type="button" onClick={() => copyText(summaryText, 'Resumo do agendamento copiado.')}><Copy size={18} /> Copiar resumo</button>
+          </div>
           <button className="btn primary full" type="button" onClick={() => { setDone(null); setForm((old) => ({ ...old, startTime: '' })); loadSlots(); }}>
             Fazer outro agendamento
           </button>
@@ -189,6 +213,7 @@ export default function PublicBooking({ showToast }) {
           <div className="public-social-row">
             {shop?.phone && <a href={whatsappLink(shop.phone, `Olá! Vim pelo link de agendamento da ${shop?.name || 'barbearia'}.`)} target="_blank" rel="noreferrer"><MessageCircle size={16} /> WhatsApp</a>}
             {instagramHref && <a href={instagramHref} target="_blank" rel="noreferrer"><Instagram size={16} /> Instagram</a>}
+            <a href={clientAppointmentsLink}><CalendarCheck size={16} /> Meus horários</a>
           </div>
         </aside>
 
@@ -197,16 +222,39 @@ export default function PublicBooking({ showToast }) {
           <h2>Monte seu agendamento</h2>
           <p>Preencha os dados abaixo. O horário só fica confirmado após retorno da barbearia.</p>
 
+          <div className="public-booking-progress" aria-label="Progresso do agendamento">
+            {bookingSteps.map((step, index) => (
+              <div className={step.done ? 'done' : ''} key={step.id}>
+                <span>{index + 1}</span>
+                <strong>{step.label}</strong>
+                <small>{step.value}</small>
+              </div>
+            ))}
+          </div>
+
+          {!loading && (services.length === 0 || barbers.length === 0) && (
+            <div className="public-unavailable-box">
+              <strong>Agenda online em preparação</strong>
+              <span>Esta barbearia ainda precisa liberar serviços e profissionais para receber pedidos por aqui.</span>
+              {shop?.phone && <a href={whatsappLink(shop.phone, `Olá! Vim pelo link de agendamento da ${shop?.name || 'barbearia'} e queria marcar um horário.`)} target="_blank" rel="noreferrer"><MessageCircle size={16} /> Chamar no WhatsApp</a>}
+            </div>
+          )}
+
           <div className="public-service-cards">
-            {services.slice(0, 6).map((service) => (
+            {highlightedServices.map((service) => (
               <button
                 key={service.id}
                 type="button"
                 className={form.serviceId === service.id ? 'active' : ''}
-                onClick={() => setForm({ ...form, serviceId: service.id })}
+                onClick={() => setForm({ ...form, serviceId: service.id, startTime: '' })}
               >
-                <strong>{service.name}</strong>
-                <span>{service.duration_min}min • {formatMoney(service.price)}</span>
+                <span className="public-service-icon"><Scissors size={16} /></span>
+                <span className="public-service-body">
+                  <strong>{service.name}</strong>
+                  <small>{service.duration_min}min</small>
+                </span>
+                <span className="public-service-price">{formatMoney(service.price)}</span>
+                {form.serviceId === service.id && <em>Selecionado</em>}
               </button>
             ))}
           </div>
@@ -214,21 +262,42 @@ export default function PublicBooking({ showToast }) {
           <form onSubmit={submit} className="form-stack public-form">
             <label>
               <span>Serviço</span>
-              <select value={form.serviceId} onChange={(e) => setForm({ ...form, serviceId: e.target.value })} required>
+              <select value={form.serviceId} onChange={(e) => setForm({ ...form, serviceId: e.target.value, startTime: '' })} required>
                 <option value="">Selecione</option>
                 {services.map((service) => <option value={service.id} key={service.id}>{service.name} • {service.duration_min}min • {formatMoney(service.price)}</option>)}
               </select>
             </label>
             <label>
               <span>Profissional</span>
-              <select value={form.barberId} onChange={(e) => setForm({ ...form, barberId: e.target.value })} required>
+              <select value={form.barberId} onChange={(e) => setForm({ ...form, barberId: e.target.value, startTime: '' })} required>
                 <option value="">Selecione</option>
                 {barbers.map((barber) => <option value={barber.id} key={barber.id}>{barber.name}</option>)}
               </select>
             </label>
+
+            {barbers.length > 0 && (
+              <div className="public-barber-cards">
+                {barbers.map((barber) => (
+                  <button
+                    type="button"
+                    key={barber.id}
+                    className={form.barberId === barber.id ? 'active' : ''}
+                    onClick={() => setForm({ ...form, barberId: barber.id, startTime: '' })}
+                  >
+                    <span className="public-barber-avatar" style={{ '--barber-color': barber.color || 'var(--brand-primary)' }}>{barber.name?.slice(0, 1) || 'P'}</span>
+                    <span>
+                      <strong>{barber.name}</strong>
+                      <small>{barber.start_time?.slice(0, 5) || '08:00'} às {barber.end_time?.slice(0, 5) || '19:00'}</small>
+                    </span>
+                    {form.barberId === barber.id && <em>Escolhido</em>}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <label>
               <span>Data</span>
-              <input type="date" min={todayISO()} value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
+              <input type="date" min={todayISO()} value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value, startTime: '' })} required />
             </label>
 
             <div className="slot-selector">
@@ -251,16 +320,31 @@ export default function PublicBooking({ showToast }) {
             <label><span>Observação opcional</span><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows="3" placeholder="Ex: preferência de corte, atraso previsto, referência etc." /></label>
 
             {(selectedService || selectedBarber || form.startTime) && (
-              <div className="public-summary">
-                <strong>Resumo</strong>
-                <span>{selectedService ? `${selectedService.name} • ${selectedService.duration_min}min • ${formatMoney(selectedService.price)}` : 'Serviço não selecionado'}</span>
-                <span>{selectedBarber ? `Com ${selectedBarber.name}` : 'Profissional não selecionado'}</span>
-                <span>{form.startTime ? `${form.date} às ${form.startTime}` : 'Horário não selecionado'}</span>
-                {paymentVisiblePreview && <span>Pix: {getPaymentModeLabel(shop?.payment_mode)} • {formatMoney(paymentAmountPreview)}</span>}
+              <div className="public-summary public-summary-pro">
+                <div className="public-summary-head">
+                  <strong>Revise antes de solicitar</strong>
+                  <small>{canSubmit ? 'Tudo preenchido para enviar.' : 'Complete os campos que faltam.'}</small>
+                </div>
+                <div className="public-summary-lines">
+                  <span><Scissors size={16} /> {selectedService ? `${selectedService.name} • ${selectedService.duration_min}min` : 'Serviço não selecionado'}</span>
+                  <span><UserRound size={16} /> {selectedBarber ? selectedBarber.name : 'Profissional não selecionado'}</span>
+                  <span><CalendarDays size={16} /> {form.startTime ? `${summaryDate} às ${form.startTime}` : 'Horário não selecionado'}</span>
+                  <span><CreditCard size={16} /> {selectedService ? formatMoney(selectedService.price) : 'Valor após escolher serviço'}</span>
+                </div>
+                {paymentVisiblePreview && (
+                  <div className="public-payment-preview">
+                    <span>{getPaymentModeLabel(shop?.payment_mode)}</span>
+                    <strong>{formatMoney(paymentAmountPreview)}</strong>
+                  </div>
+                )}
               </div>
             )}
 
-            <button className="btn primary full" type="submit" disabled={!canSubmit}><CalendarCheck size={18} /> Solicitar agendamento</button>
+            <button className="btn primary full public-submit-btn" type="submit" disabled={!canSubmit}><CalendarCheck size={18} /> {bookingReadyLabel}</button>
+            <div className="public-form-footnote">
+              <ShieldCheck size={16} />
+              <span>Você receberá o retorno da barbearia pelo WhatsApp informado.</span>
+            </div>
           </form>
         </main>
       </motion.div>
