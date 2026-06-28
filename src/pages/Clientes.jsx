@@ -3,6 +3,7 @@ import { Plus, Search } from 'lucide-react'
 import Modal from '../components/Modal'
 import { listClients, saveClient } from '../lib/api'
 import { formatDateBR } from '../lib/dates'
+import { formatPhoneInput } from '../lib/formatters'
 
 export default function Clientes({ session, showToast }) {
   const [clients, setClients] = useState([])
@@ -90,7 +91,7 @@ export default function Clientes({ session, showToast }) {
       <Modal open={modalOpen} title={form.id ? 'Editar cliente' : 'Novo cliente'} onClose={() => setModalOpen(false)} footer={<><button className="btn soft" type="button" onClick={() => setModalOpen(false)}>Cancelar</button><button className="btn primary" type="submit" form="client-form" disabled={saving}>{saving ? 'Salvando...' : 'Salvar'}</button></>}>
         <form id="client-form" onSubmit={handleSave} className="form-stack">
           <label><span>Nome</span><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></label>
-          <label><span>WhatsApp</span><input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></label>
+          <label><span>WhatsApp</span><input value={form.phone} onChange={(e) => setForm({ ...form, phone: formatPhoneInput(e.target.value) })} placeholder="(00) 00000-0000" /></label>
           <label><span>Observações</span><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows="4" /></label>
         </form>
       </Modal>

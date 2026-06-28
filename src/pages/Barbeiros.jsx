@@ -3,6 +3,7 @@ import { Percent, Plus, WalletCards } from 'lucide-react'
 import Modal from '../components/Modal'
 import { saveBarber } from '../lib/api'
 import { formatMoney } from '../lib/dates'
+import { formatPhoneInput } from '../lib/formatters'
 
 const days = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM']
 
@@ -135,7 +136,7 @@ export default function Barbeiros({ session, bootstrap, showToast, refreshBootst
       <Modal open={modalOpen} title={form.id ? 'Editar profissional' : 'Novo profissional'} onClose={() => setModalOpen(false)} footer={<><button className="btn soft" type="button" onClick={() => setModalOpen(false)}>Cancelar</button><button className="btn primary" type="submit" form="barber-form" disabled={saving}>{saving ? 'Salvando...' : 'Salvar'}</button></>}>
         <form id="barber-form" onSubmit={handleSave} className="form-grid">
           <label><span>Nome</span><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></label>
-          <label><span>WhatsApp</span><input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></label>
+          <label><span>WhatsApp</span><input value={form.phone} onChange={(e) => setForm({ ...form, phone: formatPhoneInput(e.target.value) })} placeholder="(00) 00000-0000" /></label>
           <label><span>Perfil</span><select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}><option value="BARBER">Profissional</option><option value="ADMIN">Gestor</option></select></label>
           <label><span>PIN {form.id ? '(preencha só para alterar)' : ''}</span><input value={form.pin} onChange={(e) => setForm({ ...form, pin: e.target.value })} type="password" inputMode="numeric" required={!form.id} /></label>
           <label><span>Início</span><input type="time" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} /></label>

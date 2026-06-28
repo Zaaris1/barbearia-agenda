@@ -1,168 +1,77 @@
-# Barbearia Agenda V1.10
+# Agenda Barbearia
 
-Versão com comissão dos barbeiros, relatório por barbeiro e tela de bloqueio comercial mais profissional.
+App SaaS para barbearias venderem agendamento online, organizarem equipe, clientes, pagamentos Pix e rotina operacional em um painel unico.
 
-## Principais recursos acumulados
+## Visao Geral
 
-- Multi-barbearias
-- Painel master
-- Controle de mensalidades e bloqueio
-- Portal inicial cliente/barbeiro
-- Agendamento público
-- Agenda interna
-- Pix manual com QR Code e copia e cola
-- Confirmação por WhatsApp
-- Lembrete por WhatsApp
-- Relatórios financeiros
-- PDF/Salvar relatório
-- Identidade visual por barbearia
-- Upload de logo, banner e favicon pelo painel
-- Comissão dos barbeiros
-- Relatório por barbeiro
-- Tela de bloqueio comercial mais bonita
-- Responsivo/mobile ajustado
+- Frontend em React + Vite.
+- Backend via Supabase RPCs e SQL versionado em `database/`.
+- Landing page publica em `/`.
+- Portal da barbearia em `/{slug}`.
+- Agendamento publico em `/agendar/{slug}`.
+- Area do cliente em `/meus-agendamentos/{slug}`.
+- Painel interno em `/app/{slug}`.
+- Painel master em `/master`.
 
-## Arquivos alterados na V1.10
+## Como Rodar Localmente
 
-Substitua no GitHub:
-
-```txt
-src/lib/api.js
-src/pages/Barbeiros.jsx
-src/pages/Financeiro.jsx
-src/pages/Login.jsx
-src/styles/global.css
-README.md
+```bash
+npm install
+npm run dev
 ```
 
-Suba também o SQL novo:
+O Vite abre em uma porta local e aceita acesso pela rede por causa do `--host 0.0.0.0`.
+
+## Variaveis De Ambiente
+
+Crie um `.env.local` com base no `.env.example`:
 
 ```txt
-database/011_comissoes_relatorio_barbeiro_bloqueio.sql
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+VITE_DEFAULT_SHOP_SLUG=barbearia-demo
+VITE_SALES_WHATSAPP=
 ```
 
-## SQL
+Nao versionar valores reais de Supabase, WhatsApp comercial ou qualquer chave de ambiente.
 
-Depois de subir os arquivos no GitHub, rode no Supabase somente:
+## Build
 
-```txt
-database/011_comissoes_relatorio_barbeiro_bloqueio.sql
+```bash
+npm run build
+npm run preview
 ```
 
-Abra o arquivo, copie o conteúdo completo e cole no SQL Editor do Supabase.
+Scripts disponiveis:
 
-## Comissão dos barbeiros
+- `npm run dev`: inicia o ambiente local.
+- `npm run build`: gera a pasta `dist`.
+- `npm run preview`: testa o build localmente.
+- `npm run clean`: remove `dist`.
+- `npm run check`: executa o build como verificacao.
 
-No painel da barbearia:
+## Deploy Cloudflare Pages
 
-```txt
-Barbeiros > Editar barbeiro > Comissão do barbeiro
-```
+Configuracao recomendada:
 
-Opções:
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Variaveis: preencher as mesmas chaves do `.env.example` no painel do Cloudflare.
 
-- Comissão desativada
-- Comissão percentual sobre atendimentos concluídos
-- Comissão fixa por atendimento concluído
+O arquivo `public/_redirects` deve ser preservado para fallback SPA. A pasta `dist` e uma saida de build; se ela aparecer versionada por historico do projeto, trate como artefato gerado e nao como fonte principal.
 
-A comissão é calculada no relatório financeiro sobre atendimentos com status `CONCLUIDO`.
+## Rotas Principais
 
-## Relatório por barbeiro
+- `/`: landing page comercial.
+- `/{slug}`: portal publico da barbearia.
+- `/agendar/{slug}`: fluxo publico de agendamento.
+- `/meus-agendamentos/{slug}`: consulta e cancelamento de agendamentos pelo cliente.
+- `/app/{slug}`: login por PIN e painel interno.
+- `/master`: painel da plataforma.
 
-No menu:
+## Observacoes De Seguranca
 
-```txt
-Financeiro
-```
-
-Agora a seção `Resultado por barbeiro` mostra:
-
-- faturamento recebido
-- quantidade de concluídos
-- regra de comissão
-- valor da comissão
-- líquido estimado da barbearia
-
-Clique no barbeiro para abrir o relatório detalhado dele no mês.
-
-## Tela de bloqueio comercial
-
-Quando uma barbearia estiver bloqueada por mensalidade, a tela de login mostra um card comercial explicando o bloqueio, em vez de apenas um erro simples.
-
-## Observação Cloudflare
-
-O pacote continua sem `package-lock.json` para evitar o problema do Cloudflare com `npm clean-install`.
-
-## V1.11 — Agenda avançada, meus agendamentos e mensagens WhatsApp personalizadas
-
-Novidades desta versão:
-
-- Folgas, pausas, almoço e bloqueios manuais na agenda.
-- Bloqueios por barbeiro ou para todos os barbeiros.
-- Bloqueio de horários também afeta a página pública de agendamento.
-- Página pública para cliente consultar seus agendamentos pelo WhatsApp.
-- Cliente pode cancelar agendamentos futuros ainda pendentes/agendados/confirmados.
-- Mensagens WhatsApp personalizáveis por barbearia:
-  - confirmação;
-  - lembrete;
-  - cancelamento.
-
-### SQL novo
-
-Depois de substituir os arquivos no GitHub, rode no Supabase:
-
-```txt
-database/012_agenda_cliente_whatsapp.sql
-```
-
-Abra o arquivo, copie todo o conteúdo e cole no SQL Editor.
-
-### Links novos
-
-Para a barbearia demo:
-
-```txt
-https://barbearia-agenda.pages.dev/meus-agendamentos/barbearia-demo
-```
-
-Modelo geral:
-
-```txt
-https://barbearia-agenda.pages.dev/meus-agendamentos/slug-da-barbearia
-```
-
-### Onde configurar mensagens WhatsApp
-
-No painel da barbearia:
-
-```txt
-Configurações > Mensagens WhatsApp
-```
-
-Variáveis disponíveis:
-
-```txt
-{cliente}
-{barbearia}
-{servico}
-{barbeiro}
-{data}
-{hora}
-{hora_fim}
-{valor}
-{endereco}
-{telefone_barbearia}
-{status}
-{pagamento}
-{valor_pagamento}
-```
-
-
-## V1.11.1
-
-Correção de caracteres inválidos nas mensagens de WhatsApp, removendo o símbolo � quando templates ou emojis forem corrompidos por encoding.
-
-Arquivos alterados:
-- src/lib/whatsapp.js
-- src/pages/Configuracoes.jsx
-- database/013_corrige_emojis_whatsapp.sql
+- Nao alterar nomes de RPCs ou payloads sem sincronizar com os SQLs em `database/`.
+- Nao commitar `.env`, `.env.local`, logs ou `node_modules`.
+- O frontend usa chave anonima do Supabase; regras sensiveis devem permanecer no backend/RPC.
+- Sessao, mensalidade, Pix, master e agendamento sao fluxos criticos. Mudancas nesses pontos devem ser pequenas, testadas e revisadas.

@@ -21,16 +21,7 @@ import {
   Users,
 } from 'lucide-react'
 import { whatsappLink } from '../lib/branding'
-
-function normalizeSlug(value) {
-  return String(value || '')
-    .trim()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-+|-+$)/g, '')
-}
+import { normalizeSlug } from '../lib/formatters'
 
 const heroMetrics = [
   { icon: CalendarDays, value: '24h', label: 'agenda pública' },
@@ -216,9 +207,9 @@ export default function LandingPage({ showToast }) {
   async function copySalesMessage() {
     try {
       await navigator.clipboard.writeText(salesMessage)
-      showToast('Mensagem de contato copiada.')
+      showToast('WhatsApp comercial não configurado. A mensagem de contato foi copiada para envio manual.')
     } catch {
-      showToast('Não foi possível copiar automaticamente.', 'error')
+      showToast('Configure VITE_SALES_WHATSAPP para abrir o contato comercial automaticamente.', 'error')
     }
   }
 

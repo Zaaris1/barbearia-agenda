@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { CalendarPlus, CalendarX2, RefreshCcw, Trash2 } from 'lucide-react'
 import AppointmentCard from '../components/AppointmentCard'
 import Modal from '../components/Modal'
+import ConfirmModal from '../components/ConfirmModal'
+import PromptModal from '../components/PromptModal'
 import {
   createAppointment,
   deleteScheduleBlock,
@@ -15,6 +17,7 @@ import {
 } from '../lib/api'
 import { todayISO } from '../lib/dates'
 import { openWhatsappCancellation, openWhatsappConfirmation, openWhatsappReminder } from '../lib/whatsapp'
+import { formatPhoneInput } from '../lib/formatters'
 
 const statusOptions = [
   { value: '', label: 'Todos os status' },
@@ -80,6 +83,8 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
   const [blockForm, setBlockForm] = useState(initialBlockForm(date, barberId))
   const [saving, setSaving] = useState(false)
   const [savingBlock, setSavingBlock] = useState(false)
+  const [confirmAction, setConfirmAction] = useState(null)
+  const [promptAction, setPromptAction] = useState(null)
 
   const allBarbers = bootstrap?.barbers || []
   const role = session?.user?.role || 'BARBER'
@@ -201,15 +206,25 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
     }
   }
 
-  async function handleDeleteBlock(block) {
-    if (!window.confirm('Remover este bloqueio da agenda?')) return
+  async function confirmDeleteBlock(block) {
     try {
       await deleteScheduleBlock(session.session_token, block.id)
       showToast('Bloqueio removido.')
       await Promise.all([load(), loadBlocks(), refreshBootstrap?.()])
+      setConfirmAction(null)
     } catch (error) {
       showToast(error.message, 'error')
     }
+  }
+
+  function handleDeleteBlock(block) {
+    setConfirmAction({
+      title: 'Remover bloqueio?',
+      message: `Esta ação libera o horário de ${block.start_time} a ${block.end_time}.`,
+      confirmLabel: 'Remover',
+      tone: 'danger',
+      onConfirm: () => confirmDeleteBlock(block),
+    })
   }
 
   function handleSendConfirmation(appointment) {
@@ -230,10 +245,9 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
     showToast('Mensagem de cancelamento aberta no WhatsApp.')
   }
 
-  async function handleStatus(appointmentOrId, newStatus) {
+  async function updateStatusWithNote(appointmentOrId, newStatus, note = '') {
     const appointment = typeof appointmentOrId === 'object' ? appointmentOrId : appointments.find((item) => item.id === appointmentOrId)
     const appointmentId = appointment?.id || appointmentOrId
-    const note = ['CANCELADO', 'FALTOU'].includes(newStatus) ? window.prompt('Observação opcional:') || '' : ''
 
     try {
       await updateAppointmentStatus(session.session_token, appointmentId, newStatus, note)
@@ -248,20 +262,55 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
       }
 
       await load()
+      return true
     } catch (error) {
       showToast(error.message, 'error')
+      return false
     }
   }
 
-  async function handleMarkPaid(appointment) {
-    const note = window.prompt('Observação do pagamento opcional:', appointment.payment_note || '') || ''
+  function handleStatus(appointmentOrId, newStatus) {
+    if (!['CANCELADO', 'FALTOU'].includes(newStatus)) {
+      updateStatusWithNote(appointmentOrId, newStatus)
+      return
+    }
+
+    setPromptAction({
+      title: newStatus === 'CANCELADO' ? 'Cancelar agendamento' : 'Marcar falta',
+      label: 'Observação opcional',
+      placeholder: newStatus === 'CANCELADO' ? 'Ex: cliente pediu cancelamento pelo WhatsApp.' : 'Ex: cliente não compareceu.',
+      confirmLabel: 'Atualizar status',
+      onConfirm: async (note) => {
+        const ok = await updateStatusWithNote(appointmentOrId, newStatus, note)
+        if (ok) setPromptAction(null)
+      },
+    })
+  }
+
+  async function markPaidWithNote(appointment, note = '') {
     try {
       await markAppointmentPaid(session.session_token, appointment.id, note)
       showToast('Pagamento marcado como recebido.')
       await load()
+      return true
     } catch (error) {
       showToast(error.message, 'error')
+      return false
     }
+  }
+
+  function handleMarkPaid(appointment) {
+    setPromptAction({
+      title: 'Marcar pagamento recebido',
+      label: 'Observação do pagamento',
+      defaultValue: appointment.payment_note || '',
+      placeholder: 'Ex: Pix recebido no balcão.',
+      confirmLabel: 'Marcar recebido',
+      onConfirm: async (note) => {
+        const ok = await markPaidWithNote(appointment, note)
+        if (ok) setPromptAction(null)
+      },
+    })
   }
 
   return (
@@ -367,7 +416,7 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
             <>
               <label className="full"><span>Cliente existente</span><select value={form.clientId} onChange={(e) => handleClientSelect(e.target.value)}><option value="">Novo cliente / digitar manualmente</option>{clients.map((c) => <option key={c.id} value={c.id}>{c.name} - {c.phone}</option>)}</select></label>
               <label><span>Nome do cliente</span><input value={form.clientName} onChange={(e) => setForm({ ...form, clientName: e.target.value })} required /></label>
-              <label><span>WhatsApp</span><input value={form.clientPhone} onChange={(e) => setForm({ ...form, clientPhone: e.target.value })} placeholder="(00) 00000-0000" /></label>
+              <label><span>WhatsApp</span><input value={form.clientPhone} onChange={(e) => setForm({ ...form, clientPhone: formatPhoneInput(e.target.value) })} placeholder="(00) 00000-0000" /></label>
               <label><span>Profissional</span><select value={form.barberId} onChange={(e) => setForm({ ...form, barberId: e.target.value })} required><option value="">Selecione</option>{barbers.map((b) => <option value={b.id} key={b.id}>{b.name}</option>)}</select></label>
               <label><span>Serviço</span><select value={form.serviceId} onChange={(e) => setForm({ ...form, serviceId: e.target.value })} required><option value="">Selecione</option>{services.map((s) => <option value={s.id} key={s.id}>{s.name} • {s.duration_min}min</option>)}</select></label>
             </>
@@ -380,6 +429,18 @@ export default function Agenda({ session, bootstrap, showToast, refreshBootstrap
           {selectedService && <div className="notice full">Duração calculada: <strong>{selectedService.duration_min} minutos</strong> • Valor: <strong>R$ {Number(selectedService.price).toFixed(2).replace('.', ',')}</strong></div>}
         </form>
       </Modal>
+
+      <ConfirmModal
+        open={Boolean(confirmAction)}
+        {...(confirmAction || {})}
+        onCancel={() => setConfirmAction(null)}
+      />
+
+      <PromptModal
+        open={Boolean(promptAction)}
+        {...(promptAction || {})}
+        onCancel={() => setPromptAction(null)}
+      />
     </section>
   )
 }

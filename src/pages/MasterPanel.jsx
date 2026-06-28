@@ -4,15 +4,7 @@ import { Banknote, BarChart3, CalendarClock, Copy, ExternalLink, LockKeyhole, Lo
 import { clearMasterSession, readMasterSession, saveMasterSession } from '../lib/storage'
 import { masterCreateBarbershop, masterGetSubscriptionReport, masterListBarbershops, masterLoginWithPin, masterLogout, masterRegisterPayment, masterUpdateBarbershop } from '../lib/api'
 import { formatMoney, todayISO } from '../lib/dates'
-
-function normalizeSlug(value) {
-  return String(value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
+import { formatPhoneInput, normalizeSlug } from '../lib/formatters'
 
 function addMonthsISO(baseDate, months = 1) {
   const date = baseDate ? new Date(`${baseDate}T12:00:00`) : new Date()
@@ -360,7 +352,7 @@ export default function MasterPanel({ showToast }) {
             <form onSubmit={createShop} className="form-stack">
               <label><span>Nome da barbearia</span><input value={newShop.name} onChange={(e) => setNewField('name', e.target.value)} placeholder="Barbearia do João" required /></label>
               <label><span>Slug/link</span><input value={newShop.slug} onChange={(e) => setNewField('slug', normalizeSlug(e.target.value))} placeholder="barbearia-do-joao" required /></label>
-              <label><span>WhatsApp</span><input value={newShop.phone} onChange={(e) => setNewField('phone', e.target.value)} placeholder="(00) 00000-0000" /></label>
+              <label><span>WhatsApp</span><input value={newShop.phone} onChange={(e) => setNewField('phone', formatPhoneInput(e.target.value))} placeholder="(00) 00000-0000" /></label>
               <label><span>Endereço</span><input value={newShop.address} onChange={(e) => setNewField('address', e.target.value)} placeholder="Rua, número, cidade" /></label>
               <div className="form-grid two">
                 <label><span>Mensalidade</span><input type="number" min="0" step="0.01" value={newShop.monthlyFee} onChange={(e) => setNewField('monthlyFee', e.target.value)} /></label>
@@ -422,7 +414,7 @@ export default function MasterPanel({ showToast }) {
                 <div className="form-grid">
                   <label><span>Nome</span><input value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></label>
                   <label><span>Slug</span><input value={editing.slug} onChange={(e) => setEditing({ ...editing, slug: normalizeSlug(e.target.value) })} /></label>
-                  <label><span>WhatsApp</span><input value={editing.phone} onChange={(e) => setEditing({ ...editing, phone: e.target.value })} /></label>
+                  <label><span>WhatsApp</span><input value={editing.phone} onChange={(e) => setEditing({ ...editing, phone: formatPhoneInput(e.target.value) })} placeholder="(00) 00000-0000" /></label>
                   <label><span>Endereço</span><input value={editing.address} onChange={(e) => setEditing({ ...editing, address: e.target.value })} /></label>
                   <label><span>Status financeiro</span><select value={editing.subscriptionStatus} onChange={(e) => setEditing({ ...editing, subscriptionStatus: e.target.value })}><option value="ATIVO">ATIVO</option><option value="PENDENTE">PENDENTE</option><option value="BLOQUEADO">BLOQUEADO</option><option value="INATIVO">INATIVO</option><option value="CANCELADO">CANCELADO</option></select></label>
                   <label><span>Vencimento</span><input type="date" value={editing.subscriptionDueDate || ''} onChange={(e) => setEditing({ ...editing, subscriptionDueDate: e.target.value })} /></label>

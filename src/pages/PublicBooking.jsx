@@ -5,6 +5,7 @@ import { publicCreateAppointment, publicGetAvailableSlots, publicGetShop } from 
 import { formatDateBR, formatMoney, todayISO } from '../lib/dates'
 import { applyDocumentBrand, buildThemeStyle, instagramUrl, normalizeUrl, whatsappLink } from '../lib/branding'
 import { buildPixPayload, calculatePaymentAmount, getPaymentModeLabel, pixQrCodeUrl, shouldShowPayment } from '../lib/pix'
+import { formatPhoneInput } from '../lib/formatters'
 
 function extractSlug() {
   const parts = window.location.pathname.split('/').filter(Boolean)
@@ -17,6 +18,7 @@ export default function PublicBooking({ showToast }) {
   const [slug] = useState(extractSlug())
   const [shop, setShop] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [slotsLoading, setSlotsLoading] = useState(false)
   const [slots, setSlots] = useState([])
   const [done, setDone] = useState(null)
@@ -55,6 +57,7 @@ export default function PublicBooking({ showToast }) {
 
   async function loadShop() {
     setLoading(true)
+    setError('')
     try {
       const data = await publicGetShop(slug)
       setShop(data)
@@ -62,6 +65,7 @@ export default function PublicBooking({ showToast }) {
       if (data?.services?.length === 1) setForm((old) => ({ ...old, serviceId: data.services[0].id }))
       if (data?.barbers?.length === 1) setForm((old) => ({ ...old, barberId: data.barbers[0].id }))
     } catch (error) {
+      setError(error.message || 'Não foi possível carregar esta barbearia.')
       showToast(error.message, 'error')
     } finally {
       setLoading(false)
@@ -186,6 +190,20 @@ export default function PublicBooking({ showToast }) {
     )
   }
 
+  if (!loading && error) {
+    return (
+      <div className="public-page public-page-pro branded-public payment-result-page" style={themeStyle}>
+        <motion.div className="public-card success-card payment-success-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="success-icon"><Scissors size={42} /></div>
+          <span className="eyebrow centered">Agenda indisponível</span>
+          <h1>Barbearia não encontrada</h1>
+          <p>{error}</p>
+          <a className="btn primary full" href="/"><ArrowLeft size={18} /> Voltar para o início</a>
+        </motion.div>
+      </div>
+    )
+  }
+
   return (
     <div className="public-page public-page-pro branded-public payment-result-page" style={themeStyle}>
       <div className="public-orb one" />
@@ -193,7 +211,7 @@ export default function PublicBooking({ showToast }) {
 
       <motion.div className="public-layout public-layout-v13" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
         <aside className="public-hero-card public-hero-v13" style={{ backgroundImage: coverUrl ? `linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.86)), url(${coverUrl})` : undefined }}>
-          <button className="public-back" type="button" onClick={() => window.location.href = '/'}><ArrowLeft size={16} /> Painel interno</button>
+          <button className="public-back" type="button" onClick={() => window.location.href = `/app/${slug}`}><ArrowLeft size={16} /> Painel interno</button>
           <div className={`public-logo ${logoUrl ? 'with-image' : ''}`}>
             {logoUrl ? <img src={logoUrl} alt={`Logo ${shop?.name || 'Barbearia'}`} /> : <Scissors size={34} />}
           </div>
@@ -316,7 +334,7 @@ export default function PublicBooking({ showToast }) {
             </div>
 
             <label><span>Seu nome</span><input value={form.clientName} onChange={(e) => setForm({ ...form, clientName: e.target.value })} required /></label>
-            <label><span>WhatsApp</span><input value={form.clientPhone} onChange={(e) => setForm({ ...form, clientPhone: e.target.value })} placeholder="(00) 00000-0000" required /></label>
+            <label><span>WhatsApp</span><input value={form.clientPhone} onChange={(e) => setForm({ ...form, clientPhone: formatPhoneInput(e.target.value) })} placeholder="(00) 00000-0000" required /></label>
             <label><span>Observação opcional</span><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows="3" placeholder="Ex: preferência de corte, atraso previsto, referência etc." /></label>
 
             {(selectedService || selectedBarber || form.startTime) && (

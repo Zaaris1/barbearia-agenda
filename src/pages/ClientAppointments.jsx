@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CalendarClock, MessageCircle, RefreshCcw, Scissors, Search, XCircle } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge'
+import PromptModal from '../components/PromptModal'
 import { publicCancelClientAppointment, publicFindClientAppointments } from '../lib/api'
 import { applyDocumentBrand, buildThemeStyle, normalizeUrl, whatsappLink } from '../lib/branding'
 import { formatDateBR, formatMoney, timeToMinutes } from '../lib/dates'
 import { getPaymentStatusClass, getPaymentStatusLabel } from '../lib/pix'
+import { formatPhoneInput } from '../lib/formatters'
 
 function getSlug() {
   const parts = window.location.pathname.split('/').filter(Boolean)
@@ -63,6 +65,7 @@ export default function ClientAppointments({ showToast }) {
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [cancelTarget, setCancelTarget] = useState(null)
 
   const shop = result?.shop || null
   const appointments = result?.appointments || []
@@ -95,13 +98,14 @@ export default function ClientAppointments({ showToast }) {
     }
   }
 
-  async function cancelAppointment(appointment) {
-    const reason = window.prompt('Motivo opcional do cancelamento:', 'Cancelado pelo cliente') || 'Cancelado pelo cliente'
+  async function confirmCancelAppointment(reason) {
+    if (!cancelTarget) return
     try {
-      await publicCancelClientAppointment(slug, appointment.id, phone, reason)
+      await publicCancelClientAppointment(slug, cancelTarget.id, phone, reason || 'Cancelado pelo cliente')
       showToast('Agendamento cancelado. A barbearia poderá visualizar o cancelamento no painel.')
       const data = await publicFindClientAppointments(slug, phone)
       setResult(data)
+      setCancelTarget(null)
     } catch (err) {
       showToast(err.message || 'Não foi possível cancelar este agendamento.', 'error')
     }
@@ -127,7 +131,7 @@ export default function ClientAppointments({ showToast }) {
           <form className="client-search-form" onSubmit={searchAppointments}>
             <label>
               <span>Seu WhatsApp</span>
-              <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(00) 00000-0000" required />
+              <input value={phone} onChange={(e) => setPhone(formatPhoneInput(e.target.value))} placeholder="(00) 00000-0000" required />
             </label>
             <button className="btn primary" type="submit" disabled={loading}><Search size={17} /> {loading ? 'Consultando...' : 'Consultar'}</button>
           </form>
@@ -172,7 +176,7 @@ export default function ClientAppointments({ showToast }) {
                           {shop?.phone && <a href={whatsappLink(shop.phone, whatsappMessage)} target="_blank" rel="noreferrer"><MessageCircle size={16} /> Falar no WhatsApp</a>}
                         </div>
                       )}
-                      {canClientCancel(appointment) && <button className="btn danger full" type="button" onClick={() => cancelAppointment(appointment)}><XCircle size={16} /> Cancelar agendamento</button>}
+                      {canClientCancel(appointment) && <button className="btn danger full" type="button" onClick={() => setCancelTarget(appointment)}><XCircle size={16} /> Cancelar agendamento</button>}
                     </article>
                   )
                 })}
@@ -181,6 +185,16 @@ export default function ClientAppointments({ showToast }) {
           )}
         </div>
       </section>
+
+      <PromptModal
+        open={Boolean(cancelTarget)}
+        title="Cancelar agendamento"
+        label="Motivo opcional"
+        defaultValue="Cancelado pelo cliente"
+        confirmLabel="Cancelar agendamento"
+        onCancel={() => setCancelTarget(null)}
+        onConfirm={confirmCancelAppointment}
+      />
     </main>
   )
 }

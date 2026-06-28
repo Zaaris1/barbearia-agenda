@@ -5,15 +5,7 @@ import { buildThemeStyle, instagramUrl, normalizeUrl, presetOptions, publicBooki
 import { buildPixPayload, getPaymentModeLabel, pixQrCodeUrl } from '../lib/pix'
 import { formatMoney } from '../lib/dates'
 import { uploadBrandingImage } from '../lib/uploads'
-
-function normalizeSlug(value) {
-  return String(value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
+import { formatPhoneInput, normalizeSlug } from '../lib/formatters'
 
 function setPresetColors(presetId, setForm) {
   const preset = THEME_PRESETS[presetId] || THEME_PRESETS.classic_gold
@@ -409,7 +401,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
 
             <label>
               <span>WhatsApp da barbearia</span>
-              <input value={form.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="(00) 00000-0000" />
+              <input value={form.phone} onChange={(e) => setField('phone', formatPhoneInput(e.target.value))} placeholder="(00) 00000-0000" />
             </label>
 
             <label className="full">
@@ -716,7 +708,7 @@ export default function Configuracoes({ session, bootstrap, showToast, refreshBo
                       </label>
                       <label>
                         <span>WhatsApp</span>
-                        <input value={accessForm.phone} onChange={(e) => setAccessForm({ ...accessForm, phone: e.target.value })} placeholder="(00) 00000-0000" />
+                        <input value={accessForm.phone} onChange={(e) => setAccessForm({ ...accessForm, phone: formatPhoneInput(e.target.value) })} placeholder="(00) 00000-0000" />
                       </label>
                       <label>
                         <span>Perfil</span>
