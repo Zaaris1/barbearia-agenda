@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowRight, BarChart3, CalendarCheck, CheckCircle2, Clock3, Copy, CreditCard, LockKeyhole, MessageCircle, QrCode, Scissors, ShieldCheck, Smartphone, Sparkles, UsersRound } from 'lucide-react'
+import { ArrowRight, BarChart3, CalendarCheck, CheckCircle2, Clock3, CreditCard, LockKeyhole, MessageCircle, QrCode, Scissors, ShieldCheck, Smartphone, Sparkles } from 'lucide-react'
 import { whatsappLink } from '../lib/branding'
 
 function normalizeSlug(value) {
@@ -13,10 +13,10 @@ function normalizeSlug(value) {
 }
 
 const productHighlights = [
-  { icon: CalendarCheck, label: 'Agenda online', text: 'Página pública para o cliente escolher serviço, profissional, data e horário.' },
-  { icon: MessageCircle, label: 'WhatsApp no fluxo', text: 'Confirmação, lembrete, cancelamento e contato com a barbearia sem bagunça.' },
-  { icon: CreditCard, label: 'Pix manual', text: 'Sinal ou pagamento completo com instruções e cópia do código Pix.' },
-  { icon: BarChart3, label: 'Gestão do dono', text: 'Visão de agenda, clientes, serviços, financeiro e equipe em um painel.' },
+  { icon: CalendarCheck, label: 'Link que agenda sozinho', text: 'O cliente escolhe serviço, profissional, data e horário sem depender de troca de mensagem.' },
+  { icon: MessageCircle, label: 'WhatsApp continua no jogo', text: 'Confirmação, lembrete, cancelamento e contato direto ficam prontos para a equipe.' },
+  { icon: CreditCard, label: 'Pix para reduzir falta', text: 'Configure sinal ou pagamento completo com instruções claras para o cliente.' },
+  { icon: BarChart3, label: 'Painel para controlar tudo', text: 'Agenda, clientes, serviços, profissionais, financeiro e status em uma visão só.' },
 ]
 
 const roleCards = [
@@ -26,12 +26,12 @@ const roleCards = [
 ]
 
 const proofItems = [
-  'Link público da barbearia',
-  'Painel interno por PIN',
-  'Cargos flexíveis',
-  'Fluxo sem atendente obrigatório',
-  'Área do cliente',
-  'Pronto para várias barbearias',
+  'Link próprio para cada barbearia',
+  'Painel por PIN',
+  'Dono também pode atender',
+  'Funciona sem atendentes cadastrados',
+  'Consulta do cliente',
+  'Base para vender assinatura',
 ]
 
 export default function LandingPage({ showToast }) {
@@ -43,7 +43,7 @@ export default function LandingPage({ showToast }) {
   const salesHref = useMemo(() => whatsappLink(salesPhone, salesMessage), [salesPhone])
 
   useEffect(() => {
-    document.title = 'Agenda para Barbearias | App de agendamento'
+    document.title = 'Agenda online para Barbearias | App de agendamento'
   }, [])
 
   async function copySalesMessage() {
@@ -79,23 +79,23 @@ export default function LandingPage({ showToast }) {
         <a className="landing-nav-cta" href="#acesso"><LockKeyhole size={16} /> Entrar</a>
       </header>
 
-      <section className="landing-hero" style={{ backgroundImage: 'linear-gradient(90deg, rgba(9,9,11,.96) 0%, rgba(9,9,11,.78) 42%, rgba(9,9,11,.28) 100%), url(/landing-app-preview.png)' }}>
+      <section className="landing-hero">
         <div className="landing-hero-inner">
-          <span className="landing-kicker"><Sparkles size={16} /> SaaS para barbearias</span>
-          <h1>Agenda para Barbearias</h1>
-          <p>Um app pronto para vender agendamento online, organizar profissionais, controlar pagamentos e entregar uma experiência simples para o cliente final.</p>
+          <span className="landing-kicker"><Sparkles size={16} /> Plataforma para barbearias</span>
+          <h1>Agenda online para barbearias</h1>
+          <p>Venda horários pelo link da própria barbearia, organize a equipe no painel e mantenha WhatsApp, Pix e cliente final no mesmo fluxo.</p>
           <div className="landing-hero-actions">
             {salesHref ? (
-              <a className="landing-btn primary" href={salesHref} target="_blank" rel="noreferrer"><MessageCircle size={18} /> Quero contratar</a>
+              <a className="landing-btn primary" href={salesHref} target="_blank" rel="noreferrer"><MessageCircle size={18} /> Quero vender com o app</a>
             ) : (
-              <button className="landing-btn primary" type="button" onClick={copySalesMessage}><Copy size={18} /> Copiar contato</button>
+              <button className="landing-btn primary" type="button" onClick={copySalesMessage}><MessageCircle size={18} /> Quero vender com o app</button>
             )}
-            <a className="landing-btn secondary" href="/barbearia-demo"><QrCode size={18} /> Ver portal demo</a>
+            <a className="landing-btn secondary" href="/barbearia-demo"><QrCode size={18} /> Ver demonstração</a>
           </div>
           <div className="landing-hero-metrics" aria-label="Destaques do produto">
-            <span><strong>24h</strong><small>agendamento público</small></span>
+            <span><strong>24h</strong><small>cliente agenda sozinho</small></span>
             <span><strong>3 perfis</strong><small>dono, profissional e cliente</small></span>
-            <span><strong>Pix</strong><small>sinal ou pagamento</small></span>
+            <span><strong>Pix</strong><small>sinal ou pagamento completo</small></span>
           </div>
         </div>
       </section>
@@ -107,8 +107,8 @@ export default function LandingPage({ showToast }) {
       <section className="landing-section" id="produto">
         <div className="landing-section-heading">
           <span className="landing-kicker">Produto</span>
-          <h2>O essencial para uma barbearia vender horários sem perder controle</h2>
-          <p>A experiência pública fica simples para o cliente; o painel interno continua completo para a equipe.</p>
+          <h2>Uma página pública simples para o cliente, um painel completo para a operação</h2>
+          <p>A barbearia divulga um link. O cliente agenda. O dono acompanha o que precisa sem transformar o WhatsApp em planilha.</p>
         </div>
 
         <div className="landing-feature-grid">
@@ -125,7 +125,7 @@ export default function LandingPage({ showToast }) {
       <section className="landing-section landing-operation" id="operacao">
         <div className="landing-section-heading">
           <span className="landing-kicker">Operação</span>
-          <h2>Funciona para barbearia pequena, equipe completa ou dono que também atende</h2>
+          <h2>Serve para o dono que atende sozinho e para a barbearia com equipe</h2>
         </div>
 
         <div className="landing-role-grid">
@@ -150,8 +150,8 @@ export default function LandingPage({ showToast }) {
       <section className="landing-section landing-access-section" id="acesso">
         <div className="landing-access-copy">
           <span className="landing-kicker">Acesso</span>
-          <h2>Use o mesmo domínio para vender e para atender clientes existentes</h2>
-          <p>Quem já tem uma barbearia cadastrada entra pelo link próprio. Quem está conhecendo o produto pode abrir a demonstração pública.</p>
+          <h2>O mesmo endereço divulga o produto e leva clientes para a barbearia certa</h2>
+          <p>Quem já usa o app entra pelo link próprio. Quem está avaliando a plataforma pode abrir a demonstração pública.</p>
         </div>
 
         <div className="landing-access-tool">

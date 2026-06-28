@@ -3774,7 +3774,7 @@ body.portal-route-active .portal-secondary-actions button {
 
 .landing-page {
   min-height: 100vh;
-  background: #09090b;
+  background: #08080a;
   color: #f5f5f5;
   overflow-x: hidden;
 }
@@ -3782,16 +3782,21 @@ body.portal-route-active .portal-secondary-actions button {
 .landing-nav {
   position: absolute;
   z-index: 10;
-  top: 0;
+  top: 18px;
   left: 0;
   right: 0;
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
-  min-height: 78px;
+  min-height: 58px;
+  padding: 0 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px;
+  background: rgba(8,8,10,.68);
+  backdrop-filter: blur(18px);
 }
 
 .landing-brand,
@@ -3808,8 +3813,8 @@ body.portal-route-active .portal-secondary-actions button {
 }
 
 .landing-brand span {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   border-radius: 8px;
@@ -3823,11 +3828,9 @@ body.portal-route-active .portal-secondary-actions button {
 
 .landing-nav nav {
   gap: 6px;
-  padding: 6px;
-  border: 1px solid rgba(255,255,255,.1);
+  padding: 4px;
   border-radius: 8px;
-  background: rgba(9,9,11,.58);
-  backdrop-filter: blur(18px);
+  background: rgba(255,255,255,.045);
 }
 
 .landing-nav nav a,
@@ -3855,13 +3858,16 @@ body.portal-route-active .portal-secondary-actions button {
 }
 
 .landing-hero {
-  min-height: 84svh;
+  min-height: clamp(620px, calc(100svh - 72px), 760px);
   display: flex;
   align-items: center;
+  background-image:
+    linear-gradient(90deg, rgba(9,9,11,.99) 0%, rgba(9,9,11,.92) 38%, rgba(9,9,11,.46) 68%, rgba(9,9,11,.14) 100%),
+    url('/landing-app-preview.png');
   background-size: cover;
-  background-position: center right;
+  background-position: center;
   position: relative;
-  padding: 108px 24px 64px;
+  padding: 112px 24px 70px;
 }
 
 .landing-hero::after {
@@ -3879,7 +3885,7 @@ body.portal-route-active .portal-secondary-actions button {
   width: min(1180px, 100%);
   margin: 0 auto;
   display: grid;
-  gap: 22px;
+  gap: 20px;
 }
 
 .landing-kicker {
@@ -3888,6 +3894,10 @@ body.portal-route-active .portal-secondary-actions button {
   align-items: center;
   gap: 8px;
   color: #f0c76a;
+  padding: 8px 10px;
+  border: 1px solid rgba(212,168,87,.22);
+  border-radius: 8px;
+  background: rgba(212,168,87,.08);
   text-transform: uppercase;
   letter-spacing: .14em;
   font-size: .76rem;
@@ -3895,17 +3905,17 @@ body.portal-route-active .portal-secondary-actions button {
 }
 
 .landing-hero h1 {
-  width: min(740px, 100%);
+  width: min(660px, 100%);
   margin: 0;
-  font-size: 4.8rem;
-  line-height: .95;
+  font-size: 5rem;
+  line-height: 1;
   letter-spacing: 0;
 }
 
 .landing-hero p {
-  width: min(640px, 100%);
+  width: min(590px, 100%);
   margin: 0;
-  color: rgba(255,255,255,.78);
+  color: rgba(255,255,255,.8);
   font-size: 1.15rem;
   line-height: 1.58;
 }
@@ -3952,19 +3962,23 @@ body.portal-route-active .portal-secondary-actions button {
 .landing-hero-metrics {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 0;
+  margin-top: 6px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,.11);
+  width: min(680px, 100%);
 }
 
 .landing-hero-metrics span {
-  min-width: 160px;
+  min-width: 0;
   display: grid;
   gap: 3px;
-  padding: 12px 14px;
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 8px;
-  background: rgba(9,9,11,.56);
-  backdrop-filter: blur(18px);
+  padding: 0 22px 0 0;
+}
+
+.landing-hero-metrics span + span {
+  border-left: 1px solid rgba(255,255,255,.12);
+  padding-left: 22px;
 }
 
 .landing-hero-metrics strong {
@@ -3979,18 +3993,18 @@ body.portal-route-active .portal-secondary-actions button {
 }
 
 .landing-strip {
-  width: min(1180px, calc(100% - 32px));
-  margin: -26px auto 0;
+  width: 100%;
+  margin: 0;
   position: relative;
   z-index: 2;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
-  padding: 12px;
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 8px;
-  background: rgba(21,21,24,.94);
+  padding: 14px 24px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: #101013;
 }
 
 .landing-strip span {
@@ -4011,7 +4025,7 @@ body.portal-route-active .portal-secondary-actions button {
 .landing-section {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 86px 0 0;
+  padding: 78px 0 0;
 }
 
 .landing-section-heading {
@@ -4055,14 +4069,14 @@ body.portal-route-active .portal-secondary-actions button {
 .landing-access-tool {
   border: 1px solid rgba(255,255,255,.1);
   border-radius: 8px;
-  background: rgba(255,255,255,.055);
+  background: rgba(255,255,255,.045);
 }
 
 .landing-feature-card {
   min-width: 0;
   display: grid;
   gap: 12px;
-  padding: 18px;
+  padding: 20px;
 }
 
 .landing-feature-card svg,
@@ -4212,7 +4226,8 @@ body.portal-route-active .portal-secondary-actions button {
 
   .landing-nav {
     width: min(100% - 24px, 720px);
-    min-height: 68px;
+    top: 12px;
+    min-height: 58px;
   }
 
   .landing-nav nav {
@@ -4220,13 +4235,16 @@ body.portal-route-active .portal-secondary-actions button {
   }
 
   .landing-hero {
-    min-height: 84svh;
-    padding: 96px 16px 44px;
-    background-position: center;
+    min-height: clamp(660px, calc(100svh - 58px), 780px);
+    padding: 92px 16px 42px;
+    background-image:
+      linear-gradient(90deg, rgba(8,8,10,.99) 0%, rgba(8,8,10,.96) 56%, rgba(8,8,10,.82) 100%),
+      url('/landing-app-preview.png');
+    background-position: 24% center;
   }
 
   .landing-hero h1 {
-    font-size: 3.1rem;
+    font-size: 3rem;
   }
 
   .landing-hero p {
@@ -4235,6 +4253,11 @@ body.portal-route-active .portal-secondary-actions button {
 
   .landing-hero-metrics span {
     min-width: calc(50% - 8px);
+    padding-right: 14px;
+  }
+
+  .landing-hero-metrics span + span {
+    padding-left: 14px;
   }
 
   .landing-feature-grid,
@@ -4260,11 +4283,15 @@ body.portal-route-active .portal-secondary-actions button {
   }
 
   .landing-hero {
-    min-height: 86svh;
+    min-height: 740px;
+    background-image:
+      linear-gradient(90deg, rgba(8,8,10,.99) 0%, rgba(8,8,10,.97) 62%, rgba(8,8,10,.9) 100%),
+      url('/landing-app-preview.png');
+    background-position: 18% center;
   }
 
   .landing-hero h1 {
-    font-size: 2.65rem;
+    font-size: 2.55rem;
   }
 
   .landing-hero-actions,
@@ -4275,6 +4302,17 @@ body.portal-route-active .portal-secondary-actions button {
   .landing-btn,
   .landing-hero-metrics span {
     width: 100%;
+  }
+
+  .landing-hero-metrics {
+    display: grid;
+    gap: 10px;
+  }
+
+  .landing-hero-metrics span,
+  .landing-hero-metrics span + span {
+    border-left: 0;
+    padding: 0;
   }
 
   .landing-strip {
