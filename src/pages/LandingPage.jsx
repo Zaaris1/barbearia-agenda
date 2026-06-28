@@ -26,12 +26,12 @@ const roleCards = [
 ]
 
 const proofItems = [
-  'Link próprio para cada barbearia',
+  'Link próprio',
   'Painel por PIN',
-  'Dono também pode atender',
-  'Funciona sem atendentes cadastrados',
-  'Consulta do cliente',
-  'Base para vender assinatura',
+  'Dono atende também',
+  'Sem atendente obrigatório',
+  'Área do cliente',
+  'Pronto para assinatura',
 ]
 
 export default function LandingPage({ showToast }) {

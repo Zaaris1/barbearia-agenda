@@ -3774,7 +3774,8 @@ body.portal-route-active .portal-secondary-actions button {
 
 .landing-page {
   min-height: 100vh;
-  background: #08080a;
+  background:
+    linear-gradient(180deg, #08080a 0%, #0a0a0d 48%, #08080a 100%);
   color: #f5f5f5;
   overflow-x: hidden;
 }
@@ -3794,9 +3795,10 @@ body.portal-route-active .portal-secondary-actions button {
   justify-content: space-between;
   gap: 18px;
   border: 1px solid rgba(255,255,255,.1);
-  border-radius: 8px;
-  background: rgba(8,8,10,.68);
+  border-radius: 22px;
+  background: rgba(13,13,16,.78);
   backdrop-filter: blur(18px);
+  box-shadow: 0 18px 60px rgba(0,0,0,.26);
 }
 
 .landing-brand,
@@ -3817,7 +3819,7 @@ body.portal-route-active .portal-secondary-actions button {
   height: 34px;
   display: grid;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #d4a857;
   color: #111;
 }
@@ -3829,15 +3831,15 @@ body.portal-route-active .portal-secondary-actions button {
 .landing-nav nav {
   gap: 6px;
   padding: 4px;
-  border-radius: 8px;
-  background: rgba(255,255,255,.045);
+  border-radius: 15px;
+  background: rgba(255,255,255,.055);
 }
 
 .landing-nav nav a,
 .landing-nav-cta {
   min-height: 34px;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: 12px;
   color: rgba(255,255,255,.76);
   text-decoration: none;
   font-size: .88rem;
@@ -3858,16 +3860,17 @@ body.portal-route-active .portal-secondary-actions button {
 }
 
 .landing-hero {
-  min-height: clamp(620px, calc(100svh - 72px), 760px);
+  min-height: clamp(650px, calc(100svh - 86px), 740px);
   display: flex;
   align-items: center;
   background-image:
-    linear-gradient(90deg, rgba(9,9,11,.99) 0%, rgba(9,9,11,.92) 38%, rgba(9,9,11,.46) 68%, rgba(9,9,11,.14) 100%),
+    linear-gradient(90deg, rgba(8,8,10,.98) 0%, rgba(8,8,10,.9) 34%, rgba(8,8,10,.36) 62%, rgba(8,8,10,.03) 100%),
+    linear-gradient(180deg, rgba(8,8,10,0) 68%, #08080a 100%),
     url('/landing-app-preview.png');
   background-size: cover;
   background-position: center;
   position: relative;
-  padding: 112px 24px 70px;
+  padding: 112px 24px 58px;
 }
 
 .landing-hero::after {
@@ -3896,7 +3899,7 @@ body.portal-route-active .portal-secondary-actions button {
   color: #f0c76a;
   padding: 8px 10px;
   border: 1px solid rgba(212,168,87,.22);
-  border-radius: 8px;
+  border-radius: 999px;
   background: rgba(212,168,87,.08);
   text-transform: uppercase;
   letter-spacing: .14em;
@@ -3905,19 +3908,20 @@ body.portal-route-active .portal-secondary-actions button {
 }
 
 .landing-hero h1 {
-  width: min(660px, 100%);
+  width: min(620px, 100%);
   margin: 0;
-  font-size: 5rem;
-  line-height: 1;
+  font-size: 4.65rem;
+  line-height: 1.02;
   letter-spacing: 0;
+  text-shadow: 0 18px 70px rgba(0,0,0,.42);
 }
 
 .landing-hero p {
-  width: min(590px, 100%);
+  width: min(570px, 100%);
   margin: 0;
-  color: rgba(255,255,255,.8);
+  color: rgba(255,255,255,.84);
   font-size: 1.15rem;
-  line-height: 1.58;
+  line-height: 1.65;
 }
 
 .landing-hero-actions,
@@ -3933,19 +3937,20 @@ body.portal-route-active .portal-secondary-actions button {
   align-items: center;
   justify-content: center;
   gap: 9px;
-  border-radius: 8px;
+  border-radius: 15px;
   border: 1px solid rgba(255,255,255,.12);
   padding: 12px 16px;
   color: #fff;
   text-decoration: none;
   font-weight: 900;
   background: rgba(255,255,255,.08);
+  box-shadow: 0 12px 34px rgba(0,0,0,.22);
 }
 
 .landing-btn.primary {
   border-color: transparent;
   color: #111;
-  background: #d4a857;
+  background: linear-gradient(135deg, #f5c66a, #d4a857);
 }
 
 .landing-btn.secondary {
@@ -3962,23 +3967,25 @@ body.portal-route-active .portal-secondary-actions button {
 .landing-hero-metrics {
   display: flex;
   flex-wrap: wrap;
-  gap: 0;
-  margin-top: 6px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255,255,255,.11);
-  width: min(680px, 100%);
+  gap: 10px;
+  margin-top: 4px;
+  width: min(690px, 100%);
 }
 
 .landing-hero-metrics span {
-  min-width: 0;
+  min-width: 160px;
   display: grid;
   gap: 3px;
-  padding: 0 22px 0 0;
+  padding: 13px 15px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.035));
+  box-shadow: 0 14px 36px rgba(0,0,0,.18);
 }
 
 .landing-hero-metrics span + span {
-  border-left: 1px solid rgba(255,255,255,.12);
-  padding-left: 22px;
+  border-left: 1px solid rgba(255,255,255,.1);
+  padding-left: 15px;
 }
 
 .landing-hero-metrics strong {
@@ -4000,20 +4007,24 @@ body.portal-route-active .portal-secondary-actions button {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   padding: 14px 24px;
   border-top: 1px solid rgba(255,255,255,.08);
   border-bottom: 1px solid rgba(255,255,255,.08);
-  background: #101013;
+  background: linear-gradient(180deg, #111114, #0d0d10);
 }
 
 .landing-strip span {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 8px 10px;
+  min-height: 38px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  background: rgba(255,255,255,.035);
   color: rgba(255,255,255,.78);
-  font-size: .86rem;
+  font-size: .82rem;
   font-weight: 800;
 }
 
@@ -4025,7 +4036,7 @@ body.portal-route-active .portal-secondary-actions button {
 .landing-section {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 78px 0 0;
+  padding: 56px 0 0;
 }
 
 .landing-section-heading {
@@ -4038,7 +4049,7 @@ body.portal-route-active .portal-secondary-actions button {
 .landing-section-heading h2,
 .landing-access-copy h2 {
   margin: 0;
-  font-size: 2.65rem;
+  font-size: 2.55rem;
   line-height: 1.04;
   letter-spacing: 0;
 }
@@ -4068,8 +4079,9 @@ body.portal-route-active .portal-secondary-actions button {
 .landing-flow div,
 .landing-access-tool {
   border: 1px solid rgba(255,255,255,.1);
-  border-radius: 8px;
-  background: rgba(255,255,255,.045);
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.035));
+  box-shadow: 0 16px 50px rgba(0,0,0,.18);
 }
 
 .landing-feature-card {
@@ -4081,6 +4093,11 @@ body.portal-route-active .portal-secondary-actions button {
 
 .landing-feature-card svg,
 .landing-flow svg {
+  width: 42px;
+  height: 42px;
+  padding: 10px;
+  border-radius: 15px;
+  background: rgba(212,168,87,.14);
   color: #d4a857;
 }
 
@@ -4120,7 +4137,7 @@ body.portal-route-active .portal-secondary-actions button {
   height: 44px;
   display: grid;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 15px;
   background: rgba(56,189,248,.14);
   color: #7dd3fc;
 }
@@ -4167,7 +4184,7 @@ body.portal-route-active .portal-secondary-actions button {
   display: grid;
   gap: 16px;
   padding: 20px;
-  background: rgba(21,21,24,.88);
+  background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
 }
 
 .landing-access-tool label span {
@@ -4175,7 +4192,7 @@ body.portal-route-active .portal-secondary-actions button {
 }
 
 .landing-access-tool input {
-  border-radius: 8px;
+  border-radius: 16px;
 }
 
 .landing-demo-link {
